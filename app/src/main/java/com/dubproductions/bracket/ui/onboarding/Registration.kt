@@ -227,7 +227,7 @@ fun RegistrationScreen(
                     extraText = passwordConfirmText,
                     validation = validation
                 )
-                // move inside the oncomplete of registration
+                // todo: move inside the oncomplete of registration
                 enabled = true
             },
             buttonText = "Register",
