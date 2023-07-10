@@ -49,15 +49,6 @@ fun RegistrationScreen(
     // Fields enable or disable state
     var enabled by rememberSaveable { mutableStateOf(true) }
 
-    val textList = listOf(
-        emailText,
-        usernameText,
-        firstNameText,
-        lastNameText,
-        passwordText,
-        passwordConfirmText,
-    )
-
     Column {
         // Text field for email
         OnboardingTextField(
@@ -227,8 +218,18 @@ fun RegistrationScreen(
                     extraText = passwordConfirmText,
                     validation = validation
                 )
-                // todo: move inside the oncomplete of registration
-                enabled = true
+                if (!emailError && !usernameError && !firstNameError && !lastNameError && !passwordError) {
+                    userViewModel.registerUser(
+                        email = emailText,
+                        password = passwordText,
+                        firstName = firstNameText,
+                        lastName = lastNameText,
+                        username = usernameText
+                    ) {
+                        // Todo: Add error handling
+                        enabled = true
+                    }
+                }
             },
             buttonText = "Register",
             enabled = enabled

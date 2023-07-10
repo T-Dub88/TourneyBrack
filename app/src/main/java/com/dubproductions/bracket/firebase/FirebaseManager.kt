@@ -16,7 +16,14 @@ class FirebaseManager {
     private val auth: FirebaseAuth = Firebase.auth
     private val firestore: FirebaseFirestore = Firebase.firestore
 
-    fun registerUser(email: String, password: String, onComplete: (success: Boolean) -> Unit) {
+    fun registerUser(
+        email: String,
+        password: String,
+        username: String,
+        firstName: String,
+        lastName: String,
+        onComplete: (success: Boolean) -> Unit
+    ) {
         auth
             .createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
@@ -26,6 +33,9 @@ class FirebaseManager {
                             userData = User(
                                 userId = userId,
                                 email = email,
+                                username = username,
+                                firstName = firstName,
+                                lastName = lastName
                             )
                         ) { success ->
                             if (!success) {
