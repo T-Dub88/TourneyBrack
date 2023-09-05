@@ -15,8 +15,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.dubproductions.bracket.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,9 +97,8 @@ fun ReusableDialog(
             TextButton(
                 onClick = { dismissDialog() }
             ) {
-                Text(text = "Ok")
+                Text(text = stringResource(id = R.string.ok))
             }
         },
-
-        )
+    )
 }

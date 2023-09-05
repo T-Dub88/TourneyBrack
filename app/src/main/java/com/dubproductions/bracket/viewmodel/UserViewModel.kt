@@ -20,7 +20,7 @@ class UserViewModel: ViewModel() {
 
     private var loggedIn: Boolean = false
 
-    fun updateUser(updatedUser: User) {
+    private fun updateUser(updatedUser: User) {
         _user.update { updatedUser }
         Log.i("User", "updateUser: ${user.value}")
     }

@@ -15,9 +15,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavHostController
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.navigation.Screen
@@ -52,7 +54,7 @@ fun LoginScreen(
     var showLoginFailureDialog by rememberSaveable { mutableStateOf(false) }
 
     Column {
-        Text(text = "Login")
+        Text(text = stringResource(id = R.string.login))
 
         // Text field for email
         OnboardingTextField(
@@ -63,13 +65,13 @@ fun LoginScreen(
                     emailError = false
                 }
             },
-            hint = "Email",
+            hint = stringResource(id = R.string.email),
             leadingIcon = Icons.Filled.Email,
             trailingIcon = Icons.Filled.Clear,
             trailingIconOnClick = { emailText = "" },
             visualTransformation = VisualTransformation.None,
             error = emailError,
-            errorText = "Email not valid",
+            errorText = stringResource(id = R.string.email_not_valid),
             enabled = enabled
         )
 
@@ -82,7 +84,7 @@ fun LoginScreen(
                     passwordError = false
                 }
             },
-            hint = "Password",
+            hint = stringResource(id = R.string.password),
             leadingIcon = Icons.Filled.Lock,
             trailingIcon = if (passwordVisible) {
                 Icons.Filled.Visibility
@@ -96,7 +98,7 @@ fun LoginScreen(
                 PasswordVisualTransformation()
             },
             error = passwordError,
-            errorText = "Password needed",
+            errorText = stringResource(id = R.string.password_needed),
             enabled = enabled
         )
 
@@ -132,14 +134,14 @@ fun LoginScreen(
                 }
 
             },
-            buttonText = "Login",
+            buttonText = stringResource(id = R.string.login),
             enabled = enabled
         )
 
         // Button to navigate to the registration screen
         OnboardingButton(
             whenClicked = { navHostController.navigate(Screen.Registration.route) },
-            buttonText = "Registration",
+            buttonText = stringResource(id = R.string.registration),
             enabled = enabled
         )
 
@@ -167,7 +169,7 @@ fun LoginScreen(
                 }
 
             },
-            buttonText = "Forgot Password",
+            buttonText = stringResource(id = R.string.forgot_password),
             enabled = enabled
         )
 
@@ -175,8 +177,8 @@ fun LoginScreen(
         when {
             showPasswordSuccessDialog -> {
                 ReusableDialog(
-                    titleText = "Email Sent",
-                    contentText = "A password reset email has been sent to the email address you provided.",
+                    titleText = stringResource(id = R.string.email_sent),
+                    contentText = stringResource(id = R.string.password_email_sent_message),
                     icon = Icons.Outlined.Email,
                     dismissDialog = { showPasswordSuccessDialog = false }
                 )
@@ -188,8 +190,8 @@ fun LoginScreen(
         when {
             showLoginFailureDialog -> {
                 ReusableDialog(
-                    titleText = "Login Failed",
-                    contentText = "You were not logged in successfully. Please check your credentials",
+                    titleText = stringResource(id = R.string.login_failed),
+                    contentText = stringResource(id = R.string.login_failed_message),
                     icon = Icons.Outlined.Error,
                     dismissDialog = { showLoginFailureDialog = false }
                 )
@@ -200,8 +202,8 @@ fun LoginScreen(
         when {
             showPasswordFailureDialog -> {
                 ReusableDialog(
-                    titleText = "Email not sent",
-                    contentText = "We were unable to send a password reset email to the email address you provided.",
+                    titleText = stringResource(id = R.string.password_email_not_sent),
+                    contentText = stringResource(id = R.string.password_email_not_sent_message),
                     icon = Icons.Outlined.Error,
                     dismissDialog = { showPasswordFailureDialog = false }
                 )
