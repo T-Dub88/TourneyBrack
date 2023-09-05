@@ -1,88 +1,230 @@
 package com.dubproductions.bracket.ui.onboarding
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavHostController
+import com.dubproductions.bracket.R
+import com.dubproductions.bracket.Type
+import com.dubproductions.bracket.Validation
+import com.dubproductions.bracket.navigation.Screen
+import com.dubproductions.bracket.ui.OnboardingButton
+import com.dubproductions.bracket.ui.OnboardingTextField
+import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
-fun LoginScreen(userViewModel: UserViewModel, navHostController: NavHostController) {
+fun LoginScreen(
+    userViewModel: UserViewModel,
+    navHostController: NavHostController,
+    validation: Validation
+) {
+    // Text field texts
+    var emailText by rememberSaveable { mutableStateOf("") }
+    var passwordText by rememberSaveable { mutableStateOf("") }
 
-    var emailText by remember { mutableStateOf("") }
-    var passwordText by remember { mutableStateOf("") }
+    // Password visibility
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
-    Column(
+    // Error states
+    var emailError by rememberSaveable { mutableStateOf(false) }
+    var passwordError by rememberSaveable { mutableStateOf(false) }
 
-    ) {
-        Text(text = "Login")
-        LoginScreenTextField(
+    // Fields enable or disable state
+    var enabled by rememberSaveable { mutableStateOf(true) }
+
+    // Dialog visibility
+    var showPasswordSuccessDialog by rememberSaveable { mutableStateOf(false) }
+    var showPasswordFailureDialog by rememberSaveable { mutableStateOf(false) }
+    var showLoginFailureDialog by rememberSaveable { mutableStateOf(false) }
+
+    Column {
+        Text(text = stringResource(id = R.string.login))
+
+        // Text field for email
+        OnboardingTextField(
             text = emailText,
-            whenChanged = { newText -> emailText = newText },
-            hint = "Email",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 25.dp
-                )
+            whenChanged = { newText ->
+                emailText = newText
+                if (emailError) {
+                    emailError = false
+                }
+            },
+            hint = stringResource(id = R.string.email),
+            leadingIcon = Icons.Filled.Email,
+            trailingIcon = Icons.Filled.Clear,
+            trailingIconOnClick = { emailText = "" },
+            visualTransformation = VisualTransformation.None,
+            error = emailError,
+            errorText = stringResource(id = R.string.email_not_valid),
+            enabled = enabled
         )
-        LoginScreenTextField(
+
+        // Text field for password
+        OnboardingTextField(
             text = passwordText,
-            whenChanged = { newText -> passwordText = newText },
-            hint = "Password",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 25.dp
+            whenChanged = { newText ->
+                passwordText = newText
+                if (passwordError) {
+                    passwordError = false
+                }
+            },
+            hint = stringResource(id = R.string.password),
+            leadingIcon = Icons.Filled.Lock,
+            trailingIcon = if (passwordVisible) {
+                Icons.Filled.Visibility
+            } else {
+                Icons.Filled.VisibilityOff
+            },
+            trailingIconOnClick = { passwordVisible = !passwordVisible },
+            visualTransformation = if (passwordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            error = passwordError,
+            errorText = stringResource(id = R.string.password_needed),
+            enabled = enabled
+        )
+
+        // Button to log user in
+        OnboardingButton(
+            whenClicked = {
+                enabled = false
+                emailError = validateFields(
+                    text = emailText,
+                    type = Type.EMAIL,
+                    validation = validation
                 )
+                passwordError = validateFields(
+                    text = passwordText,
+                    type = Type.EMPTY,
+                    validation = validation
+                )
+
+                if (!passwordError || !emailError) {
+                    userViewModel.loginUser(
+                        email = emailText,
+                        password = passwordText
+                    ) {
+                        enabled = true
+                        if (it) {
+                            navHostController.navigate(Screen.Home.route)
+                        } else {
+                            showLoginFailureDialog = true
+                        }
+                    }
+                } else {
+                    enabled = true
+                }
+
+            },
+            buttonText = stringResource(id = R.string.login),
+            enabled = enabled
         )
-        LoginScreenButton(
-            whenClicked = { /*TODO*/ },
-            buttonText = "Login"
+
+        // Button to navigate to the registration screen
+        OnboardingButton(
+            whenClicked = { navHostController.navigate(Screen.Registration.route) },
+            buttonText = stringResource(id = R.string.registration),
+            enabled = enabled
         )
-        LoginScreenButton(
-            whenClicked = { /*TODO*/ },
-            buttonText = "Registration"
+
+        // Button for password reset
+        OnboardingButton(
+            whenClicked = {
+                enabled = false
+                emailError = validateFields(
+                    text = emailText,
+                    type = Type.EMAIL,
+                    validation = validation
+                )
+
+                if (!emailError) {
+                    userViewModel.resetPassword(emailText) { success ->
+                        enabled = true
+                        if (success) {
+                            showPasswordSuccessDialog = true
+                        } else {
+                            showPasswordFailureDialog = true
+                        }
+                    }
+                } else {
+                    enabled = true
+                }
+
+            },
+            buttonText = stringResource(id = R.string.forgot_password),
+            enabled = enabled
         )
+
+        // Dialog to tell user password email has sent.
+        when {
+            showPasswordSuccessDialog -> {
+                ReusableDialog(
+                    titleText = stringResource(id = R.string.email_sent),
+                    contentText = stringResource(id = R.string.password_email_sent_message),
+                    icon = Icons.Outlined.Email,
+                    dismissDialog = { showPasswordSuccessDialog = false }
+                )
+            }
+        }
+
+
+        // Dialog to tell user login has failed.
+        when {
+            showLoginFailureDialog -> {
+                ReusableDialog(
+                    titleText = stringResource(id = R.string.login_failed),
+                    contentText = stringResource(id = R.string.login_failed_message),
+                    icon = Icons.Outlined.Error,
+                    dismissDialog = { showLoginFailureDialog = false }
+                )
+            }
+        }
+
+        // Dialog to tell user password email not sent.
+        when {
+            showPasswordFailureDialog -> {
+                ReusableDialog(
+                    titleText = stringResource(id = R.string.password_email_not_sent),
+                    contentText = stringResource(id = R.string.password_email_not_sent_message),
+                    icon = Icons.Outlined.Error,
+                    dismissDialog = { showPasswordFailureDialog = false }
+                )
+            }
+        }
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun LoginScreenTextField(
+private fun validateFields(
     text: String,
-    whenChanged: (String) -> Unit,
-    hint: String,
-    modifier: Modifier
-) {
-   OutlinedTextField(
-       value = text,
-       onValueChange = whenChanged,
-       label = { Text(text = hint) },
-       modifier = modifier
-   )
-}
-
-@Composable
-fun LoginScreenButton(
-    whenClicked: () -> Unit,
-    buttonText: String
-) {
-    Button(
-        onClick = whenClicked,
-    ) {
-        Text(text = buttonText)
+    type: Type,
+    validation: Validation
+): Boolean {
+    return !when (type) {
+        Type.EMAIL -> {
+            validation.isEmailValid(text)
+        }
+        Type.EMPTY -> {
+            validation.isFieldEmpty(text)
+        } else -> {
+            false
+        }
     }
 }
