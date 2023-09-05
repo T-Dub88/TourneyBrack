@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.User
@@ -17,8 +18,11 @@ class UserViewModel: ViewModel() {
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
-    fun updateUser(user: User) {
-        _user.update { user }
+    private var loggedIn: Boolean = false
+
+    fun updateUser(updatedUser: User) {
+        _user.update { updatedUser }
+        Log.i("User", "updateUser: ${user.value}")
     }
 
     fun registerUser(
@@ -37,6 +41,62 @@ class UserViewModel: ViewModel() {
                 firstName = firstName,
                 lastName = lastName
             ) { success: Boolean ->
+                if (success) {
+                    fetchUserData {
+                        loggedIn = true
+                        onComplete(it)
+                    }
+                } else {
+                    onComplete(false)
+                }
+            }
+        }
+    }
+
+    fun loginUser(
+        email: String,
+        password: String,
+        onComplete: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            firebaseManager.signInUser(
+                email = email,
+                password = password
+            ) { success ->
+                if (success) {
+                    fetchUserData {
+                        loggedIn = true
+                        onComplete(it)
+                    }
+                } else {
+                    onComplete(false)
+                }
+            }
+        }
+    }
+
+    private fun fetchUserData(onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            firebaseManager.fetchUserData { user ->
+                when {
+                    loggedIn && user != null -> {
+                        updateUser(user)
+                    }
+                    !loggedIn && user != null -> {
+                        updateUser(user)
+                        onComplete(true)
+                    }
+                    !loggedIn && user == null -> {
+                        onComplete(false)
+                    }
+                }
+            }
+        }
+    }
+
+    fun resetPassword(email: String, onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            firebaseManager.resetUserPassword(email = email) { success ->
                 onComplete(success)
             }
         }

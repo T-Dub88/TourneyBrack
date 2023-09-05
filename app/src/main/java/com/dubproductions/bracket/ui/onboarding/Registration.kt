@@ -9,6 +9,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +21,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavHostController
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
+import com.dubproductions.bracket.navigation.Screen
+import com.dubproductions.bracket.ui.OnboardingButton
+import com.dubproductions.bracket.ui.OnboardingTextField
+import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
@@ -39,7 +45,7 @@ fun RegistrationScreen(
     // Password boolean
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
-    // Field error stats
+    // Field error states
     var emailError by rememberSaveable { mutableStateOf(false) }
     var usernameError by rememberSaveable { mutableStateOf(false) }
     var firstNameError by rememberSaveable { mutableStateOf(false) }
@@ -49,7 +55,13 @@ fun RegistrationScreen(
     // Fields enable or disable state
     var enabled by rememberSaveable { mutableStateOf(true) }
 
+    // Dialog visibility
+    var showRegistrationFailureDialog by rememberSaveable { mutableStateOf(false) }
+
     Column {
+
+        Text(text = "Registration")
+
         // Text field for email
         OnboardingTextField(
             text = emailText,
@@ -226,14 +238,33 @@ fun RegistrationScreen(
                         lastName = lastNameText,
                         username = usernameText
                     ) {
-                        // Todo: Add error handling
                         enabled = true
+                        if (it) {
+                            navHostController.navigate(Screen.Home.route)
+                        } else {
+                            showRegistrationFailureDialog = true
+                        }
                     }
+                } else {
+                    enabled = true
                 }
             },
             buttonText = "Register",
             enabled = enabled
         )
+
+        // Dialog to tell user registration has failed.
+        when {
+            showRegistrationFailureDialog -> {
+                ReusableDialog(
+                    titleText = "Registration not successful",
+                    contentText = "Account registration has failed. Please check your credentials.",
+                    icon = Icons.Outlined.Error,
+                    dismissDialog = { showRegistrationFailureDialog = false }
+                )
+            }
+        }
+
     }
 }
 

@@ -39,5 +39,11 @@ fun SetupNavGraph(
                 validation = validation
             )
         }
+
+        composable(
+            route = Screen.Home.route
+        ) {
+            // Todo Add home screen
+        }
     }
 }

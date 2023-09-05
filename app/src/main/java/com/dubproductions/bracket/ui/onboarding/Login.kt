@@ -1,35 +1,29 @@
 package com.dubproductions.bracket.ui.onboarding
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.navigation.Screen
+import com.dubproductions.bracket.ui.OnboardingButton
+import com.dubproductions.bracket.ui.OnboardingTextField
+import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
@@ -38,7 +32,6 @@ fun LoginScreen(
     navHostController: NavHostController,
     validation: Validation
 ) {
-
     // Text field texts
     var emailText by rememberSaveable { mutableStateOf("") }
     var passwordText by rememberSaveable { mutableStateOf("") }
@@ -46,12 +39,17 @@ fun LoginScreen(
     // Password visibility
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
-    // Error stats
+    // Error states
     var emailError by rememberSaveable { mutableStateOf(false) }
     var passwordError by rememberSaveable { mutableStateOf(false) }
 
     // Fields enable or disable state
     var enabled by rememberSaveable { mutableStateOf(true) }
+
+    // Dialog visibility
+    var showPasswordSuccessDialog by rememberSaveable { mutableStateOf(false) }
+    var showPasswordFailureDialog by rememberSaveable { mutableStateOf(false) }
+    var showLoginFailureDialog by rememberSaveable { mutableStateOf(false) }
 
     Column {
         Text(text = "Login")
@@ -116,8 +114,23 @@ fun LoginScreen(
                     type = Type.EMPTY,
                     validation = validation
                 )
-                // todo: move inside login function
-                enabled = true
+
+                if (!passwordError || !emailError) {
+                    userViewModel.loginUser(
+                        email = emailText,
+                        password = passwordText
+                    ) {
+                        enabled = true
+                        if (it) {
+                            navHostController.navigate(Screen.Home.route)
+                        } else {
+                            showLoginFailureDialog = true
+                        }
+                    }
+                } else {
+                    enabled = true
+                }
+
             },
             buttonText = "Login",
             enabled = enabled
@@ -129,6 +142,71 @@ fun LoginScreen(
             buttonText = "Registration",
             enabled = enabled
         )
+
+        // Button for password reset
+        OnboardingButton(
+            whenClicked = {
+                enabled = false
+                emailError = validateFields(
+                    text = emailText,
+                    type = Type.EMAIL,
+                    validation = validation
+                )
+
+                if (!emailError) {
+                    userViewModel.resetPassword(emailText) { success ->
+                        enabled = true
+                        if (success) {
+                            showPasswordSuccessDialog = true
+                        } else {
+                            showPasswordFailureDialog = true
+                        }
+                    }
+                } else {
+                    enabled = true
+                }
+
+            },
+            buttonText = "Forgot Password",
+            enabled = enabled
+        )
+
+        // Dialog to tell user password email has sent.
+        when {
+            showPasswordSuccessDialog -> {
+                ReusableDialog(
+                    titleText = "Email Sent",
+                    contentText = "A password reset email has been sent to the email address you provided.",
+                    icon = Icons.Outlined.Email,
+                    dismissDialog = { showPasswordSuccessDialog = false }
+                )
+            }
+        }
+
+
+        // Dialog to tell user login has failed.
+        when {
+            showLoginFailureDialog -> {
+                ReusableDialog(
+                    titleText = "Login Failed",
+                    contentText = "You were not logged in successfully. Please check your credentials",
+                    icon = Icons.Outlined.Error,
+                    dismissDialog = { showLoginFailureDialog = false }
+                )
+            }
+        }
+
+        // Dialog to tell user password email not sent.
+        when {
+            showPasswordFailureDialog -> {
+                ReusableDialog(
+                    titleText = "Email not sent",
+                    contentText = "We were unable to send a password reset email to the email address you provided.",
+                    icon = Icons.Outlined.Error,
+                    dismissDialog = { showPasswordFailureDialog = false }
+                )
+            }
+        }
     }
 }
 
@@ -146,66 +224,5 @@ private fun validateFields(
         } else -> {
             false
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun OnboardingTextField(
-    text: String,
-    whenChanged: (String) -> Unit,
-    hint: String,
-    leadingIcon: ImageVector,
-    trailingIcon: ImageVector,
-    trailingIconOnClick: () -> Unit,
-    visualTransformation: VisualTransformation,
-    error: Boolean,
-    errorText: String,
-    enabled: Boolean
-) {
-   OutlinedTextField(
-       value = text,
-       onValueChange = whenChanged,
-       label = { Text(text = hint) },
-       leadingIcon = { Icon(imageVector = leadingIcon, contentDescription = null) },
-       trailingIcon = {
-           if (error) {
-               Icon(imageVector = Icons.Filled.Error, contentDescription = null)
-           } else {
-               IconButton(onClick = trailingIconOnClick) {
-                   Icon(imageVector = trailingIcon, contentDescription = null)
-               }
-           }
-       },
-       modifier = Modifier
-           .fillMaxWidth()
-           .padding(
-               horizontal = 25.dp
-           ),
-       visualTransformation = visualTransformation,
-       isError = error,
-       supportingText = {
-           if (error) {
-               Text(text = errorText)
-           }
-       },
-       enabled = enabled
-   )
-}
-
-@Composable
-fun OnboardingButton(
-    whenClicked: () -> Unit,
-    buttonText: String,
-    enabled: Boolean
-) {
-    Button(
-        onClick = whenClicked,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 25.dp),
-        enabled = enabled
-    ) {
-        Text(text = buttonText)
     }
 }

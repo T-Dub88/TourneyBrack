@@ -85,7 +85,7 @@ class FirebaseManager {
             }
     }
 
-    fun fetchUserData(onComplete: (user: User) -> Unit) {
+    fun fetchUserData(onComplete: (user: User?) -> Unit) {
         auth.currentUser?.uid?.let { userId ->
             firestore
                 .collection("Users")
@@ -93,13 +93,22 @@ class FirebaseManager {
                 .addSnapshotListener { value, error ->
                     if (error != null) {
                         Log.e(TAG, "fetchUserData: ${error.message}")
+                        onComplete(null)
                         return@addSnapshotListener
                     }
                     if (value != null && value.exists()) {
                         val user = value.toObject<User>()
-                        user?.let { onComplete(it) }
+                        onComplete(user)
+                    } else {
+                        onComplete(null)
                     }
                 }
+        }
+    }
+
+    fun resetUserPassword(email: String, onComplete: (success: Boolean) -> Unit) {
+        auth.sendPasswordResetEmail(email).addOnCompleteListener {
+            onComplete(it.isSuccessful)
         }
     }
 
