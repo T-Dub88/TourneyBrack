@@ -7,11 +7,11 @@ data class Match(
     var tie: Boolean? = null,
     val round: Int? = null
 ) {
-    fun setWinner(participant: Participant) {
+    fun declareWinner(participant: Participant) {
         winner = participant
     }
 
-    fun setTie() {
+    fun declareTie() {
         tie = true
     }
 }
