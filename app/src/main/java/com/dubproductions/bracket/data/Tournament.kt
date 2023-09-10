@@ -1,5 +1,8 @@
 package com.dubproductions.bracket.data
 
+import kotlin.math.ceil
+import kotlin.math.log2
+
 data class Tournament(
     var id: String? = null,
     var type: String? = null,
@@ -90,6 +93,17 @@ data class Tournament(
             }
             matchList
         }
+    }
+
+    fun setNumberOfRounds() {
+        // participants <= 2^rounds
+
+        participants?.let {
+            val participantNth = log2(it.size.toDouble())
+
+            roundCount = ceil(participantNth).toInt()
+        }
+
     }
 
 
