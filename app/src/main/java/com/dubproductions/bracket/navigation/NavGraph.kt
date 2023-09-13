@@ -52,7 +52,8 @@ fun SetupNavGraph(
             route = Screen.Loading.route
         ) {
             LoadingScreen(
-                navHostController = navHostController
+                navHostController = navHostController,
+                userViewModel = userViewModel
             )
         }
     }

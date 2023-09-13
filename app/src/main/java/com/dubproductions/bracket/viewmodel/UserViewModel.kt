@@ -18,8 +18,6 @@ class UserViewModel: ViewModel() {
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
-    private var loggedIn: Boolean = false
-
     private fun updateUser(updatedUser: User) {
         _user.update { updatedUser }
         Log.i("User", "updateUser: ${user.value}")
@@ -43,7 +41,6 @@ class UserViewModel: ViewModel() {
             ) { success: Boolean ->
                 if (success) {
                     fetchUserData {
-                        loggedIn = true
                         onComplete(it)
                     }
                 } else {
@@ -65,7 +62,6 @@ class UserViewModel: ViewModel() {
             ) { success ->
                 if (success) {
                     fetchUserData {
-                        loggedIn = true
                         onComplete(it)
                     }
                 } else {
@@ -79,14 +75,14 @@ class UserViewModel: ViewModel() {
         viewModelScope.launch {
             firebaseManager.fetchUserData { user ->
                 when {
-                    loggedIn && user != null -> {
+                    firebaseManager.checkLoginStatus() && user?.userId != null -> {
                         updateUser(user)
                     }
-                    !loggedIn && user != null -> {
+                    !firebaseManager.checkLoginStatus() && user?.userId != null -> {
                         updateUser(user)
                         onComplete(true)
                     }
-                    !loggedIn && user == null -> {
+                    !firebaseManager.checkLoginStatus() && user?.userId == null -> {
                         onComplete(false)
                     }
                 }
@@ -99,6 +95,16 @@ class UserViewModel: ViewModel() {
             firebaseManager.resetUserPassword(email = email) { success ->
                 onComplete(success)
             }
+        }
+    }
+
+    fun userLoggedIn(onComplete: (Boolean) -> Unit) {
+        if (firebaseManager.checkLoginStatus()) {
+            fetchUserData {
+                onComplete(it)
+            }
+        } else {
+            onComplete(false)
         }
     }
 
