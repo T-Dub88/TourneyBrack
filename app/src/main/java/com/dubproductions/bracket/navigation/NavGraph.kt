@@ -6,6 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.dubproductions.bracket.Validation
+import com.dubproductions.bracket.ui.LoadingScreen
+import com.dubproductions.bracket.ui.main.HomeScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
 import com.dubproductions.bracket.viewmodel.UserViewModel
@@ -18,7 +20,7 @@ fun SetupNavGraph(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Loading.route
     ) {
         composable(
             route = Screen.Login.route
@@ -43,7 +45,15 @@ fun SetupNavGraph(
         composable(
             route = Screen.Home.route
         ) {
-            // Todo Add home screen
+            HomeScreen()
+        }
+
+        composable(
+            route = Screen.Loading.route
+        ) {
+            LoadingScreen(
+                navHostController = navHostController
+            )
         }
     }
 }
