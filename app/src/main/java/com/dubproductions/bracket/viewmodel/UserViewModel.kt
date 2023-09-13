@@ -18,6 +18,8 @@ class UserViewModel: ViewModel() {
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
+    private var loggedIn: Boolean = false
+
     private fun updateUser(updatedUser: User) {
         _user.update { updatedUser }
         Log.i("User", "updateUser: ${user.value}")
@@ -41,6 +43,7 @@ class UserViewModel: ViewModel() {
             ) { success: Boolean ->
                 if (success) {
                     fetchUserData {
+                        loggedIn = true
                         onComplete(it)
                     }
                 } else {
@@ -62,6 +65,7 @@ class UserViewModel: ViewModel() {
             ) { success ->
                 if (success) {
                     fetchUserData {
+                        loggedIn = true
                         onComplete(it)
                     }
                 } else {
@@ -75,14 +79,15 @@ class UserViewModel: ViewModel() {
         viewModelScope.launch {
             firebaseManager.fetchUserData { user ->
                 when {
-                    firebaseManager.checkLoginStatus() && user?.userId != null -> {
+                    loggedIn && user?.userId != null -> {
                         updateUser(user)
                     }
-                    !firebaseManager.checkLoginStatus() && user?.userId != null -> {
+                    !loggedIn && user?.userId != null -> {
                         updateUser(user)
+                        loggedIn = true
                         onComplete(true)
                     }
-                    !firebaseManager.checkLoginStatus() && user?.userId == null -> {
+                    !loggedIn && user?.userId == null -> {
                         onComplete(false)
                     }
                 }
