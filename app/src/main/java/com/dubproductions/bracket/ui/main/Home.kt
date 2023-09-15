@@ -13,7 +13,7 @@ fun HomeScreen(userViewModel: UserViewModel) {
     val userInfo by userViewModel.user.collectAsStateWithLifecycle()
 
     Column {
-        Text(text = userInfo.toString())
+        Text(text = "Welcome ${userInfo.username}")
     }
 
 }

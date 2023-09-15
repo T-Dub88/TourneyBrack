@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
+import com.dubproductions.bracket.navigation.Map
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
@@ -124,7 +125,11 @@ fun LoginScreen(
                     ) {
                         enabled = true
                         if (it) {
-                            navHostController.navigate(Screen.Home.route)
+                            navHostController.navigate(Map.Main.route) {
+                                popUpTo(Map.Onboarding.route) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
                             showLoginFailureDialog = true
                         }

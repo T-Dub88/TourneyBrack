@@ -3,6 +3,7 @@ package com.dubproductions.bracket.ui
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import com.dubproductions.bracket.navigation.Map
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
@@ -13,8 +14,8 @@ fun LoadingScreen(
 ) {
     userViewModel.userLoggedIn { success ->
         if (success) {
-            navHostController.navigate(Screen.Home.route) {
-                popUpTo(Screen.Loading.route) {
+            navHostController.navigate(Map.Main.route) {
+                popUpTo(Map.Onboarding.route) {
                     inclusive = true
                 }
             }

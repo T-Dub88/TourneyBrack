@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.LoadingScreen
 import com.dubproductions.bracket.ui.main.HomeScreen
@@ -20,43 +21,53 @@ fun SetupNavGraph(
 ) {
     NavHost(
         navController = navHostController,
-        startDestination = Screen.Loading.route
+        startDestination = Map.Onboarding.route
     ) {
-        composable(
-            route = Screen.Login.route
+        navigation(
+            startDestination = Screen.Loading.route,
+            route = Map.Onboarding.route
         ) {
-            LoginScreen(
-                userViewModel = userViewModel,
-                navHostController = navHostController,
-                validation = validation
-            )
+            composable(
+                route = Screen.Loading.route
+            ) {
+                LoadingScreen(
+                    navHostController = navHostController,
+                    userViewModel = userViewModel
+                )
+            }
+
+            composable(
+                route = Screen.Login.route
+            ) {
+                LoginScreen(
+                    userViewModel = userViewModel,
+                    navHostController = navHostController,
+                    validation = validation
+                )
+            }
+
+            composable(
+                route = Screen.Registration.route
+            ) {
+                RegistrationScreen(
+                    userViewModel = userViewModel,
+                    navHostController = navHostController,
+                    validation = validation
+                )
+            }
         }
 
-        composable(
-            route = Screen.Registration.route
+        navigation(
+            startDestination = Screen.Home.route,
+            route = Map.Main.route
         ) {
-            RegistrationScreen(
-                userViewModel = userViewModel,
-                navHostController = navHostController,
-                validation = validation
-            )
-        }
-
-        composable(
-            route = Screen.Home.route
-        ) {
-            HomeScreen(
-                userViewModel = userViewModel
-            )
-        }
-
-        composable(
-            route = Screen.Loading.route
-        ) {
-            LoadingScreen(
-                navHostController = navHostController,
-                userViewModel = userViewModel
-            )
+            composable(
+                route = Screen.Home.route
+            ) {
+                HomeScreen(
+                    userViewModel = userViewModel
+                )
+            }
         }
     }
 }
