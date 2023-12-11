@@ -10,46 +10,38 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(
     val route: String,
     val label: String,
-    val icon: ImageVector? = null,
-    val showBottomBar: Boolean
+    val icon: ImageVector? = null
 ) {
     object Loading: Screen(
         route = "loading",
-        label = "Loading",
-        showBottomBar = false
+        label = "Loading"
     )
     object Login: Screen(
         route = "login",
-        label = "Login",
-        showBottomBar = false
+        label = "Login"
     )
     object Registration: Screen(
         route = "registration",
-        label = "Registration",
-        showBottomBar = false
+        label = "Registration"
     )
     object Home: Screen(
         route = "home",
         label = "Home",
-        icon = Icons.Filled.Home,
-        showBottomBar = true
+        icon = Icons.Filled.Home
     )
     object Hosting: Screen(
         route = "hosting",
         label = "Hosting",
-        icon = Icons.Filled.EventNote,
-        showBottomBar = true
+        icon = Icons.Filled.EventNote
     )
     object Participating: Screen(
         route = "participating",
         label = "Participating",
-        icon = Icons.Filled.Event,
-        showBottomBar = true
+        icon = Icons.Filled.Event
     )
     object Settings: Screen(
         route = "settings",
         label = "Settings",
-        icon = Icons.Filled.Settings,
-        showBottomBar = true
+        icon = Icons.Filled.Settings
     )
 }

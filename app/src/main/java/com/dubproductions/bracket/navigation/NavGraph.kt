@@ -19,7 +19,6 @@ fun SetupNavGraph(
     navHostController: NavHostController,
     userViewModel: UserViewModel = viewModel(),
     validation: Validation = Validation(),
-    controlBottomBarVisibility: (Boolean) -> Unit
 ) {
     // Pre Login Map
     NavHost(
@@ -33,7 +32,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Loading.route
             ) {
-                controlBottomBarVisibility(Screen.Loading.showBottomBar)
                 LoadingScreen(
                     navHostController = navHostController,
                     userViewModel = userViewModel
@@ -43,7 +41,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Login.route
             ) {
-                controlBottomBarVisibility(Screen.Login.showBottomBar)
                 LoginScreen(
                     userViewModel = userViewModel,
                     navHostController = navHostController,
@@ -54,7 +51,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Registration.route
             ) {
-                controlBottomBarVisibility(Screen.Registration.showBottomBar)
                 RegistrationScreen(
                     userViewModel = userViewModel,
                     navHostController = navHostController,
@@ -71,7 +67,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Home.route
             ) {
-                controlBottomBarVisibility(Screen.Home.showBottomBar)
                 HomeScreen(
                     userViewModel = userViewModel
                 )
@@ -80,7 +75,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Hosting.route
             ) {
-                controlBottomBarVisibility(Screen.Hosting.showBottomBar)
                 // Todo: Make screen
                 Log.i("Nav Graph", "Hosting Screen")
             }
@@ -88,7 +82,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Participating.route
             ) {
-                controlBottomBarVisibility(Screen.Participating.showBottomBar)
                 // Todo: Make screen
                 Log.i("Nav Graph", "Participating Screen")
             }
@@ -96,7 +89,6 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Settings.route
             ) {
-                controlBottomBarVisibility(Screen.Settings.showBottomBar)
                 // Todo: Make screen
                 Log.i("Nav Graph", "Settings Screen")
             }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.navigation.SetupNavGraph
 import com.dubproductions.bracket.ui.theme.BracketTheme
@@ -27,10 +28,11 @@ import com.dubproductions.bracket.ui.theme.BracketTheme
 fun MainAppContent(
     navController: NavHostController
 ) {
-    var selectedNavBarItem by rememberSaveable { mutableStateOf(0) }
-    var bottomBarVisible by rememberSaveable { mutableStateOf(false) }
-
     val navBarItems: List<Screen> = listOf(Screen.Home, Screen.Hosting, Screen.Participating, Screen.Settings)
+    var selectedNavBarItem by rememberSaveable { mutableStateOf(0) }
+    val bottomBarVisible: Boolean = navController.currentBackStackEntryAsState().value?.destination?.route in navBarItems.map {
+        it.route
+    }
 
     BracketTheme {
         Scaffold(
@@ -66,11 +68,9 @@ fun MainAppContent(
                     .padding(it),
                 color = MaterialTheme.colorScheme.background
             ) {
-                SetupNavGraph(navHostController = navController) { visible ->
-                    bottomBarVisible = visible
-                }
+                SetupNavGraph(navHostController = navController)
             }
         }
-        
+
     }
 }
