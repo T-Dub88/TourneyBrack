@@ -10,6 +10,9 @@ import androidx.navigation.navigation
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.LoadingScreen
 import com.dubproductions.bracket.ui.main.HomeScreen
+import com.dubproductions.bracket.ui.main.HostingScreen
+import com.dubproductions.bracket.ui.main.ParticipatingScreen
+import com.dubproductions.bracket.ui.main.SettingsScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
 import com.dubproductions.bracket.viewmodel.UserViewModel
@@ -75,22 +78,19 @@ fun SetupNavGraph(
             composable(
                 route = Screen.Hosting.route
             ) {
-                // Todo: Make screen
-                Log.i("Nav Graph", "Hosting Screen")
+                HostingScreen()
             }
 
             composable(
                 route = Screen.Participating.route
             ) {
-                // Todo: Make screen
-                Log.i("Nav Graph", "Participating Screen")
+                ParticipatingScreen()
             }
 
             composable(
                 route = Screen.Settings.route
             ) {
-                // Todo: Make screen
-                Log.i("Nav Graph", "Settings Screen")
+                SettingsScreen()
             }
         }
     }
