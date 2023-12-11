@@ -5,6 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dubproductions.bracket.ui.MainAppContent
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
