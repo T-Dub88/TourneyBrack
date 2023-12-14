@@ -10,12 +10,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -34,7 +36,10 @@ fun HomeScreen(userViewModel: UserViewModel) {
 
     HomeScreenContent(
         userName = userInfo.username.toString(),
-        tournamentList = tournamentList
+        tournamentList = tournamentList,
+        cardPressed = {
+            // Todo: Navigate to tournament info screen
+        }
     )
 
 }
@@ -42,7 +47,8 @@ fun HomeScreen(userViewModel: UserViewModel) {
 @Composable
 fun HomeScreenContent(
     userName: String,
-    tournamentList: MutableList<Tournament>
+    tournamentList: MutableList<Tournament>,
+    cardPressed: () -> Unit
 ) {
     Column {
         Text(text = stringResource(
@@ -57,14 +63,21 @@ fun HomeScreenContent(
                 .padding(horizontal = 8.dp)
         ) {
             items(tournamentList) { tournament ->
-                TournamentSummaryCard(tournament = tournament)
+                TournamentSummaryCard(
+                    tournament = tournament,
+                    onPress = cardPressed
+                )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TournamentSummaryCard(tournament: Tournament) {
+fun TournamentSummaryCard(
+    tournament: Tournament,
+    onPress: () -> Unit,
+) {
     Card(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp
@@ -75,7 +88,8 @@ fun TournamentSummaryCard(tournament: Tournament) {
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
+        ),
+        onClick = onPress
     ) {
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -93,16 +107,16 @@ fun TournamentSummaryCard(tournament: Tournament) {
                 )
                 Text(
                     text = stringResource(
-                        id = R.string.status,
-                        tournament.status.toString()
+                        id = R.string.rounds,
+                        tournament.roundCount.toString()
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
                 )
                 Text(
                     text = stringResource(
-                        id = R.string.rounds,
-                        tournament.roundCount.toString()
+                        id = R.string.status,
+                        tournament.status.toString()
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
@@ -137,6 +151,13 @@ fun TournamentSummaryCard(tournament: Tournament) {
                 )
             }
         }
+        Text(
+            text = stringResource(id = R.string.more_info_card),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -148,7 +169,7 @@ private fun formatDateTime(timestamp: Long?): String {
 @Preview
 @Composable
 private fun TournamentCardPreview() {
-    val tournament: Tournament = Tournament(
+    val tournament = Tournament(
         name = "Tourney Classic",
         id = "djsjlkhfj",
         type = "Swiss",
@@ -169,5 +190,8 @@ private fun TournamentCardPreview() {
     tournament.timeStampStart()
     tournament.timeStampFinish()
 
-    TournamentSummaryCard(tournament = tournament)
+    TournamentSummaryCard(
+        tournament = tournament,
+        onPress = {}
+    )
 }

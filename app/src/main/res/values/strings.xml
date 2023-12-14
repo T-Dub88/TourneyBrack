@@ -39,6 +39,7 @@
     <string name="type">Type: %1$s</string>
     <string name="started_date">Started: %1$s</string>
     <string name="completed_date">Completed: %1$s</string>
+    <string name="more_info_card">Tap card for more information</string>
 
     <!--Composables-->
     <string name="ok">Ok</string>
