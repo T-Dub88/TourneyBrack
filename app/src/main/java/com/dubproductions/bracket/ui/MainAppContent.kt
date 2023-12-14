@@ -34,7 +34,6 @@ fun MainAppContent(
                 val selectedIndex: Int = navBarItems.indexOfFirst {
                     it.route == currentDestination
                 }
-                Log.i("Bottom Index", selectedIndex.toString())
                 if (selectedIndex != -1) {
                     NavigationBar {
                         navBarItems.forEachIndexed { index, item ->

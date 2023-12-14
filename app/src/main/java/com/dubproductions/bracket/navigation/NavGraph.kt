@@ -1,6 +1,5 @@
 package com.dubproductions.bracket.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -15,6 +14,7 @@ import com.dubproductions.bracket.ui.main.ParticipatingScreen
 import com.dubproductions.bracket.ui.main.SettingsScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
+import com.dubproductions.bracket.viewmodel.AppViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
@@ -22,6 +22,7 @@ fun SetupNavGraph(
     navHostController: NavHostController,
     userViewModel: UserViewModel = viewModel(),
     validation: Validation = Validation(),
+    appViewModel: AppViewModel = viewModel()
 ) {
     // Pre Login Map
     NavHost(
@@ -37,7 +38,8 @@ fun SetupNavGraph(
             ) {
                 LoadingScreen(
                     navHostController = navHostController,
-                    userViewModel = userViewModel
+                    userViewModel = userViewModel,
+                    appViewModel = appViewModel
                 )
             }
 
