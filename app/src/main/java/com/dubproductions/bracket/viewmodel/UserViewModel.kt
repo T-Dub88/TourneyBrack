@@ -3,6 +3,7 @@ package com.dubproductions.bracket.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.firebase.FirebaseManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,19 @@ class UserViewModel: ViewModel() {
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
+    private val _tournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
+    val tournamentList: StateFlow<MutableList<Tournament>> = _tournamentList
+
     private var loggedIn: Boolean = false
+
+    private fun updateTournamentList(tournament: Tournament) {
+        _tournamentList.update { previousTourneyList ->
+            if (tournament !in previousTourneyList) {
+                previousTourneyList.add(tournament)
+            }
+            previousTourneyList
+        }
+    }
 
     private fun updateUser(updatedUser: User) {
         _user.update { updatedUser }

@@ -30,6 +30,16 @@
     <string name="registration_not_successful">Registration Not Successful</string>
     <string name="registration_failure_message">Account registration has failed. Please check your credentials.</string>
 
+    <!--Home Screen-->
+    <string name="greeting">Hi %1$s!</string>
+    <string name="tournament_history">Tournament History:</string>
+    <string name="tournament_name">Name: %1$s</string>
+    <string name="status">Status: %1$s</string>
+    <string name="rounds">Rounds: %1$s</string>
+    <string name="type">Type: %1$s</string>
+    <string name="started_date">Started: %1$s</string>
+    <string name="completed_date">Completed: %1$s</string>
+
     <!--Composables-->
     <string name="ok">Ok</string>
 
