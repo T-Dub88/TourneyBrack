@@ -33,8 +33,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 fun LoginScreen(
     userViewModel: UserViewModel,
     preLoginNavHostController: NavHostController,
-    mainNavHostController: NavHostController,
-    validation: Validation
+    mainNavHostController: NavHostController
 ) {
     // Text field texts
     var emailText by rememberSaveable { mutableStateOf("") }
@@ -111,12 +110,12 @@ fun LoginScreen(
                 emailError = validateFields(
                     text = emailText,
                     type = Type.EMAIL,
-                    validation = validation
+                    validation = Validation
                 )
                 passwordError = validateFields(
                     text = passwordText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
 
                 if (!passwordError || !emailError) {
@@ -158,7 +157,7 @@ fun LoginScreen(
                 emailError = validateFields(
                     text = emailText,
                     type = Type.EMAIL,
-                    validation = validation
+                    validation = Validation
                 )
 
                 if (!emailError) {

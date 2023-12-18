@@ -52,7 +52,6 @@ fun MainNavHost(
 fun PreLoginNavHost(
     userViewModel: UserViewModel,
     appViewModel: AppViewModel,
-    validation: Validation = Validation(),
     mainNavHostController: NavHostController
 ) {
     val preLoginNavController = rememberNavController()
@@ -77,7 +76,6 @@ fun PreLoginNavHost(
             LoginScreen(
                 userViewModel = userViewModel,
                 preLoginNavHostController = preLoginNavController,
-                validation = validation,
                 mainNavHostController = mainNavHostController
             )
         }
@@ -87,8 +85,7 @@ fun PreLoginNavHost(
         ) {
             RegistrationScreen(
                 userViewModel = userViewModel,
-                mainNavHostController = mainNavHostController,
-                validation = validation
+                mainNavHostController = mainNavHostController
             )
         }
     }

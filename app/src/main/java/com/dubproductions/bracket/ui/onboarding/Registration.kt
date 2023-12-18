@@ -33,8 +33,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun RegistrationScreen(
     userViewModel: UserViewModel,
-    mainNavHostController: NavHostController,
-    validation: Validation
+    mainNavHostController: NavHostController
 ) {
 
     // Field texts
@@ -210,28 +209,28 @@ fun RegistrationScreen(
                 emailError = verifyField(
                     text = emailText,
                     type = Type.EMAIL,
-                    validation = validation
+                    validation = Validation
                 )
                 usernameError = verifyField(
                     text = usernameText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
                 firstNameError = verifyField(
                     text = firstNameText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
                 lastNameError = verifyField(
                     text = lastNameText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
                 passwordError = verifyField(
                     text = passwordText,
                     type = Type.PASSWORD,
                     extraText = passwordConfirmText,
-                    validation = validation
+                    validation = Validation
                 )
                 if (!emailError && !usernameError && !firstNameError && !lastNameError && !passwordError) {
                     userViewModel.registerUser(
