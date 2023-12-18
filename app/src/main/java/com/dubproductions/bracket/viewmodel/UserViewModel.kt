@@ -6,15 +6,18 @@ import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.firebase.FirebaseManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UserViewModel: ViewModel() {
-
-    private val firebaseManager: FirebaseManager = FirebaseManager()
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val firebaseManager: FirebaseManager
+): ViewModel() {
 
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
