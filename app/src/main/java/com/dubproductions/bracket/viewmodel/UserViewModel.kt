@@ -3,22 +3,38 @@ package com.dubproductions.bracket.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.firebase.FirebaseManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class UserViewModel: ViewModel() {
-
-    private val firebaseManager: FirebaseManager = FirebaseManager()
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val firebaseManager: FirebaseManager
+): ViewModel() {
 
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
+    private val _tournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
+    val tournamentList: StateFlow<MutableList<Tournament>> = _tournamentList
+
     private var loggedIn: Boolean = false
+
+    private fun updateTournamentList(tournament: Tournament) {
+        _tournamentList.update { previousTourneyList ->
+            if (tournament !in previousTourneyList) {
+                previousTourneyList.add(tournament)
+            }
+            previousTourneyList
+        }
+    }
 
     private fun updateUser(updatedUser: User) {
         _user.update { updatedUser }
@@ -79,14 +95,15 @@ class UserViewModel: ViewModel() {
         viewModelScope.launch {
             firebaseManager.fetchUserData { user ->
                 when {
-                    loggedIn && user != null -> {
+                    loggedIn && user?.userId != null -> {
                         updateUser(user)
                     }
-                    !loggedIn && user != null -> {
+                    !loggedIn && user?.userId != null -> {
                         updateUser(user)
+                        loggedIn = true
                         onComplete(true)
                     }
-                    !loggedIn && user == null -> {
+                    !loggedIn && user?.userId == null -> {
                         onComplete(false)
                     }
                 }
@@ -99,6 +116,16 @@ class UserViewModel: ViewModel() {
             firebaseManager.resetUserPassword(email = email) { success ->
                 onComplete(success)
             }
+        }
+    }
+
+    fun userLoggedIn(onComplete: (Boolean) -> Unit) {
+        if (firebaseManager.checkLoginStatus()) {
+            fetchUserData {
+                onComplete(it)
+            }
+        } else {
+            onComplete(false)
         }
     }
 

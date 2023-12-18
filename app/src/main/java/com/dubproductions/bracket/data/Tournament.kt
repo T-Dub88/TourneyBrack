@@ -1,14 +1,19 @@
 package com.dubproductions.bracket.data
 
+import java.util.Date
 import kotlin.math.ceil
 import kotlin.math.log2
 
 data class Tournament(
+    var name: String? = null,
     var id: String? = null,
     var type: String? = null,
     var rounds: MutableList<Round>? = null,
     var participants: List<Participant>? = null,
     var roundCount: Int? = null,
+    var status: String? = null,
+    var timeStarted: Long? = null,
+    var timeCompleted: Long? = null
 ) {
     fun createNextRound() {
 
@@ -103,7 +108,14 @@ data class Tournament(
 
             roundCount = ceil(participantNth).toInt()
         }
+    }
 
+    fun timeStampStart() {
+        timeStarted = Date().time
+    }
+
+    fun timeStampFinish() {
+        timeCompleted = Date().time
     }
 
 }

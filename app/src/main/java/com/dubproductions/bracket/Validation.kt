@@ -2,7 +2,7 @@ package com.dubproductions.bracket
 
 import android.util.Patterns
 
-class Validation {
+object Validation {
 
     // Check to see if email is a valid pattern
     fun isEmailValid(email: String): Boolean {

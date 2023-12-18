@@ -3,6 +3,7 @@ package com.dubproductions.bracket.firebase
 import android.util.Log
 import com.dubproductions.bracket.data.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -110,6 +111,10 @@ class FirebaseManager {
         auth.sendPasswordResetEmail(email).addOnCompleteListener {
             onComplete(it.isSuccessful)
         }
+    }
+
+    fun checkLoginStatus(): Boolean {
+        return auth.currentUser != null
     }
 
 }

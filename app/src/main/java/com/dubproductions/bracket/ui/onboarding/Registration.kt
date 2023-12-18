@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
@@ -32,8 +33,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun RegistrationScreen(
     userViewModel: UserViewModel,
-    navHostController: NavHostController,
-    validation: Validation
+    mainNavHostController: NavHostController
 ) {
 
     // Field texts
@@ -209,28 +209,28 @@ fun RegistrationScreen(
                 emailError = verifyField(
                     text = emailText,
                     type = Type.EMAIL,
-                    validation = validation
+                    validation = Validation
                 )
                 usernameError = verifyField(
                     text = usernameText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
                 firstNameError = verifyField(
                     text = firstNameText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
                 lastNameError = verifyField(
                     text = lastNameText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
                 passwordError = verifyField(
                     text = passwordText,
                     type = Type.PASSWORD,
                     extraText = passwordConfirmText,
-                    validation = validation
+                    validation = Validation
                 )
                 if (!emailError && !usernameError && !firstNameError && !lastNameError && !passwordError) {
                     userViewModel.registerUser(
@@ -242,7 +242,11 @@ fun RegistrationScreen(
                     ) {
                         enabled = true
                         if (it) {
-                            navHostController.navigate(Screen.Home.route)
+                            mainNavHostController.navigate(Screen.Home.route) {
+                                popUpTo(mainNavHostController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
                             showRegistrationFailureDialog = true
                         }

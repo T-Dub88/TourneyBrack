@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
@@ -31,8 +32,8 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun LoginScreen(
     userViewModel: UserViewModel,
-    navHostController: NavHostController,
-    validation: Validation
+    preLoginNavHostController: NavHostController,
+    mainNavHostController: NavHostController
 ) {
     // Text field texts
     var emailText by rememberSaveable { mutableStateOf("") }
@@ -109,12 +110,12 @@ fun LoginScreen(
                 emailError = validateFields(
                     text = emailText,
                     type = Type.EMAIL,
-                    validation = validation
+                    validation = Validation
                 )
                 passwordError = validateFields(
                     text = passwordText,
                     type = Type.EMPTY,
-                    validation = validation
+                    validation = Validation
                 )
 
                 if (!passwordError || !emailError) {
@@ -124,7 +125,11 @@ fun LoginScreen(
                     ) {
                         enabled = true
                         if (it) {
-                            navHostController.navigate(Screen.Home.route)
+                            mainNavHostController.navigate(Screen.Home.route) {
+                                popUpTo(mainNavHostController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
                             showLoginFailureDialog = true
                         }
@@ -140,7 +145,7 @@ fun LoginScreen(
 
         // Button to navigate to the registration screen
         OnboardingButton(
-            whenClicked = { navHostController.navigate(Screen.Registration.route) },
+            whenClicked = { preLoginNavHostController.navigate(Screen.Registration.route) },
             buttonText = stringResource(id = R.string.registration),
             enabled = enabled
         )
@@ -152,7 +157,7 @@ fun LoginScreen(
                 emailError = validateFields(
                     text = emailText,
                     type = Type.EMAIL,
-                    validation = validation
+                    validation = Validation
                 )
 
                 if (!emailError) {
