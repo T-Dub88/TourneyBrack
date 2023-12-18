@@ -19,11 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
-import com.dubproductions.bracket.navigation.Map
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
@@ -33,7 +33,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun RegistrationScreen(
     userViewModel: UserViewModel,
-    navHostController: NavHostController,
+    mainNavHostController: NavHostController,
     validation: Validation
 ) {
 
@@ -243,8 +243,8 @@ fun RegistrationScreen(
                     ) {
                         enabled = true
                         if (it) {
-                            navHostController.navigate(Map.Main.route) {
-                                popUpTo(Map.Onboarding.route) {
+                            mainNavHostController.navigate(Screen.Home.route) {
+                                popUpTo(mainNavHostController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
                             }

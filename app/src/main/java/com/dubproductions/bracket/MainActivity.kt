@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MainAppContent(
-                navController = rememberNavController()
+                mainNavController = rememberNavController()
             )
         }
     }

@@ -5,15 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
-import com.dubproductions.bracket.navigation.Map
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.viewmodel.AppViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
 fun LoadingScreen(
-    navHostController: NavHostController,
+    mainNavController: NavHostController,
+    preLoginNavHostController: NavHostController,
     userViewModel: UserViewModel,
     appViewModel: AppViewModel
 ) {
@@ -29,15 +30,15 @@ fun LoadingScreen(
 
     LaunchedEffect(navState) {
         when (navState.route) {
-            "home" -> {
-                navHostController.navigate(Map.Main.route) {
-                    popUpTo(Map.Onboarding.route) {
+            Screen.Home.route -> {
+                mainNavController.navigate(navState.route) {
+                    popUpTo(mainNavController.graph.findStartDestination().id) {
                         inclusive = true
                     }
                 }
             }
             else -> {
-                navHostController.navigate(navState.route) {
+                preLoginNavHostController.navigate(navState.route) {
                     popUpTo(Screen.Loading.route) {
                         inclusive = true
                     }

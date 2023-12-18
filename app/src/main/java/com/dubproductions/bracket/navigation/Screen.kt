@@ -12,34 +12,34 @@ sealed class Screen(
     val label: String,
     val icon: ImageVector? = null
 ) {
-    object Loading: Screen(
+    data object Loading: Screen(
         route = "loading",
         label = "Loading"
     )
-    object Login: Screen(
+    data object Login: Screen(
         route = "login",
         label = "Login"
     )
-    object Registration: Screen(
+    data object Registration: Screen(
         route = "registration",
         label = "Registration"
     )
-    object Home: Screen(
+    data object Home: Screen(
         route = "home",
         label = "Home",
         icon = Icons.Filled.Home
     )
-    object Hosting: Screen(
+    data object Hosting: Screen(
         route = "hosting",
         label = "Hosting",
         icon = Icons.Filled.EventNote
     )
-    object Participating: Screen(
+    data object Participating: Screen(
         route = "participating",
         label = "Participating",
         icon = Icons.Filled.Event
     )
-    object Settings: Screen(
+    data object Settings: Screen(
         route = "settings",
         label = "Settings",
         icon = Icons.Filled.Settings
