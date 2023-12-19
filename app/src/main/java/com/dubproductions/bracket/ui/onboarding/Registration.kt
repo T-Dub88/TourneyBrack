@@ -33,7 +33,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun RegistrationScreen(
     userViewModel: UserViewModel,
-    mainNavHostController: NavHostController
+    mainNavController: NavHostController
 ) {
 
     // Field texts
@@ -242,8 +242,8 @@ fun RegistrationScreen(
                     ) {
                         enabled = true
                         if (it) {
-                            mainNavHostController.navigate(Screen.Home.route) {
-                                popUpTo(mainNavHostController.graph.findStartDestination().id) {
+                            mainNavController.navigate(Screen.Home.route) {
+                                popUpTo(mainNavController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
                             }

@@ -14,7 +14,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun LoadingScreen(
     mainNavController: NavHostController,
-    preLoginNavHostController: NavHostController,
+    preLoginNavController: NavHostController,
     userViewModel: UserViewModel,
     appViewModel: AppViewModel
 ) {
@@ -38,7 +38,7 @@ fun LoadingScreen(
                 }
             }
             else -> {
-                preLoginNavHostController.navigate(navState.route) {
+                preLoginNavController.navigate(navState.route) {
                     popUpTo(Screen.Loading.route) {
                         inclusive = true
                     }

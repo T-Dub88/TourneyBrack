@@ -32,7 +32,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun LoginScreen(
     userViewModel: UserViewModel,
-    preLoginNavHostController: NavHostController,
+    preLoginNavController: NavHostController,
     mainNavHostController: NavHostController
 ) {
     // Text field texts
@@ -145,7 +145,7 @@ fun LoginScreen(
 
         // Button to navigate to the registration screen
         OnboardingButton(
-            whenClicked = { preLoginNavHostController.navigate(Screen.Registration.route) },
+            whenClicked = { preLoginNavController.navigate(Screen.Registration.route) },
             buttonText = stringResource(id = R.string.registration),
             enabled = enabled
         )

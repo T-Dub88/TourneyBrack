@@ -26,7 +26,7 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 @Composable
 fun HostingScreen(
     userViewModel: UserViewModel,
-    hostingNavHostController: NavHostController
+    hostingNavController: NavHostController
 ) {
 
     val hostingTournamentList by userViewModel.hostingTournamentList.collectAsStateWithLifecycle()
@@ -34,7 +34,7 @@ fun HostingScreen(
     HostingScreenContent(
         hostingTournamentList = hostingTournamentList,
         floatingActionButtonClick = {
-            hostingNavHostController.navigate(Screen.TournamentCreation.route)
+            hostingNavController.navigate(Screen.TournamentCreation.route)
         },
         tournamentCardClick = {
             // Todo: Set action for clicking existing tournament

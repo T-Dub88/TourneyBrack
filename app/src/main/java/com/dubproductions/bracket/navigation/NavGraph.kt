@@ -33,7 +33,7 @@ fun MainNavHost(
             PreLoginNavHost(
                 userViewModel = userViewModel,
                 appViewModel = appViewModel,
-                mainNavHostController = mainNavController
+                mainNavController = mainNavController
             )
         }
 
@@ -42,7 +42,7 @@ fun MainNavHost(
         ) {
             BottomBarNavHost(
                 userViewModel = userViewModel,
-                bottomBarNavHostController = bottomBarNavController
+                bottomBarNavController = bottomBarNavController
             )
         }
     }
@@ -51,10 +51,10 @@ fun MainNavHost(
 @Composable
 fun BottomBarNavHost(
     userViewModel: UserViewModel,
-    bottomBarNavHostController: NavHostController
+    bottomBarNavController: NavHostController
 ) {
     NavHost(
-        navController = bottomBarNavHostController,
+        navController = bottomBarNavController,
         startDestination = Screen.Home.route,
     ) {
         composable(route = Screen.Home.route) {
@@ -76,7 +76,7 @@ fun BottomBarNavHost(
 fun PreLoginNavHost(
     userViewModel: UserViewModel,
     appViewModel: AppViewModel,
-    mainNavHostController: NavHostController
+    mainNavController: NavHostController
 ) {
     val preLoginNavController = rememberNavController()
     NavHost(
@@ -87,8 +87,8 @@ fun PreLoginNavHost(
             route = Screen.Loading.route
         ) {
             LoadingScreen(
-                mainNavController = mainNavHostController,
-                preLoginNavHostController = preLoginNavController,
+                mainNavController = mainNavController,
+                preLoginNavController = preLoginNavController,
                 userViewModel = userViewModel,
                 appViewModel = appViewModel
             )
@@ -99,8 +99,8 @@ fun PreLoginNavHost(
         ) {
             LoginScreen(
                 userViewModel = userViewModel,
-                preLoginNavHostController = preLoginNavController,
-                mainNavHostController = mainNavHostController
+                preLoginNavController = preLoginNavController,
+                mainNavHostController = mainNavController
             )
         }
 
@@ -109,7 +109,7 @@ fun PreLoginNavHost(
         ) {
             RegistrationScreen(
                 userViewModel = userViewModel,
-                mainNavHostController = mainNavHostController
+                mainNavController = mainNavController
             )
         }
     }
@@ -140,9 +140,9 @@ fun HomeNavHost(
 fun HostingNavHost(
     userViewModel: UserViewModel
 ) {
-    val hostingNavHostController = rememberNavController()
+    val hostingNavController = rememberNavController()
     NavHost(
-        navController = hostingNavHostController,
+        navController = hostingNavController,
         startDestination = Screen.Hosting.route
     ) {
         composable(
@@ -150,7 +150,7 @@ fun HostingNavHost(
         ) {
             HostingScreen(
                 userViewModel = userViewModel,
-                hostingNavHostController = hostingNavHostController
+                hostingNavController = hostingNavController
             )
         }
 
