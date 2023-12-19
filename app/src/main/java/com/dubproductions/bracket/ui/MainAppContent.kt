@@ -16,8 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.dubproductions.bracket.navigation.MainNavHost
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.theme.BracketTheme
@@ -27,15 +27,20 @@ import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppContent(
-    mainNavController: NavHostController,
-) {
-    val navBarItems: List<Screen> = listOf(Screen.Home, Screen.Hosting, Screen.Participating, Screen.Settings)
-    val currentDestination by mainNavController.currentBackStackEntryAsState()
+fun MainAppContent() {
+    val navBarItems: List<Screen> = listOf(
+        Screen.Home,
+        Screen.Hosting,
+        Screen.Participating,
+        Screen.Settings
+    )
     val userViewModel: UserViewModel = hiltViewModel()
     val appViewModel: AppViewModel = viewModel()
 
     BracketTheme {
+        val mainNavController = rememberNavController()
+        val bottomBarNavController = rememberNavController()
+        val currentDestination by bottomBarNavController.currentBackStackEntryAsState()
         Scaffold(
             bottomBar = {
                 val selectedIndex: Int = navBarItems.indexOfFirst {
@@ -47,8 +52,8 @@ fun MainAppContent(
                             NavigationBarItem(
                                 selected = index == selectedIndex,
                                 onClick = {
-                                    mainNavController.navigate(item.route) {
-                                        popUpTo(mainNavController.graph.findStartDestination().id) {
+                                    bottomBarNavController.navigate(item.route) {
+                                        popUpTo(bottomBarNavController.graph.findStartDestination().id) {
                                             saveState = true
                                         }
                                         launchSingleTop = true
@@ -56,12 +61,16 @@ fun MainAppContent(
                                     }
                                 },
                                 icon = {
-                                    item.icon?.let {
-                                        Icon(
-                                            imageVector = it,
-                                            contentDescription = null
-                                        )
-                                    }
+                                       (if (index == selectedIndex) {
+                                           item.selectedIcon
+                                       } else {
+                                           item.unselectedIcon
+                                       })?.let {
+                                           Icon(
+                                               imageVector = it,
+                                               contentDescription = null
+                                           )
+                                       }
                                 },
                                 label = { Text(text = item.label) }
                             )
@@ -80,7 +89,8 @@ fun MainAppContent(
                 MainNavHost(
                     mainNavController = mainNavController,
                     userViewModel = userViewModel,
-                    appViewModel = appViewModel
+                    appViewModel = appViewModel,
+                    bottomBarNavController = bottomBarNavController
                 )
             }
         }
