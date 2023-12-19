@@ -22,13 +22,25 @@ class UserViewModel @Inject constructor(
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
     val user: StateFlow<User> = _user.asStateFlow()
 
-    private val _tournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
-    val tournamentList: StateFlow<MutableList<Tournament>> = _tournamentList
+    private val _completedTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
+    val completedTournamentList: StateFlow<MutableList<Tournament>> = _completedTournamentList
+
+    private val _hostingTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
+    val hostingTournamentList: StateFlow<MutableList<Tournament>> = _hostingTournamentList
 
     private var loggedIn: Boolean = false
 
-    private fun updateTournamentList(tournament: Tournament) {
-        _tournamentList.update { previousTourneyList ->
+    private fun updateHostingTournamentList(tournament: Tournament){
+        _hostingTournamentList.update { previousTourneyList ->
+            if (tournament !in previousTourneyList) {
+                previousTourneyList.add(tournament)
+            }
+            previousTourneyList
+        }
+    }
+
+    private fun updateCompletedTournamentList(tournament: Tournament) {
+        _completedTournamentList.update { previousTourneyList ->
             if (tournament !in previousTourneyList) {
                 previousTourneyList.add(tournament)
             }

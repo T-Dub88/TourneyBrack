@@ -37,7 +37,7 @@ fun MainNavHost(
             HomeNavHost(userViewModel = userViewModel)
         }
         composable(route = Screen.Hosting.route) {
-            HostingNavHost()
+            HostingNavHost(userViewModel = userViewModel)
         }
         composable(route = Screen.Participating.route) {
             ParticipatingNavHost()
@@ -114,7 +114,7 @@ fun HomeNavHost(
 // Hosting tab NavGraph
 @Composable
 fun HostingNavHost(
-
+    userViewModel: UserViewModel
 ) {
     val hostingNavController = rememberNavController()
     NavHost(
@@ -124,7 +124,7 @@ fun HostingNavHost(
         composable(
             route = Screen.Hosting.route
         ) {
-            HostingScreen()
+            HostingScreen(userViewModel)
         }
     }
 }
