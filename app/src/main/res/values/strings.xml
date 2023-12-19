@@ -43,6 +43,8 @@
 
     <!--Composables-->
     <string name="ok">Ok</string>
+    <string name="pending">Pending</string>
+    <string name="update_tournament">Tap card to update tournament</string>
 
 
 </resources>

@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Tournament
+import com.dubproductions.bracket.ui.TournamentSummaryCard
 import com.dubproductions.bracket.viewmodel.UserViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -32,7 +33,7 @@ import java.util.Locale
 fun HomeScreen(userViewModel: UserViewModel) {
 
     val userInfo by userViewModel.user.collectAsStateWithLifecycle()
-    val tournamentList by userViewModel.tournamentList.collectAsStateWithLifecycle()
+    val tournamentList by userViewModel.completedTournamentList.collectAsStateWithLifecycle()
 
     HomeScreenContent(
         userName = userInfo.username.toString(),
@@ -65,105 +66,12 @@ fun HomeScreenContent(
             items(tournamentList) { tournament ->
                 TournamentSummaryCard(
                     tournament = tournament,
-                    onPress = cardPressed
+                    onPress = cardPressed,
+                    tapCardInstruction = stringResource(id = R.string.more_info_card)
                 )
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TournamentSummaryCard(
-    tournament: Tournament,
-    onPress: () -> Unit,
-) {
-    Card(
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        ),
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
-        onClick = onPress
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(0.5f)
-            ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.tournament_name,
-                        tournament.name.toString()
-                    ),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.rounds,
-                        tournament.roundCount.toString()
-                    ),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.status,
-                        tournament.status.toString()
-                    ),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                )
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(
-                        id = R.string.type,
-                        tournament.type.toString()
-                    ),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.started_date,
-                        formatDateTime(tournament.timeStarted)
-                    ),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                )
-                Text(
-                    text = stringResource(
-                        id = R.string.completed_date,
-                        formatDateTime(tournament.timeCompleted)
-                    ),
-                    modifier = Modifier
-                        .padding(all = 4.dp)
-                )
-            }
-        }
-        Text(
-            text = stringResource(id = R.string.more_info_card),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp),
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-private fun formatDateTime(timestamp: Long?): String {
-    val sdf = SimpleDateFormat("MM-dd-yy HH:mm", Locale.getDefault())
-    return sdf.format(timestamp)
 }
 
 @Preview
@@ -173,7 +81,6 @@ private fun TournamentCardPreview() {
         name = "Tourney Classic",
         id = "djsjlkhfj",
         type = "Swiss",
-        roundCount = 0,
         status = "Complete",
         participants = listOf(
             Participant(),
@@ -192,6 +99,7 @@ private fun TournamentCardPreview() {
 
     TournamentSummaryCard(
         tournament = tournament,
-        onPress = {}
+        onPress = {},
+        tapCardInstruction = stringResource(id = R.string.more_info_card)
     )
 }
