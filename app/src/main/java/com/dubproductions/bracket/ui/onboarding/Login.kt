@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
@@ -28,6 +29,7 @@ import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.viewmodel.UserViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -35,6 +37,9 @@ fun LoginScreen(
     preLoginNavController: NavHostController,
     mainNavHostController: NavHostController
 ) {
+
+    val coroutineScope = rememberCoroutineScope()
+
     // Text field texts
     var emailText by rememberSaveable { mutableStateOf("") }
     var passwordText by rememberSaveable { mutableStateOf("") }
@@ -161,9 +166,10 @@ fun LoginScreen(
                 )
 
                 if (!emailError) {
-                    userViewModel.resetPassword(emailText) { success ->
+                    coroutineScope.launch {
+                        val resetResult = userViewModel.resetPassword(emailText)
                         enabled = true
-                        if (success) {
+                        if (resetResult) {
                             showPasswordSuccessDialog = true
                         } else {
                             showPasswordFailureDialog = true

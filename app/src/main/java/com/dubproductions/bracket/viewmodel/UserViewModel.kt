@@ -5,8 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.User
-import com.dubproductions.bracket.firebase.FirebaseManager
+import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val firebaseManager: FirebaseManager
+    private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
     private val _user: MutableStateFlow<User> = MutableStateFlow(User())
@@ -25,19 +26,7 @@ class UserViewModel @Inject constructor(
     private val _completedTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
     val completedTournamentList: StateFlow<MutableList<Tournament>> = _completedTournamentList
 
-    private val _hostingTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
-    val hostingTournamentList: StateFlow<MutableList<Tournament>> = _hostingTournamentList
-
     private var loggedIn: Boolean = false
-
-    private fun updateHostingTournamentList(tournament: Tournament){
-        _hostingTournamentList.update { previousTourneyList ->
-            if (tournament !in previousTourneyList) {
-                previousTourneyList.add(tournament)
-            }
-            previousTourneyList
-        }
-    }
 
     private fun updateCompletedTournamentList(tournament: Tournament) {
         _completedTournamentList.update { previousTourneyList ->
@@ -62,22 +51,23 @@ class UserViewModel @Inject constructor(
         onComplete: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
-            firebaseManager.registerUser(
+            val registrationResult = tournamentRepository.registerUser(
                 email = email,
                 password = password,
                 username = username,
                 firstName = firstName,
                 lastName = lastName
-            ) { success: Boolean ->
-                if (success) {
-                    fetchUserData {
-                        loggedIn = true
-                        onComplete(it)
-                    }
-                } else {
-                    onComplete(false)
+            )
+
+            if (registrationResult) {
+                fetchUserData {
+                    loggedIn = true
+                    onComplete(it)
                 }
+            } else {
+                onComplete(false)
             }
+
         }
     }
 
@@ -87,25 +77,26 @@ class UserViewModel @Inject constructor(
         onComplete: (Boolean) -> Unit
     ) {
         viewModelScope.launch {
-            firebaseManager.signInUser(
+            val signInResult = tournamentRepository.signInUser(
                 email = email,
                 password = password
-            ) { success ->
-                if (success) {
-                    fetchUserData {
-                        loggedIn = true
-                        onComplete(it)
-                    }
-                } else {
-                    onComplete(false)
+            )
+
+            if (signInResult) {
+                fetchUserData {
+                    loggedIn = true
+                    onComplete(it)
                 }
+            } else {
+                onComplete(false)
             }
+
         }
     }
 
     private fun fetchUserData(onComplete: (Boolean) -> Unit) {
         viewModelScope.launch {
-            firebaseManager.fetchUserData { user ->
+            tournamentRepository.fetchUserData { user ->
                 when {
                     loggedIn && user?.userId != null -> {
                         updateUser(user)
@@ -123,16 +114,14 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    fun resetPassword(email: String, onComplete: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            firebaseManager.resetUserPassword(email = email) { success ->
-                onComplete(success)
-            }
-        }
+    suspend fun resetPassword(email: String): Boolean {
+        return viewModelScope.async {
+            tournamentRepository.resetPassword(email = email)
+        }.await()
     }
 
     fun userLoggedIn(onComplete: (Boolean) -> Unit) {
-        if (firebaseManager.checkLoginStatus()) {
+        if (tournamentRepository.checkLoginStatus()) {
             fetchUserData {
                 onComplete(it)
             }

@@ -1,6 +1,6 @@
 package com.dubproductions.bracket.di
 
-import com.dubproductions.bracket.firebase.FirebaseManager
+import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +13,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseManager(): FirebaseManager {
-        return FirebaseManager()
+    fun provideFirebaseManager(): TournamentRepositoryImpl {
+        return TournamentRepositoryImpl()
     }
 }
