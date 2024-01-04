@@ -6,5 +6,6 @@ data class User(
     var firstName: String? = null,
     var lastName: String? = null,
     var email: String? = null,
-    var tournaments: List<String>? = null // TournamentIDs
+    var hostTournaments: List<String>? = null,
+    var participatingTournaments: List<String>? = null
 )

@@ -13,7 +13,8 @@ data class Tournament(
     var roundCount: Int? = null,
     var status: String? = null,
     var timeStarted: Long? = null,
-    var timeCompleted: Long? = null
+    var timeCompleted: Long? = null,
+    var hostId: String? = null
 ) {
     fun createNextRound() {
 

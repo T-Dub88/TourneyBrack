@@ -24,9 +24,69 @@ class UserViewModel @Inject constructor(
     val user: StateFlow<User> = _user.asStateFlow()
 
     private val _completedTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
-    val completedTournamentList: StateFlow<MutableList<Tournament>> = _completedTournamentList
+    val completedTournamentList: StateFlow<MutableList<Tournament>> = _completedTournamentList.asStateFlow()
+
+    private val _hostingTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
+    val hostingTournamentList: StateFlow<MutableList<Tournament>> = _hostingTournamentList.asStateFlow()
+
+    private val _participatingTournamentList: MutableStateFlow<MutableList<Tournament>> = MutableStateFlow(mutableListOf())
+    val participatingTournamentList: StateFlow<MutableList<Tournament>> = _participatingTournamentList.asStateFlow()
 
     private var loggedIn: Boolean = false
+
+
+    private fun updateUser(updatedUser: User) {
+        _user.update { updatedUser }
+        Log.i("User", "updateUser: ${user.value}")
+
+        // Update all hosting and hosted tournaments
+        updatedUser.hostTournaments?.let { tournamentIdList ->
+            launchTourneyListUpdate(tournamentIdList, true)
+        }
+
+        // Update all participating lists
+        updatedUser.participatingTournaments?.let { tournamentIdList ->
+            launchTourneyListUpdate(tournamentIdList, false)
+        }
+    }
+
+    private fun launchTourneyListUpdate(
+        tournamentIdList: List<String>,
+        hosting: Boolean
+    ) {
+        for (id in tournamentIdList) {
+            viewModelScope.launch {
+                val retrievedTournament = fetchTournament(id)
+                retrievedTournament?.let {tournament ->
+                    if (tournament.status == "complete") {
+                        updateCompletedTournamentList(tournament)
+                    } else if (hosting){
+                        updateHostingTournamentList(tournament)
+                    } else {
+                        updateParticipatingTournamentList(tournament)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateParticipatingTournamentList(tournament: Tournament) {
+        _participatingTournamentList.update { previousTourneyList ->
+            if (tournament !in previousTourneyList) {
+                previousTourneyList.add(tournament)
+            }
+            previousTourneyList
+        }
+    }
+
+    private fun updateHostingTournamentList(tournament: Tournament){
+        _hostingTournamentList.update { previousTourneyList ->
+            if (tournament !in previousTourneyList) {
+                previousTourneyList.add(tournament)
+            }
+            previousTourneyList
+        }
+    }
 
     private fun updateCompletedTournamentList(tournament: Tournament) {
         _completedTournamentList.update { previousTourneyList ->
@@ -37,9 +97,8 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    private fun updateUser(updatedUser: User) {
-        _user.update { updatedUser }
-        Log.i("User", "updateUser: ${user.value}")
+    private suspend fun fetchTournament(tournamentId: String): Tournament? {
+        return viewModelScope.async { tournamentRepository.fetchTournamentData(tournamentId) }.await()
     }
 
     fun registerUser(
