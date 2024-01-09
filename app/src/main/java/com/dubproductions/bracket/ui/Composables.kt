@@ -109,7 +109,7 @@ fun ReusableDialog(
             ) {
                 Text(text = stringResource(id = R.string.ok))
             }
-        },
+        }
     )
 }
 

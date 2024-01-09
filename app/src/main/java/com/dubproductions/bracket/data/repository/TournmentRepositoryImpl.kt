@@ -147,4 +147,22 @@ class TournamentRepositoryImpl: TournamentRepository {
         }
     }
 
+    override suspend fun createTournament(tournament: Tournament): Boolean {
+        val createdTournamentRef = firestore.collection("Tournaments").document()
+        tournament.id = createdTournamentRef.id
+        tournament.hostId = auth.currentUser?.uid
+
+        return try {
+            firestore
+                .collection("Tournaments")
+                .document(tournament.id!!)
+                .set(tournament)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "createTournament: $e")
+            false
+        }
+    }
+
 }

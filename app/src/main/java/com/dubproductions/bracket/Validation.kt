@@ -19,10 +19,16 @@ object Validation {
         return password == confirmPassword
     }
 
+    // Validate if tourney type is selected
+    fun selectedTourneyType(selected: String): Boolean {
+        return selected != "Select Tournament Type"
+    }
+
 }
 
 enum class Type {
     EMAIL,
     PASSWORD,
-    EMPTY
+    EMPTY,
+    TOURNEY_TYPE
 }

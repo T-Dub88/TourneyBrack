@@ -37,4 +37,6 @@ interface TournamentRepository {
         tournamentId: String
     ): Tournament?
 
+    suspend fun createTournament(tournament: Tournament): Boolean
+
 }

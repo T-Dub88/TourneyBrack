@@ -105,9 +105,12 @@ data class Tournament(
         // participants <= 2^rounds
 
         participants?.let {
-            val participantNth = log2(it.size.toDouble())
-
-            roundCount = ceil(participantNth).toInt()
+            roundCount = if (it.isNotEmpty()) {
+                val participantNth = log2(it.size.toDouble())
+                ceil(participantNth).toInt()
+            } else {
+                0
+            }
         }
     }
 

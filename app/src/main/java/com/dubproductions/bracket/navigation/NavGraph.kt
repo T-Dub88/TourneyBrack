@@ -157,7 +157,7 @@ fun HostingNavHost(
         composable(
             route = Screen.TournamentCreation.route
         ) {
-            TournamentCreationScreen()
+            TournamentCreationScreen(navController = hostingNavController)
         }
     }
 }

@@ -114,16 +114,14 @@ fun LoginScreen(
                 enabled = false
                 emailError = validateFields(
                     text = emailText,
-                    type = Type.EMAIL,
-                    validation = Validation
+                    type = Type.EMAIL
                 )
                 passwordError = validateFields(
                     text = passwordText,
-                    type = Type.EMPTY,
-                    validation = Validation
+                    type = Type.EMPTY
                 )
 
-                if (!passwordError || !emailError) {
+                if (!passwordError && !emailError) {
                     userViewModel.loginUser(
                         email = emailText,
                         password = passwordText
@@ -161,8 +159,7 @@ fun LoginScreen(
                 enabled = false
                 emailError = validateFields(
                     text = emailText,
-                    type = Type.EMAIL,
-                    validation = Validation
+                    type = Type.EMAIL
                 )
 
                 if (!emailError) {
@@ -226,14 +223,13 @@ fun LoginScreen(
 private fun validateFields(
     text: String,
     type: Type,
-    validation: Validation
 ): Boolean {
     return !when (type) {
         Type.EMAIL -> {
-            validation.isEmailValid(text)
+            Validation.isEmailValid(text)
         }
         Type.EMPTY -> {
-            validation.isFieldEmpty(text)
+            Validation.isFieldEmpty(text)
         } else -> {
             false
         }

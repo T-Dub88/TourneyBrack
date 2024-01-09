@@ -208,29 +208,24 @@ fun RegistrationScreen(
                 enabled = false
                 emailError = verifyField(
                     text = emailText,
-                    type = Type.EMAIL,
-                    validation = Validation
+                    type = Type.EMAIL
                 )
                 usernameError = verifyField(
                     text = usernameText,
-                    type = Type.EMPTY,
-                    validation = Validation
+                    type = Type.EMPTY
                 )
                 firstNameError = verifyField(
                     text = firstNameText,
-                    type = Type.EMPTY,
-                    validation = Validation
+                    type = Type.EMPTY
                 )
                 lastNameError = verifyField(
                     text = lastNameText,
-                    type = Type.EMPTY,
-                    validation = Validation
+                    type = Type.EMPTY
                 )
                 passwordError = verifyField(
                     text = passwordText,
                     type = Type.PASSWORD,
-                    extraText = passwordConfirmText,
-                    validation = Validation
+                    extraText = passwordConfirmText
                 )
                 if (!emailError && !usernameError && !firstNameError && !lastNameError && !passwordError) {
                     userViewModel.registerUser(
@@ -277,16 +272,15 @@ fun RegistrationScreen(
 private fun verifyField(
     text: String,
     type: Type,
-    validation: Validation,
     extraText: String? = null
 ): Boolean {
     return !when (type) {
         Type.EMPTY -> {
-            validation.isFieldEmpty(text)
+            Validation.isFieldEmpty(text)
         }
         Type.PASSWORD -> {
             if (!extraText.isNullOrEmpty()) {
-                validation.passwordsMatch(
+                Validation.passwordsMatch(
                     password = text,
                     confirmPassword = extraText
                 )
@@ -295,7 +289,8 @@ private fun verifyField(
             }
         }
         Type.EMAIL -> {
-            validation.isEmailValid(text)
+            Validation.isEmailValid(text)
         }
+        else -> true
     }
 }
