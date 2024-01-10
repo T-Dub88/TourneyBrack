@@ -178,7 +178,12 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.started_date,
-                        formatDateTime(tournament.timeStarted)
+                        if (tournament.timeStarted != null) {
+                            formatDateTime(tournament.timeStarted)
+                        } else {
+                            stringResource(id = R.string.pending)
+                        }
+
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

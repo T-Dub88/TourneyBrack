@@ -6,6 +6,7 @@ import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -158,9 +159,55 @@ class TournamentRepositoryImpl: TournamentRepository {
                 .document(tournament.id!!)
                 .set(tournament)
                 .await()
-            true
+            if (!tournament.id.isNullOrEmpty() && !tournament.hostId.isNullOrEmpty()) {
+                addTournamentIdToHost(
+                    tournamentId = tournament.id!!,
+                    userId = tournament.hostId!!
+                )
+            } else {
+                false
+            }
+
         } catch (e: Exception) {
             Log.e(TAG, "createTournament: $e")
+            false
+        }
+    }
+
+    override suspend fun addTournamentIdToHost(
+        tournamentId: String,
+        userId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection("Users")
+                .document(userId)
+                .update(
+                    "hostTournaments",
+                    FieldValue.arrayUnion(tournamentId)
+                )
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addTournamentIdToHost: $e")
+            removeTournamentFromDatabase(tournamentId, null)
+            false
+        }
+    }
+
+    override suspend fun removeTournamentFromDatabase(
+        tournamentId: String,
+        userId: String?
+    ): Boolean {
+        return try {
+            firestore
+                .collection("Tournaments")
+                .document(tournamentId)
+                .delete()
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeTournamentFromDatabase: $e")
             false
         }
     }

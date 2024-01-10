@@ -33,6 +33,7 @@ class UserViewModel @Inject constructor(
     val participatingTournamentList: StateFlow<MutableList<Tournament>> = _participatingTournamentList.asStateFlow()
 
     private var loggedIn: Boolean = false
+    private var attemptedFetchUserData: Boolean = false
 
 
     private fun updateUser(updatedUser: User) {
@@ -118,7 +119,7 @@ class UserViewModel @Inject constructor(
                 lastName = lastName
             )
 
-            if (registrationResult) {
+            if (registrationResult && !attemptedFetchUserData) {
                 fetchUserData {
                     loggedIn = true
                     onComplete(it)
@@ -141,7 +142,7 @@ class UserViewModel @Inject constructor(
                 password = password
             )
 
-            if (signInResult) {
+            if (signInResult && !attemptedFetchUserData) {
                 fetchUserData {
                     loggedIn = true
                     onComplete(it)
@@ -154,6 +155,7 @@ class UserViewModel @Inject constructor(
     }
 
     private fun fetchUserData(onComplete: (Boolean) -> Unit) {
+        attemptedFetchUserData = true
         viewModelScope.launch {
             tournamentRepository.fetchUserData { user ->
                 when {
@@ -181,8 +183,10 @@ class UserViewModel @Inject constructor(
 
     fun userLoggedIn(onComplete: (Boolean) -> Unit) {
         if (tournamentRepository.checkLoginStatus()) {
-            fetchUserData {
-                onComplete(it)
+            if (!attemptedFetchUserData) {
+                fetchUserData {
+                    onComplete(it)
+                }
             }
         } else {
             onComplete(false)

@@ -39,4 +39,8 @@ interface TournamentRepository {
 
     suspend fun createTournament(tournament: Tournament): Boolean
 
+    suspend fun addTournamentIdToHost(tournamentId: String, userId: String): Boolean
+
+    suspend fun removeTournamentFromDatabase(tournamentId: String, userId: String?): Boolean
+
 }
