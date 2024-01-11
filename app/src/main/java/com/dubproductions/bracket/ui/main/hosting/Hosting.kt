@@ -67,7 +67,7 @@ fun HostingScreenContent(
         Column(
             Modifier.padding(it)
         ) {
-            Text(text = "Currently Hosting:")
+            Text(text = stringResource(id = R.string.currently_hosting))
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()

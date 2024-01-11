@@ -41,6 +41,23 @@
     <string name="completed_date">Completed: %1$s</string>
     <string name="more_info_card">Tap card for more information</string>
 
+    <!--Hosting Screen-->
+    <string name="currently_hosting">Currently Hosting:</string>
+
+    <!--Tournament Creation Screen-->
+    <string name="create">Create a tournament</string>
+    <string name="selected_tournament_type">Select Tournament Type</string>
+    <string name="swiss">Swiss</string>
+    <string name="tournament_name_hint">Tournament Name</string>
+    <string name="participants_hint">Participants (Separate with comma)</string>
+    <string name="participants_helper_text">*Participants an be added/sign-up later</string>
+    <string name="creation_success_header">Tournament Created!</string>
+    <string name="creation_success_text">Your tournament has been successfully created. Users can search and sign up for your tournament using the code displayed on your hosting screen.</string>
+    <string name="creation_failure_header">Tournament Creation Failed!</string>
+    <string name="creation_failure_text">Your tournament was not created due to an error. Please check the status of your internet connection and try again.</string>
+    <string name="must_select_type">Must select type</string>
+    <string name="create_tournament">Create Tournament</string>
+
     <!--Composables-->
     <string name="ok">Ok</string>
     <string name="pending">Pending</string>

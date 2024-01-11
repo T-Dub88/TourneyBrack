@@ -42,8 +42,8 @@ fun TournamentCreationScreen(
     navController: NavHostController
 ) {
     val dropDownItems = listOf(
-        "Select Tournament Type",
-        "Swiss"
+        stringResource(id = R.string.selected_tournament_type),
+        stringResource(id = R.string.swiss)
     )
 
     val creationStatus by tournamentCreationViewModel.successfulCreation.collectAsStateWithLifecycle()
@@ -68,7 +68,7 @@ fun TournamentCreationScreen(
             .padding(top = 8.dp)
     ) {
         Text(
-            text = "Create a tournament",
+            text = stringResource(R.string.create),
             modifier = Modifier
                 .align(alignment = Alignment.CenterHorizontally),
             fontSize = 25.sp
@@ -83,7 +83,7 @@ fun TournamentCreationScreen(
                 }
                 tournamentName = it
             },
-            hint = "Tournament Name",
+            hint = stringResource(id = R.string.tournament_name_hint),
             trailingIconOnClick = { tournamentName = "" },
             enabled = screenEnabled,
             error = nameError
@@ -109,14 +109,14 @@ fun TournamentCreationScreen(
         TournamentCreationTextField(
             text = tournamentParticipants,
             onValueChanged = { tournamentParticipants = it },
-            hint = "Participants (Separate with comma)",
+            hint = stringResource(id = R.string.participants_hint),
             trailingIconOnClick = { tournamentParticipants = "" },
             enabled = screenEnabled,
             error = false
         )
 
         Text(
-            text = "*Participants an be added/sign-up later",
+            text = stringResource(id = R.string.participants_helper_text),
             modifier = Modifier
                 .padding(start = 16.dp)
         )
@@ -151,8 +151,8 @@ fun TournamentCreationScreen(
         when(creationStatus) {
             true -> {
                 ReusableDialog(
-                    titleText = "Tournament Created!",
-                    contentText = "Your tournament has been successfully created. Users can search and sign up for your tournament using the code displayed on your hosting screen.",
+                    titleText = stringResource(id = R.string.creation_success_header),
+                    contentText = stringResource(id = R.string.creation_success_text),
                     icon = Icons.Outlined.CheckCircle
                 ) {
                     tournamentCreationViewModel.updateCreationState(null)
@@ -161,8 +161,8 @@ fun TournamentCreationScreen(
             }
             false -> {
                 ReusableDialog(
-                    titleText = "Tournament Creation Failed!",
-                    contentText = "Your tournament was not created due to an error. Please check the status of your internet connection and try again.",
+                    titleText = stringResource(id = R.string.creation_failure_header),
+                    contentText = stringResource(id = R.string.creation_failure_text),
                     icon = Icons.Outlined.Error
                 ) {
                     tournamentCreationViewModel.updateCreationState(null)
@@ -252,7 +252,7 @@ private fun ExposedDropDownMenu(
             isError = error,
             supportingText = {
                 if (error) {
-                    Text(text = "Must select type")
+                    Text(text = stringResource(id = R.string.must_select_type))
                 }
             }
         )
@@ -286,7 +286,7 @@ private fun CreateTournamentButton(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         enabled = enabled
     ) {
-        Text(text = "Create Tournament")
+        Text(text = stringResource(id = R.string.create_tournament))
     }
 }
 
