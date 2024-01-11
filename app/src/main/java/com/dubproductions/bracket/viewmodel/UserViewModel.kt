@@ -36,6 +36,16 @@ class UserViewModel @Inject constructor(
     private var attemptedFetchUserData: Boolean = false
 
 
+    init {
+        Log.i("UserViewModel", "Created")
+        fetchUserData { }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("UserViewModel", "Cleared")
+    }
+
     private fun updateUser(updatedUser: User) {
         _user.update { updatedUser }
         Log.i("User", "updateUser: ${user.value}")
@@ -99,59 +109,9 @@ class UserViewModel @Inject constructor(
     }
 
     private suspend fun fetchTournament(tournamentId: String): Tournament? {
-        return viewModelScope.async { tournamentRepository.fetchTournamentData(tournamentId) }.await()
-    }
-
-    fun registerUser(
-        email: String,
-        password: String,
-        username: String,
-        firstName: String,
-        lastName: String,
-        onComplete: (Boolean) -> Unit
-    ) {
-        viewModelScope.launch {
-            val registrationResult = tournamentRepository.registerUser(
-                email = email,
-                password = password,
-                username = username,
-                firstName = firstName,
-                lastName = lastName
-            )
-
-            if (registrationResult && !attemptedFetchUserData) {
-                fetchUserData {
-                    loggedIn = true
-                    onComplete(it)
-                }
-            } else {
-                onComplete(false)
-            }
-
-        }
-    }
-
-    fun loginUser(
-        email: String,
-        password: String,
-        onComplete: (Boolean) -> Unit
-    ) {
-        viewModelScope.launch {
-            val signInResult = tournamentRepository.signInUser(
-                email = email,
-                password = password
-            )
-
-            if (signInResult && !attemptedFetchUserData) {
-                fetchUserData {
-                    loggedIn = true
-                    onComplete(it)
-                }
-            } else {
-                onComplete(false)
-            }
-
-        }
+        return viewModelScope.async {
+            tournamentRepository.fetchTournamentData(tournamentId)
+        }.await()
     }
 
     private fun fetchUserData(onComplete: (Boolean) -> Unit) {
@@ -172,24 +132,6 @@ class UserViewModel @Inject constructor(
                     }
                 }
             }
-        }
-    }
-
-    suspend fun resetPassword(email: String): Boolean {
-        return viewModelScope.async {
-            tournamentRepository.resetPassword(email = email)
-        }.await()
-    }
-
-    fun userLoggedIn(onComplete: (Boolean) -> Unit) {
-        if (tournamentRepository.checkLoginStatus()) {
-            if (!attemptedFetchUserData) {
-                fetchUserData {
-                    onComplete(it)
-                }
-            }
-        } else {
-            onComplete(false)
         }
     }
 

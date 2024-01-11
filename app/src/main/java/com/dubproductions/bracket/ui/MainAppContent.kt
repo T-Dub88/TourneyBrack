@@ -13,29 +13,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dubproductions.bracket.navigation.MainNavHost
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.theme.BracketTheme
-import com.dubproductions.bracket.viewmodel.AppViewModel
-import com.dubproductions.bracket.viewmodel.UserViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppContent() {
+fun MainAppContent(loggedIn: Boolean) {
     val navBarItems: List<Screen> = listOf(
         Screen.Home,
         Screen.Hosting,
         Screen.Participating,
         Screen.Settings
     )
-    val userViewModel: UserViewModel = hiltViewModel()
-    val appViewModel: AppViewModel = viewModel()
 
     BracketTheme {
         val mainNavController = rememberNavController()
@@ -88,9 +82,8 @@ fun MainAppContent() {
             ) {
                 MainNavHost(
                     mainNavController = mainNavController,
-                    userViewModel = userViewModel,
-                    appViewModel = appViewModel,
-                    bottomBarNavController = bottomBarNavController
+                    bottomBarNavController = bottomBarNavController,
+                    loggedIn = loggedIn
                 )
             }
         }

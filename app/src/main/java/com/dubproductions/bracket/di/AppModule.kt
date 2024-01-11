@@ -16,4 +16,5 @@ object AppModule {
     fun provideFirebaseManager(): TournamentRepositoryImpl {
         return TournamentRepositoryImpl()
     }
+
 }

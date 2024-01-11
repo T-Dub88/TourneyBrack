@@ -28,12 +28,12 @@ import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.viewmodel.UserViewModel
+import com.dubproductions.bracket.viewmodel.OnboardingViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    userViewModel: UserViewModel,
+    onboardingViewModel: OnboardingViewModel,
     preLoginNavController: NavHostController,
     mainNavHostController: NavHostController
 ) {
@@ -122,12 +122,13 @@ fun LoginScreen(
                 )
 
                 if (!passwordError && !emailError) {
-                    userViewModel.loginUser(
-                        email = emailText,
-                        password = passwordText
-                    ) {
+                    coroutineScope.launch {
+                        val result = onboardingViewModel.loginUser(
+                            email = emailText,
+                            password = passwordText
+                        )
                         enabled = true
-                        if (it) {
+                        if (result) {
                             mainNavHostController.navigate(Screen.Home.route) {
                                 popUpTo(mainNavHostController.graph.findStartDestination().id) {
                                     inclusive = true
@@ -137,6 +138,7 @@ fun LoginScreen(
                             showLoginFailureDialog = true
                         }
                     }
+
                 } else {
                     enabled = true
                 }
@@ -164,7 +166,7 @@ fun LoginScreen(
 
                 if (!emailError) {
                     coroutineScope.launch {
-                        val resetResult = userViewModel.resetPassword(emailText)
+                        val resetResult = onboardingViewModel.resetPassword(emailText)
                         enabled = true
                         if (resetResult) {
                             showPasswordSuccessDialog = true

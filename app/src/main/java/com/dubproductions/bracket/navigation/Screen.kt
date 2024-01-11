@@ -17,10 +17,6 @@ sealed class Screen(
     val selectedIcon: ImageVector? = null,
     val unselectedIcon: ImageVector? = null
 ) {
-    data object Loading: Screen(
-        route = "loading",
-        label = "Loading"
-    )
     data object Login: Screen(
         route = "login",
         label = "Login"

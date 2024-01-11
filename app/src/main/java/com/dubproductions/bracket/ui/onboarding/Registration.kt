@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
@@ -28,13 +29,16 @@ import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.viewmodel.UserViewModel
+import com.dubproductions.bracket.viewmodel.OnboardingViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegistrationScreen(
-    userViewModel: UserViewModel,
+    onboardingViewModel: OnboardingViewModel,
     mainNavController: NavHostController
 ) {
+
+    val coroutineScope = rememberCoroutineScope()
 
     // Field texts
     var emailText by rememberSaveable { mutableStateOf("") }
@@ -228,15 +232,16 @@ fun RegistrationScreen(
                     extraText = passwordConfirmText
                 )
                 if (!emailError && !usernameError && !firstNameError && !lastNameError && !passwordError) {
-                    userViewModel.registerUser(
-                        email = emailText,
-                        password = passwordText,
-                        firstName = firstNameText,
-                        lastName = lastNameText,
-                        username = usernameText
-                    ) {
+                    coroutineScope.launch {
+                        val result = onboardingViewModel.registerUser(
+                            email = emailText,
+                            password = passwordText,
+                            firstName = firstNameText,
+                            lastName = lastNameText,
+                            username = usernameText
+                        )
                         enabled = true
-                        if (it) {
+                        if (result) {
                             mainNavController.navigate(Screen.Home.route) {
                                 popUpTo(mainNavController.graph.findStartDestination().id) {
                                     inclusive = true
@@ -246,6 +251,7 @@ fun RegistrationScreen(
                             showRegistrationFailureDialog = true
                         }
                     }
+
                 } else {
                     enabled = true
                 }

@@ -1,11 +1,11 @@
 package com.dubproductions.bracket.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.dubproductions.bracket.ui.LoadingScreen
 import com.dubproductions.bracket.ui.main.HomeScreen
 import com.dubproductions.bracket.ui.main.ParticipatingScreen
 import com.dubproductions.bracket.ui.main.SettingsScreen
@@ -13,26 +13,27 @@ import com.dubproductions.bracket.ui.main.hosting.HostingScreen
 import com.dubproductions.bracket.ui.main.hosting.TournamentCreationScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
-import com.dubproductions.bracket.viewmodel.AppViewModel
+import com.dubproductions.bracket.viewmodel.OnboardingViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
 fun MainNavHost(
     mainNavController: NavHostController,
-    userViewModel: UserViewModel,
-    appViewModel: AppViewModel,
-    bottomBarNavController: NavHostController
+    bottomBarNavController: NavHostController,
+    loggedIn: Boolean
 ) {
     NavHost(
         navController = mainNavController,
-        startDestination = Screen.Loading.route
+        startDestination = if (loggedIn) {
+            Screen.Home.route
+        } else {
+            Screen.Login.route
+        }
     ) {
         composable(
-            route = Screen.Loading.route
+            route = Screen.Login.route
         ) {
             PreLoginNavHost(
-                userViewModel = userViewModel,
-                appViewModel = appViewModel,
                 mainNavController = mainNavController
             )
         }
@@ -41,7 +42,6 @@ fun MainNavHost(
             route = Screen.Home.route
         ) {
             BottomBarNavHost(
-                userViewModel = userViewModel,
                 bottomBarNavController = bottomBarNavController
             )
         }
@@ -50,8 +50,8 @@ fun MainNavHost(
 
 @Composable
 fun BottomBarNavHost(
-    userViewModel: UserViewModel,
-    bottomBarNavController: NavHostController
+    bottomBarNavController: NavHostController,
+    userViewModel: UserViewModel = hiltViewModel()
 ) {
     NavHost(
         navController = bottomBarNavController,
@@ -74,31 +74,19 @@ fun BottomBarNavHost(
 
 @Composable
 fun PreLoginNavHost(
-    userViewModel: UserViewModel,
-    appViewModel: AppViewModel,
-    mainNavController: NavHostController
+    mainNavController: NavHostController,
+    onboardingViewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val preLoginNavController = rememberNavController()
     NavHost(
         navController = preLoginNavController,
-        startDestination = Screen.Loading.route
+        startDestination = Screen.Login.route
     ) {
-        composable(
-            route = Screen.Loading.route
-        ) {
-            LoadingScreen(
-                mainNavController = mainNavController,
-                preLoginNavController = preLoginNavController,
-                userViewModel = userViewModel,
-                appViewModel = appViewModel
-            )
-        }
-
         composable(
             route = Screen.Login.route
         ) {
             LoginScreen(
-                userViewModel = userViewModel,
+                onboardingViewModel = onboardingViewModel,
                 preLoginNavController = preLoginNavController,
                 mainNavHostController = mainNavController
             )
@@ -108,7 +96,7 @@ fun PreLoginNavHost(
             route = Screen.Registration.route
         ) {
             RegistrationScreen(
-                userViewModel = userViewModel,
+                onboardingViewModel = onboardingViewModel,
                 mainNavController = mainNavController
             )
         }
@@ -163,9 +151,7 @@ fun HostingNavHost(
 }
 
 @Composable
-fun ParticipatingNavHost(
-
-) {
+fun ParticipatingNavHost() {
     val participatingNavController = rememberNavController()
     NavHost(
         navController = participatingNavController,
@@ -180,9 +166,7 @@ fun ParticipatingNavHost(
 }
 
 @Composable
-fun SettingsNavHost(
-
-) {
+fun SettingsNavHost() {
     val settingsNavController = rememberNavController()
     NavHost(
         navController = settingsNavController,
