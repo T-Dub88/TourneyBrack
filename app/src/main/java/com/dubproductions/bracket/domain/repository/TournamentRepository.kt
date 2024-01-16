@@ -31,16 +31,37 @@ interface TournamentRepository {
     fun checkLoginStatus(): Boolean
 
     // Update app data methods
-    fun fetchUserData(onComplete: (User?) -> Unit)
+    fun fetchUserData(
+        onComplete: (User?) -> Unit
+    )
 
     suspend fun fetchTournamentData(
         tournamentId: String
     ): Tournament?
 
-    suspend fun createTournament(tournament: Tournament): Boolean
+    fun listenToTournament(
+        tournamentId: String,
+        onComplete: (Tournament?) -> Unit
+    )
 
-    suspend fun addTournamentIdToHost(tournamentId: String, userId: String): Boolean
+    suspend fun createTournament(
+        tournament: Tournament
+    ): Boolean
 
-    suspend fun removeTournamentFromDatabase(tournamentId: String, userId: String?): Boolean
+    suspend fun addTournamentIdToHost(
+        tournamentId: String,
+        userId: String
+    ): Boolean
+
+    suspend fun removeTournamentFromDatabase(
+        tournamentId: String,
+        userId: String?
+    ): Boolean
+
+    fun removeTournamentListener(
+        tournamentId: String
+    )
+
+    suspend fun updateTournamentStatus(id: String, status: String)
 
 }

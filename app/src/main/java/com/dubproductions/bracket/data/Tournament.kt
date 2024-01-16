@@ -10,12 +10,14 @@ data class Tournament(
     var type: String? = null,
     var rounds: MutableList<Round>? = null,
     var participants: List<Participant>? = null,
-    var roundCount: Int? = null,
     var status: String? = null,
     var timeStarted: Long? = null,
     var timeCompleted: Long? = null,
     var hostId: String? = null
 ) {
+
+    // Status strings: registering, closed, playing, complete
+
     fun createNextRound() {
 
         participants?.let {
@@ -101,16 +103,13 @@ data class Tournament(
         }
     }
 
-    fun setNumberOfRounds() {
+    fun setNumberOfRounds(): Int {
         // participants <= 2^rounds
-
-        participants?.let {
-            roundCount = if (it.isNotEmpty()) {
-                val participantNth = log2(it.size.toDouble())
-                ceil(participantNth).toInt()
-            } else {
-                0
-            }
+        return if (!participants.isNullOrEmpty()) {
+            val participantNth = log2(participants!!.size.toDouble())
+            ceil(participantNth).toInt()
+        } else {
+            0
         }
     }
 

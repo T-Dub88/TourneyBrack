@@ -44,8 +44,6 @@ class CreationViewModel @Inject constructor(
 
             Log.i("Tournament", "createTournament: $tournament")
 
-            tournament.setNumberOfRounds()
-
             val result = tournamentRepository.createTournament(tournament = tournament)
             updateCreationState(result)
         }

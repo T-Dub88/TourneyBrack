@@ -48,7 +48,7 @@ fun HomeScreen(userViewModel: UserViewModel) {
 @Composable
 fun HomeScreenContent(
     userName: String,
-    tournamentList: MutableList<Tournament>,
+    tournamentList: List<Tournament>,
     cardPressed: () -> Unit
 ) {
     Column {

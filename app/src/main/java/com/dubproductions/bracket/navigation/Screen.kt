@@ -54,4 +54,9 @@ sealed class Screen(
         route = "tournament_creation",
         label = "Tournament Creation",
     )
+
+    data object EditTournament: Screen(
+        route = "edit_tournament",
+        label = "Edit Tournament"
+    )
 }

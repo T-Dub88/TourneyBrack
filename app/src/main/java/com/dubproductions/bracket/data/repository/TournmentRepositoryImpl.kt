@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -19,6 +20,8 @@ class TournamentRepositoryImpl: TournamentRepository {
 
     private val auth: FirebaseAuth = Firebase.auth
     private val firestore: FirebaseFirestore = Firebase.firestore
+
+    val tournamentListenerMap: MutableMap<String, ListenerRegistration> = mutableMapOf()
 
     override suspend fun registerUser(
         email: String,
@@ -210,6 +213,46 @@ class TournamentRepositoryImpl: TournamentRepository {
             Log.e(TAG, "removeTournamentFromDatabase: $e")
             false
         }
+    }
+
+    override fun listenToTournament(
+        tournamentId: String,
+        onComplete: (Tournament?) -> Unit
+    ) {
+        val listener = firestore
+            .collection("Tournaments")
+            .document(tournamentId)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.e(TAG, "listenToTournament: ${error.message}")
+                    onComplete(null)
+                    return@addSnapshotListener
+                }
+                if (value != null && value.exists()) {
+                    val tournament = value.toObject<Tournament>()
+                    onComplete(tournament)
+                } else {
+                    onComplete(null)
+                }
+            }
+        tournamentListenerMap[tournamentId] = listener
+    }
+
+    override fun removeTournamentListener(tournamentId: String) {
+        tournamentListenerMap[tournamentId]?.remove()
+    }
+
+    override suspend fun updateTournamentStatus(id: String, status: String) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(id)
+                .update("status", status)
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "updateTournamentStatus: $e")
+        }
+
     }
 
 }

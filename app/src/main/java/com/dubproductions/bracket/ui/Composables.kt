@@ -150,7 +150,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.rounds,
-                        tournament.roundCount.toString()
+                        tournament.setNumberOfRounds().toString()
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

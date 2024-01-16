@@ -39,7 +39,9 @@ fun HostingScreen(
             hostingNavController.navigate(Screen.TournamentCreation.route)
         },
         tournamentCardClick = {
-            // Todo: Set action for clicking existing tournament
+            userViewModel.updateViewingTournament(it)
+            userViewModel.viewingTournamentId = it.id.toString()
+            hostingNavController.navigate(Screen.EditTournament.route)
         }
     )
 
@@ -48,9 +50,9 @@ fun HostingScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HostingScreenContent(
-    hostingTournamentList: MutableList<Tournament>,
+    hostingTournamentList: List<Tournament>,
     floatingActionButtonClick: () -> Unit,
-    tournamentCardClick: () -> Unit
+    tournamentCardClick: (Tournament) -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
@@ -77,7 +79,7 @@ fun HostingScreenContent(
                 items(hostingTournamentList) { tournament ->
                     TournamentSummaryCard(
                         tournament = tournament,
-                        onPress = { tournamentCardClick() },
+                        onPress = { tournamentCardClick(tournament) },
                         tapCardInstruction = stringResource(id = R.string.update_tournament)
                     )
                 }

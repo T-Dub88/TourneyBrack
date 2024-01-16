@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.dubproductions.bracket.ui.main.HomeScreen
 import com.dubproductions.bracket.ui.main.ParticipatingScreen
 import com.dubproductions.bracket.ui.main.SettingsScreen
+import com.dubproductions.bracket.ui.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.ui.main.hosting.HostingScreen
 import com.dubproductions.bracket.ui.main.hosting.TournamentCreationScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
@@ -145,7 +146,18 @@ fun HostingNavHost(
         composable(
             route = Screen.TournamentCreation.route
         ) {
-            TournamentCreationScreen(navController = hostingNavController)
+            TournamentCreationScreen(
+                navController = hostingNavController
+            )
+        }
+
+        composable(
+            route = Screen.EditTournament.route
+        ) {
+            EditTournamentScreen(
+                userViewModel = userViewModel,
+                hostingNavController = hostingNavController
+            )
         }
     }
 }
