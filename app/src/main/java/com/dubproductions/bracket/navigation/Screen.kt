@@ -59,4 +59,15 @@ sealed class Screen(
         route = "edit_tournament",
         label = "Edit Tournament"
     )
+
+    data object Bracket: Screen(
+        route = "bracket",
+        label = "Bracket"
+    )
+
+    data object Participants: Screen(
+        route = "participants",
+        label = "Participants"
+    )
+
 }
