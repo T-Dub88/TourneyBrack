@@ -8,6 +8,7 @@ import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -121,6 +122,15 @@ class UserViewModel @Inject constructor(
             newList
         }
     }
+
+    private fun removeDeletedTournamentFromFlow(id: String) {
+        _hostingTournamentList.update { tourneyList ->
+            val newList = tourneyList.toMutableList()
+            newList.removeIf { it.id == id }
+            newList
+        }
+    }
+
     fun updateViewingTournament(tournament: Tournament) {
         _viewingTournament.update {
             tournament
@@ -168,6 +178,45 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             tournamentRepository.updateTournamentStatus(id, status)
         }
+    }
+
+    suspend fun generateBracket(tournament: Tournament) {
+
+        tournament.id?.let { tournamentId ->
+            tournament.participants?.let { participants ->
+                viewModelScope.async {
+                    tournament.createNextRound()
+                }.await()
+
+                tournament.rounds?.let { rounds ->
+                    val roundsJob = viewModelScope.async {
+                        tournamentRepository.updateTournamentRounds(
+                            id = tournamentId,
+                            rounds = rounds
+                        )
+                    }
+
+                    val participantsJob = viewModelScope.async {
+                        tournamentRepository.updateParticipantList(
+                            id = tournamentId,
+                            participants = participants
+                        )
+                    }
+
+                    awaitAll(roundsJob, participantsJob)
+
+                }
+            }
+        }
+    }
+
+    suspend fun deleteTournament(tournamentId: String) {
+        tournamentRepository.removeTournamentListener(tournamentId)
+        tournamentRepository.removeTournamentFromDatabase(
+            tournamentId = tournamentId,
+            userId = _user.value.userId
+        )
+        removeDeletedTournamentFromFlow(tournamentId)
     }
 
     fun formatDateTime(timestamp: Long?): String {

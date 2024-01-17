@@ -1,5 +1,7 @@
 package com.dubproductions.bracket.domain.repository
 
+import com.dubproductions.bracket.data.Participant
+import com.dubproductions.bracket.data.Round
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.User
 
@@ -58,10 +60,28 @@ interface TournamentRepository {
         userId: String?
     ): Boolean
 
+    suspend fun removeTournamentFromUser(
+        userId: String,
+        tournamentId: String
+    ): Boolean
+
     fun removeTournamentListener(
         tournamentId: String
     )
 
-    suspend fun updateTournamentStatus(id: String, status: String)
+    suspend fun updateTournamentStatus(
+        id: String,
+        status: String
+    )
+
+    suspend fun updateTournamentRounds(
+        id: String,
+        rounds: MutableList<Round>
+    )
+
+    suspend fun updateParticipantList(
+        id: String,
+        participants: List<Participant>
+    )
 
 }

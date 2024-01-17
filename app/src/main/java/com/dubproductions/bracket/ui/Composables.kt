@@ -158,7 +158,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.status,
-                        tournament.status.toString()
+                        tournament.status?.replaceFirstChar { it.uppercase() }.toString()
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

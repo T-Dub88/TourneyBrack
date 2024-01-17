@@ -1,14 +1,14 @@
 package com.dubproductions.bracket.data
 
 data class Match(
-    val playerOne: Participant? = null,
-    val playerTwo: Participant? = null,
-    var winner: Participant? = null,
+    val playerOneId: String? = null,
+    val playerTwoId: String? = null,
+    var winnerId: String? = null,
     var tie: Boolean? = null,
     val round: Int? = null
 ) {
-    fun declareWinner(participant: Participant) {
-        winner = participant
+    fun declareWinner(id: String) {
+        winnerId = id
     }
 
     fun declareTie() {

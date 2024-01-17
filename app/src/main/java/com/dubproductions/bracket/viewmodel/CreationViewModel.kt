@@ -7,6 +7,7 @@ import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,7 +40,7 @@ class CreationViewModel @Inject constructor(
                 name = name,
                 type = type,
                 participants = createParticipantList(participants),
-                status = "awaiting"
+                status = "registering"
             )
 
             Log.i("Tournament", "createTournament: $tournament")
@@ -49,40 +50,48 @@ class CreationViewModel @Inject constructor(
         }
     }
 
-    private fun createParticipantList(participants: String): List<Participant> {
-        var participant = ""
-        val participantList = mutableListOf<Participant>()
+    private suspend fun createParticipantList(participants: String): List<Participant> {
+        return viewModelScope.async {
+            var participant = ""
+            val participantList = mutableListOf<Participant>()
 
-        for (i in participants) {
-            participant = when (i) {
-                ',' -> {
-                    val trimmedParticipant = participant.trim()
-                    if (trimmedParticipant != "") {
-                        val createdParticipant = createParticipant(trimmedParticipant)
-                        participantList.add(createdParticipant)
+            for (i in participants) {
+                participant = when (i) {
+                    ',' -> {
+                        val trimmedParticipant = participant.trim()
+                        if (trimmedParticipant != "") {
+                            val createdParticipant = createParticipant(trimmedParticipant)
+                            participantList.add(createdParticipant)
+                        }
+                        ""
                     }
-                    ""
-                }
 
-                else -> {
-                    participant.plus(i)
+                    else -> {
+                        participant.plus(i)
+                    }
                 }
             }
-        }
-        val trimmedParticipant = participant.trim()
-        if (trimmedParticipant != "") {
-            val createdParticipant = createParticipant(trimmedParticipant)
-            participantList.add(createdParticipant)
-        }
-        return participantList
+            val trimmedParticipant = participant.trim()
+            if (trimmedParticipant != "") {
+                val createdParticipant = createParticipant(trimmedParticipant)
+                participantList.add(createdParticipant)
+            }
+            participantList
+        }.await()
     }
 
     private fun createParticipant(enteredText: String): Participant {
         return Participant(
+            userId = makeRandomString(),
             username = enteredText,
             dropped = false,
             points = 0.0
         )
+    }
+
+    private fun makeRandomString(): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (0..4).map { allowedChars.random() }.joinToString("")
     }
 
 }

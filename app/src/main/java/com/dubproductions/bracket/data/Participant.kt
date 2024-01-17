@@ -9,24 +9,26 @@ data class Participant(
     var sonnebornBerger: Double? = null,
     var dropped: Boolean? = null,
 ) {
-    fun updateTiebreakers() {
+    fun updateTiebreakers(participantList: List<Participant>) {
         buchholz = 0.0
         sonnebornBerger = 0.0
 
         matches?.let { matchesList ->
             for (match in matchesList) {
 
-                val opponent = if (match.playerOne?.username != username) {
-                    match.playerOne
+                val opponentId = if (match.playerOneId != userId) {
+                    match.playerOneId
                 } else {
-                    match.playerTwo
+                    match.playerTwoId
                 }
+
+                val opponent = participantList.find { opponentId == it.userId }
 
                 opponent?.points?.let { opponentsPoints ->
 
                     buchholz = buchholz!! + opponentsPoints
 
-                    sonnebornBerger = sonnebornBerger!! + if (match.winner?.username == username) {
+                    sonnebornBerger = sonnebornBerger!! + if (match.winnerId == userId) {
                         opponentsPoints
                     } else if (match.tie == true) {
                         (opponentsPoints * 0.5)

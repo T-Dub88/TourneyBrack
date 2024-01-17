@@ -22,7 +22,7 @@ data class Tournament(
 
         participants?.let {
             for (participant in it) {
-                participant.updateTiebreakers()
+                participant.updateTiebreakers(it)
             }
 
             if (rounds.isNullOrEmpty()) {
@@ -34,7 +34,7 @@ data class Tournament(
                         matches = generateRoundMatchList(randomizedParticipantList, 1),
                         roundNumber = 1,
                         bye = if (randomizedParticipantList.size % 2.0 != 0.0) {
-                            randomizedParticipantList.last()
+                            randomizedParticipantList.last().userId
                         } else {
                             null
                         }
@@ -56,7 +56,7 @@ data class Tournament(
                         matches = generateRoundMatchList(sortedParticipantList, newRoundNumber),
                         roundNumber = newRoundNumber,
                         bye = if (sortedParticipantList.size % 2.0 != 0.0) {
-                            sortedParticipantList.last()
+                            sortedParticipantList.last().userId
                         } else {
                             null
                         }
@@ -77,8 +77,8 @@ data class Tournament(
             while (j < numberOfParticipants) {
                 matchList.add(
                     Match(
-                        playerOne = participantList[i],
-                        playerTwo = participantList[j],
+                        playerOneId = participantList[i].userId,
+                        playerTwoId = participantList[j].userId,
                         round = roundNumber
                     )
                 )
@@ -91,8 +91,8 @@ data class Tournament(
             while (j < numberOfParticipants - 1) {
                 matchList.add(
                     Match(
-                        playerOne = participantList[i],
-                        playerTwo = participantList[j],
+                        playerOneId = participantList[i].userId,
+                        playerTwoId = participantList[j].userId,
                         round = roundNumber
                     )
                 )

@@ -3,5 +3,5 @@ package com.dubproductions.bracket.data
 data class Round(
     var matches: List<Match>? = null,
     var roundNumber: Int? = null,
-    var bye: Participant? = null
+    var bye: String? = null
 )

@@ -1,6 +1,8 @@
 package com.dubproductions.bracket.data.repository
 
 import android.util.Log
+import com.dubproductions.bracket.data.Participant
+import com.dubproductions.bracket.data.Round
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
@@ -208,9 +210,32 @@ class TournamentRepositoryImpl: TournamentRepository {
                 .document(tournamentId)
                 .delete()
                 .await()
+            userId?.let {
+                removeTournamentFromUser(
+                    userId = it,
+                    tournamentId = tournamentId
+                )
+            }
             true
         } catch (e: Exception) {
             Log.e(TAG, "removeTournamentFromDatabase: $e")
+            false
+        }
+    }
+
+    override suspend fun removeTournamentFromUser(
+        userId: String,
+        tournamentId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection("Users")
+                .document(userId)
+                .update("hostTournaments", FieldValue.arrayRemove(tournamentId))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeTournamentFromUser: $e")
             false
         }
     }
@@ -240,6 +265,7 @@ class TournamentRepositoryImpl: TournamentRepository {
 
     override fun removeTournamentListener(tournamentId: String) {
         tournamentListenerMap[tournamentId]?.remove()
+        tournamentListenerMap.remove(tournamentId)
     }
 
     override suspend fun updateTournamentStatus(id: String, status: String) {
@@ -253,6 +279,30 @@ class TournamentRepositoryImpl: TournamentRepository {
             Log.e(TAG, "updateTournamentStatus: $e")
         }
 
+    }
+
+    override suspend fun updateTournamentRounds(id: String, rounds: MutableList<Round>) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(id)
+                .update("rounds", rounds)
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "updateTournamentRounds: $e")
+        }
+    }
+
+    override suspend fun updateParticipantList(id: String, participants: List<Participant>) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(id)
+                .update("participants", participants)
+                .await()
+        } catch (e: Exception){
+            Log.e(TAG, "updateParticipantList: $e")
+        }
     }
 
 }
