@@ -60,7 +60,7 @@ fun EditTournamentScreen(
     EditTournamentScreenContent(
         tournamentName = tournament.name,
         registrationCode = tournament.id?.takeLast(4),
-        numParticipants = tournament.participants?.size,
+        numParticipants = tournament.participants.size,
         rounds = tournament.setNumberOfRounds(),
         format = tournament.type,
         start = userViewModel.formatDateTime(tournament.timeStarted),
@@ -70,27 +70,22 @@ fun EditTournamentScreen(
         bracketDialog = displayBracketGenerationDialog,
         deleteDialog = displayDeleteTournamentDialog,
         lockOnClick = {
-
-            tournament.status?.let { status ->
-                when (status) {
-                    "registering" -> {
-                        displayClosedDialog = true
-                        userViewModel.updateTournamentStatus(
-                            id = tournament.id!!,
-                            status = "closed"
-                        )
-                    }
-                    "closed" -> {
-                        displayOpenDialog = true
-                        userViewModel.updateTournamentStatus(
-                            id = tournament.id!!,
-                            status = "registering"
-                        )
-                    }
+            when (tournament.status) {
+                "registering" -> {
+                    displayClosedDialog = true
+                    userViewModel.updateTournamentStatus(
+                        id = tournament.id!!,
+                        status = "closed"
+                    )
+                }
+                "closed" -> {
+                    displayOpenDialog = true
+                    userViewModel.updateTournamentStatus(
+                        id = tournament.id!!,
+                        status = "registering"
+                    )
                 }
             }
-
-
         },
         participantsOnClick = {
             hostingNavController.navigate(Screen.Participants.route)

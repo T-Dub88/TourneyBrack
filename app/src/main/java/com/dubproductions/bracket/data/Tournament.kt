@@ -5,12 +5,12 @@ import kotlin.math.ceil
 import kotlin.math.log2
 
 data class Tournament(
-    var name: String? = null,
+    var name: String,
     var id: String? = null,
-    var type: String? = null,
+    var type: String,
     var rounds: MutableList<Round>? = null,
-    var participants: List<Participant>? = null,
-    var status: String? = null,
+    var participants: List<Participant>,
+    var status: String,
     var timeStarted: Long? = null,
     var timeCompleted: Long? = null,
     var hostId: String? = null
@@ -20,49 +20,49 @@ data class Tournament(
 
     fun createNextRound() {
 
-        participants?.let {
-            for (participant in it) {
-                participant.updateTiebreakers(it)
-            }
+        for (participant in participants) {
+            participant.updateTiebreakers(participants)
+        }
 
-            if (rounds.isNullOrEmpty()) {
-                // First round
-                rounds = mutableListOf()
-                val randomizedParticipantList = it.shuffled()
-                rounds!!.add(
-                    Round(
-                        matches = generateRoundMatchList(randomizedParticipantList, 1),
-                        roundNumber = 1,
-                        bye = if (randomizedParticipantList.size % 2.0 != 0.0) {
-                            randomizedParticipantList.last().userId
-                        } else {
-                            null
-                        }
-                    )
+        if (rounds.isNullOrEmpty()) {
+            // First round
+            rounds = mutableListOf()
+            val randomizedParticipantList = participants.shuffled()
+            rounds!!.add(
+                Round(
+                    matches = generateRoundMatchList(randomizedParticipantList, 1),
+                    roundNumber = 1,
+                    bye = if (randomizedParticipantList.size % 2.0 != 0.0) {
+                        randomizedParticipantList.last().userId
+                    } else {
+                        null
+                    }
                 )
+            )
 
-            } else {
-                // after the first round
-                val sortedParticipantList = it.sortedWith(
-                    compareBy(
-                        { player -> player.points },
-                        { player -> player.buchholz },
-                        { player -> player.sonnebornBerger }
-                    )
+        } else {
+            // after the first round
+            val sortedParticipantList = participants.sortedWith(
+                compareBy(
+                    { player -> !player.dropped },
+                    { player -> player.points },
+                    { player -> player.buchholz },
+                    { player -> player.sonnebornBerger }
                 )
-                val newRoundNumber = rounds!!.last().roundNumber!! + 1
-                rounds!!.add(
-                    Round(
-                        matches = generateRoundMatchList(sortedParticipantList, newRoundNumber),
-                        roundNumber = newRoundNumber,
-                        bye = if (sortedParticipantList.size % 2.0 != 0.0) {
-                            sortedParticipantList.last().userId
-                        } else {
-                            null
-                        }
-                    )
+            )
+            val newRoundNumber = rounds!!.last().roundNumber + 1
+            rounds!!.add(
+                Round(
+                    matches = generateRoundMatchList(sortedParticipantList, newRoundNumber),
+                    roundNumber = newRoundNumber,
+                    bye = if (sortedParticipantList.size % 2.0 != 0.0) {
+                        sortedParticipantList.last().userId
+                    } else {
+                        null
+                    }
                 )
-            }
+            )
+            participants = sortedParticipantList
         }
     }
 
@@ -105,8 +105,8 @@ data class Tournament(
 
     fun setNumberOfRounds(): Int {
         // participants <= 2^rounds
-        return if (!participants.isNullOrEmpty()) {
-            val participantNth = log2(participants!!.size.toDouble())
+        return if (participants.isNotEmpty()) {
+            val participantNth = log2(participants.size.toDouble())
             ceil(participantNth).toInt()
         } else {
             0

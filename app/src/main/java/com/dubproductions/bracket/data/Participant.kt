@@ -1,13 +1,13 @@
 package com.dubproductions.bracket.data
 
 data class Participant(
-    val username: String? = null,
-    val userId: String? = null,
-    var points: Double? = null,
+    val username: String,
+    val userId: String,
+    var points: Double,
     val matches: MutableList<Match>? = null,
-    var buchholz: Double? = null,
-    var sonnebornBerger: Double? = null,
-    var dropped: Boolean? = null,
+    var buchholz: Double,
+    var sonnebornBerger: Double,
+    var dropped: Boolean,
 ) {
     fun updateTiebreakers(participantList: List<Participant>) {
         buchholz = 0.0
@@ -26,9 +26,9 @@ data class Participant(
 
                 opponent?.points?.let { opponentsPoints ->
 
-                    buchholz = buchholz!! + opponentsPoints
+                    buchholz += opponentsPoints
 
-                    sonnebornBerger = sonnebornBerger!! + if (match.winnerId == userId) {
+                    sonnebornBerger += if (match.winnerId == userId) {
                         opponentsPoints
                     } else if (match.tie == true) {
                         (opponentsPoints * 0.5)

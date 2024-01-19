@@ -85,7 +85,9 @@ class CreationViewModel @Inject constructor(
             userId = makeRandomString(),
             username = enteredText,
             dropped = false,
-            points = 0.0
+            points = 0.0,
+            buchholz = 0.0,
+            sonnebornBerger = 0.0
         )
     }
 

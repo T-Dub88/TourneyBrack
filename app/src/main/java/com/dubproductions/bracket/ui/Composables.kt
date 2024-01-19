@@ -142,7 +142,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.tournament_name,
-                        tournament.name.toString()
+                        tournament.name
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
@@ -158,7 +158,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.status,
-                        tournament.status?.replaceFirstChar { it.uppercase() }.toString()
+                        tournament.status.replaceFirstChar { it.uppercase() }
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
@@ -170,7 +170,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.type,
-                        tournament.type.toString()
+                        tournament.type
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

@@ -1,33 +1,22 @@
 package com.dubproductions.bracket.ui.main
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dubproductions.bracket.R
-import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.ui.TournamentSummaryCard
 import com.dubproductions.bracket.viewmodel.UserViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
 fun HomeScreen(userViewModel: UserViewModel) {
@@ -36,7 +25,7 @@ fun HomeScreen(userViewModel: UserViewModel) {
     val tournamentList by userViewModel.completedTournamentList.collectAsStateWithLifecycle()
 
     HomeScreenContent(
-        userName = userInfo.username.toString(),
+        userName = userInfo.username,
         tournamentList = tournamentList,
         cardPressed = {
             // Todo: Navigate to tournament info screen
@@ -82,16 +71,7 @@ private fun TournamentCardPreview() {
         id = "djsjlkhfj",
         type = "Swiss",
         status = "Complete",
-        participants = listOf(
-            Participant(),
-            Participant(),
-            Participant(),
-            Participant(),
-            Participant(),
-            Participant(),
-            Participant(),
-            Participant()
-        )
+        participants = listOf()
     )
     tournament.setNumberOfRounds()
     tournament.timeStampStart()

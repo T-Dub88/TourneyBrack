@@ -23,7 +23,14 @@ class UserViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    private val _user: MutableStateFlow<User> = MutableStateFlow(User())
+    private val _user: MutableStateFlow<User> = MutableStateFlow(
+        User(
+            email = "",
+            firstName = "",
+            lastName = "",
+            username = ""
+        )
+    )
     val user: StateFlow<User> = _user.asStateFlow()
 
     private val _completedTournamentList: MutableStateFlow<List<Tournament>> = MutableStateFlow(listOf())
@@ -35,7 +42,14 @@ class UserViewModel @Inject constructor(
     private val _participatingTournamentList: MutableStateFlow<List<Tournament>> = MutableStateFlow(mutableListOf())
     val participatingTournamentList: StateFlow<List<Tournament>> = _participatingTournamentList.asStateFlow()
 
-    private val _viewingTournament: MutableStateFlow<Tournament> = MutableStateFlow(Tournament())
+    private val _viewingTournament: MutableStateFlow<Tournament> = MutableStateFlow(
+        Tournament(
+            name = "",
+            participants = listOf(),
+            status = "",
+            type = ""
+        )
+    )
     val viewingTournament: StateFlow<Tournament> = _viewingTournament.asStateFlow()
 
     private var loggedIn: Boolean = false
@@ -183,29 +197,27 @@ class UserViewModel @Inject constructor(
     suspend fun generateBracket(tournament: Tournament) {
 
         tournament.id?.let { tournamentId ->
-            tournament.participants?.let { participants ->
-                viewModelScope.async {
-                    tournament.createNextRound()
-                }.await()
+            viewModelScope.async {
+                tournament.createNextRound()
+            }.await()
 
-                tournament.rounds?.let { rounds ->
-                    val roundsJob = viewModelScope.async {
-                        tournamentRepository.updateTournamentRounds(
-                            id = tournamentId,
-                            rounds = rounds
-                        )
-                    }
-
-                    val participantsJob = viewModelScope.async {
-                        tournamentRepository.updateParticipantList(
-                            id = tournamentId,
-                            participants = participants
-                        )
-                    }
-
-                    awaitAll(roundsJob, participantsJob)
-
+            tournament.rounds?.let { rounds ->
+                val roundsJob = viewModelScope.async {
+                    tournamentRepository.updateTournamentRounds(
+                        id = tournamentId,
+                        rounds = rounds
+                    )
                 }
+
+                val participantsJob = viewModelScope.async {
+                    tournamentRepository.updateParticipantList(
+                        id = tournamentId,
+                        participants = tournament.participants
+                    )
+                }
+
+                awaitAll(roundsJob, participantsJob)
+
             }
         }
     }
