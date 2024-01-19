@@ -162,9 +162,7 @@ class UserViewModel @Inject constructor(
     }
 
     private suspend fun fetchTournament(tournamentId: String): Tournament? {
-        return viewModelScope.async {
-            tournamentRepository.fetchTournamentData(tournamentId)
-        }.await()
+        return tournamentRepository.fetchTournamentData(tournamentId)
     }
 
     private fun fetchUserData(onComplete: (Boolean) -> Unit) {
