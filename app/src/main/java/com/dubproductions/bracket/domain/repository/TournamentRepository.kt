@@ -84,4 +84,19 @@ interface TournamentRepository {
         participants: List<Participant>
     )
 
+    suspend fun addParticipant(
+        tournamentId: String,
+        participant: Participant
+    )
+
+    suspend fun removeParticipant(
+        tournamentId: String,
+        participant: Participant
+    )
+
+    suspend fun dropParticipant(
+        tournamentId: String,
+        participant: Participant
+    )
+
 }

@@ -42,14 +42,7 @@ data class Tournament(
 
         } else {
             // after the first round
-            val sortedParticipantList = participants.sortedWith(
-                compareBy(
-                    { player -> !player.dropped },
-                    { player -> player.points },
-                    { player -> player.buchholz },
-                    { player -> player.sonnebornBerger }
-                )
-            )
+            val sortedParticipantList = sortPlayerStandings()
             val newRoundNumber = rounds!!.last().roundNumber + 1
             rounds!!.add(
                 Round(
@@ -119,6 +112,17 @@ data class Tournament(
 
     fun timeStampFinish() {
         timeCompleted = Date().time
+    }
+
+    fun sortPlayerStandings(): List<Participant> {
+        return participants.sortedWith(
+            compareBy(
+                { player -> player.dropped },
+                { player -> -player.points },
+                { player -> -player.buchholz },
+                { player -> -player.sonnebornBerger }
+            )
+        )
     }
 
 }

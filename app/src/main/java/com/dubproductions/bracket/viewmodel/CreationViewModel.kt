@@ -39,8 +39,7 @@ class CreationViewModel @Inject constructor(
             val tournament = Tournament(
                 name = name,
                 type = type,
-                participants = createParticipantList(participants),
-                status = "registering"
+                participants = createParticipantList(participants)
             )
 
             Log.i("Tournament", "createTournament: $tournament")
@@ -83,11 +82,7 @@ class CreationViewModel @Inject constructor(
     private fun createParticipant(enteredText: String): Participant {
         return Participant(
             userId = makeRandomString(),
-            username = enteredText,
-            dropped = false,
-            points = 0.0,
-            buchholz = 0.0,
-            sonnebornBerger = 0.0
+            username = enteredText
         )
     }
 

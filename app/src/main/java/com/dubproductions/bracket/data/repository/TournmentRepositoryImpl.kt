@@ -305,4 +305,52 @@ class TournamentRepositoryImpl: TournamentRepository {
         }
     }
 
+    override suspend fun addParticipant(
+        tournamentId: String,
+        participant: Participant
+    ) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(tournamentId)
+                .update("participants", FieldValue.arrayUnion(participant))
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "addParticipant: $e")
+        }
+    }
+
+    override suspend fun removeParticipant(
+        tournamentId: String,
+        participant: Participant
+    ) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(tournamentId)
+                .update(
+                    "participants",
+                    FieldValue.arrayRemove(participant)
+                )
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "removeParticipant: $e")
+        }
+    }
+
+    override suspend fun dropParticipant(
+        tournamentId: String,
+        participant: Participant
+    ) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(tournamentId)
+                .update("participants", FieldValue.arrayUnion(participant))
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "dropParticipant: $e")
+        }
+    }
+
 }
