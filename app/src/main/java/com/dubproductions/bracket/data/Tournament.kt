@@ -5,12 +5,12 @@ import kotlin.math.ceil
 import kotlin.math.log2
 
 data class Tournament(
-    var name: String,
+    var name: String = "",
     var id: String? = null,
-    var type: String,
+    var type: String = "",
     var rounds: MutableList<Round>? = null,
-    var participants: List<Participant>,
-    var status: String,
+    var participants: List<Participant> = listOf(),
+    var status: String = "registering",
     var timeStarted: Long? = null,
     var timeCompleted: Long? = null,
     var hostId: String? = null

@@ -1,13 +1,13 @@
 package com.dubproductions.bracket.data
 
 data class Participant(
-    val username: String,
-    val userId: String,
-    var points: Double,
+    val username: String = "",
+    val userId: String = "",
+    var points: Double = 0.0,
     val matches: MutableList<Match>? = null,
-    var buchholz: Double,
-    var sonnebornBerger: Double,
-    var dropped: Boolean,
+    var buchholz: Double = 0.0,
+    var sonnebornBerger: Double = 0.0,
+    var dropped: Boolean = false,
 ) {
     fun updateTiebreakers(participantList: List<Participant>) {
         buchholz = 0.0
