@@ -10,7 +10,7 @@ data class Tournament(
     var type: String = "",
     var rounds: MutableList<Round>? = null,
     var participants: List<Participant> = listOf(),
-    var status: String = "registering",
+    var status: String = TournamentStatus.REGISTERING.status,
     var timeStarted: Long? = null,
     var timeCompleted: Long? = null,
     var hostId: String? = null

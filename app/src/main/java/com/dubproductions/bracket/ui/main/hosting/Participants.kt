@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dubproductions.bracket.data.Participant
+import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.viewmodel.ParticipantViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -70,7 +71,8 @@ fun ParticipantsScreen(
     ParticipantsScreenContent(
         floatingActionButtonClick = {
             when(tournament.status) {
-                "registering", "closed" -> {
+                TournamentStatus.REGISTERING.status,
+                TournamentStatus.CLOSED.status -> {
                     displayAddPlayerDialog = true
                 }
                 else -> {

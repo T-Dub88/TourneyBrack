@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.viewmodel.UserViewModel
@@ -71,18 +72,18 @@ fun EditTournamentScreen(
         deleteDialog = displayDeleteTournamentDialog,
         lockOnClick = {
             when (tournament.status) {
-                "registering" -> {
+                TournamentStatus.REGISTERING.status -> {
                     displayClosedDialog = true
                     userViewModel.updateTournamentStatus(
                         id = tournament.id!!,
-                        status = "closed"
+                        status = TournamentStatus.CLOSED.status
                     )
                 }
-                "closed" -> {
+                TournamentStatus.CLOSED.status -> {
                     displayOpenDialog = true
                     userViewModel.updateTournamentStatus(
                         id = tournament.id!!,
-                        status = "registering"
+                        status = TournamentStatus.REGISTERING.status
                     )
                 }
             }

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.Tournament
+import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -96,7 +97,7 @@ class UserViewModel @Inject constructor(
                 }
                 val retrievedTournament = fetchTournament(id)
                 retrievedTournament?.let { tournament ->
-                    if (tournament.status == "complete") {
+                    if (tournament.status == TournamentStatus.COMPLETE.status) {
                         updateCompletedTournamentList(tournament)
                     } else if (hosting) {
                         updateHostingTournamentList(tournament)

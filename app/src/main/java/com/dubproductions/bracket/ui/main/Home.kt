@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Tournament
+import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.ui.TournamentSummaryCard
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
@@ -70,7 +71,7 @@ private fun TournamentCardPreview() {
         name = "Tourney Classic",
         id = "djsjlkhfj",
         type = "Swiss",
-        status = "Complete",
+        status = TournamentStatus.COMPLETE.status,
         participants = listOf()
     )
     tournament.setNumberOfRounds()
