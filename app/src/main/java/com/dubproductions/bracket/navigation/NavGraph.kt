@@ -1,22 +1,28 @@
 package com.dubproductions.bracket.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.ui.main.HomeScreen
 import com.dubproductions.bracket.ui.main.ParticipatingScreen
 import com.dubproductions.bracket.ui.main.SettingsScreen
 import com.dubproductions.bracket.ui.main.hosting.BracketScreen
 import com.dubproductions.bracket.ui.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.ui.main.hosting.HostingScreen
-import com.dubproductions.bracket.ui.main.hosting.ParticipantsScreen
+import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.ui.main.hosting.TournamentCreationScreen
+import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatchesScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
 import com.dubproductions.bracket.viewmodel.OnboardingViewModel
+import com.dubproductions.bracket.viewmodel.ParticipantViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
@@ -129,9 +135,11 @@ fun HomeNavHost(
 // Hosting tab NavGraph
 @Composable
 fun HostingNavHost(
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+    participantViewModel: ParticipantViewModel = hiltViewModel()
 ) {
     val hostingNavController = rememberNavController()
+
     NavHost(
         navController = hostingNavController,
         startDestination = Screen.Hosting.route
@@ -165,13 +173,25 @@ fun HostingNavHost(
         composable(
             route = Screen.Participants.route
         ) {
-            ParticipantsScreen(userViewModel = userViewModel)
+            ParticipantsScreen(
+                userViewModel = userViewModel,
+                hostingNavController = hostingNavController,
+                participantViewModel = participantViewModel
+            )
         }
 
         composable(
             route = Screen.Bracket.route
         ) {
             BracketScreen(userViewModel = userViewModel)
+        }
+
+        composable(
+            route = Screen.ParticipantMatches.route
+        ) {
+            ParticipantMatchesScreen(
+                participantViewModel = participantViewModel
+            )
         }
     }
 }

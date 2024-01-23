@@ -70,4 +70,9 @@ sealed class Screen(
         label = "Participants"
     )
 
+    data object ParticipantMatches: Screen(
+        route = "participant_matches",
+        label = "Player Matches"
+    )
+
 }

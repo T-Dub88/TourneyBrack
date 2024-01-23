@@ -1,4 +1,4 @@
-package com.dubproductions.bracket.ui.main.hosting
+package com.dubproductions.bracket.ui.main.hosting.participant
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,8 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.TournamentStatus
+import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.viewmodel.ParticipantViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -45,7 +47,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ParticipantsScreen(
     userViewModel: UserViewModel,
-    participantViewModel: ParticipantViewModel = hiltViewModel()
+    participantViewModel: ParticipantViewModel,
+    hostingNavController: NavHostController
 ) {
     val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
     val selectedParticipant by participantViewModel.selectedParticipant.collectAsStateWithLifecycle()
@@ -84,7 +87,10 @@ fun ParticipantsScreen(
             participantViewModel.updateSelectedParticipant(participant)
             displayDropPlayerDialog = true
         },
-        viewMatchesOnClick = { /*TODO*/ },
+        viewMatchesOnClick = { participant ->
+            participantViewModel.updateSelectedParticipant(participant)
+            hostingNavController.navigate(Screen.ParticipantMatches.route)
+        },
         participantList = tournament.sortPlayerStandings(),
         displayAddPlayerDialog = displayAddPlayerDialog,
         displayCannotAddDialog = displayCannotAddDialog,
@@ -140,7 +146,7 @@ fun ParticipantsScreenContent(
     fieldsEnabled: Boolean,
     floatingActionButtonClick: () -> Unit,
     dropPlayerOnClick: (Participant) -> Unit,
-    viewMatchesOnClick: () -> Unit,
+    viewMatchesOnClick: (Participant) -> Unit,
     addPlayerCloseDialog: (Boolean) -> Unit,
     cannotAddPlayerCloseDialog: () -> Unit,
     addPlayerTextFieldEdit: (String) -> Unit,
@@ -169,8 +175,8 @@ fun ParticipantsScreenContent(
                         ParticipantCard(
                             standing = index + 1,
                             participant = participant,
-                            dropPlayerOnClick = dropPlayerOnClick,
-                            viewMatchesOnClick = viewMatchesOnClick
+                            dropPlayerOnClick = { dropPlayerOnClick(participant) },
+                            viewMatchesOnClick = { viewMatchesOnClick(participant) }
                         )
                     }
                 }
@@ -276,7 +282,7 @@ fun ParticipantsScreenContent(
 fun ParticipantCard(
     participant: Participant,
     standing: Int,
-    dropPlayerOnClick: (Participant) -> Unit,
+    dropPlayerOnClick: () -> Unit,
     viewMatchesOnClick: () -> Unit
 ) {
     Card(
@@ -331,9 +337,7 @@ fun ParticipantCard(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             TextButton(
-                onClick = {
-                    dropPlayerOnClick(participant)
-                }
+                onClick = dropPlayerOnClick
             ) {
                 Text(text = "Drop Player", fontSize = 16.sp)
             }

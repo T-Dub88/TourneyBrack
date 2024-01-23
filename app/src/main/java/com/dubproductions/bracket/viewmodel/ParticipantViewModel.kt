@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
@@ -14,6 +15,15 @@ import javax.inject.Inject
 class ParticipantViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
+
+    init {
+        Log.i("ParticipantsViewmodel", "Created")
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.i("ParticipantsViewmodel", "Destroyed")
+    }
 
     private val _selectedParticipant: MutableStateFlow<Participant> = MutableStateFlow(Participant())
     val selectedParticipant: StateFlow<Participant> = _selectedParticipant.asStateFlow()
