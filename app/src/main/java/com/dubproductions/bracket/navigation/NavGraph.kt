@@ -25,7 +25,8 @@ import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatches
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
-import com.dubproductions.bracket.viewmodel.OnboardingViewModel
+import com.dubproductions.bracket.viewmodel.LoginViewModel
+import com.dubproductions.bracket.viewmodel.RegistrationViewModel
 import kotlinx.coroutines.launch
 
 
@@ -122,16 +123,16 @@ fun NavGraphBuilder.loginScreen(
     composable(
         route = Screen.Login.route
     ) {
-        val onboardingViewModel: OnboardingViewModel = it.sharedViewModel(navController)
-        val uiState by onboardingViewModel.loginUIState.collectAsStateWithLifecycle()
+        val loginViewModel: LoginViewModel = hiltViewModel()
+        val uiState by loginViewModel.loginUIState.collectAsStateWithLifecycle()
         val coroutineScope = rememberCoroutineScope()
 
         LoginScreen(
             loginClick = { email, password ->
-                onboardingViewModel.disableLoginScreenUI()
+                loginViewModel.disableLoginScreenUI()
                 coroutineScope.launch {
-                    val result = onboardingViewModel.loginUser(email, password)
-                    onboardingViewModel.enableLoginScreenUI()
+                    val result = loginViewModel.loginUser(email, password)
+                    loginViewModel.enableLoginScreenUI()
                     if (result) {
                         navController.navigate(Map.BottomBar.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -139,24 +140,24 @@ fun NavGraphBuilder.loginScreen(
                             }
                         }
                     } else {
-                        onboardingViewModel.showLoginFailureDialog()
+                        loginViewModel.showLoginFailureDialog()
                     }
                 }
             },
             registrationClick = { navController.navigate(Screen.Registration.route) },
             forgotPasswordClick = { email ->
-                onboardingViewModel.disableLoginScreenUI()
+                loginViewModel.disableLoginScreenUI()
                 coroutineScope.launch {
-                    val result = onboardingViewModel.resetPassword(email)
-                    onboardingViewModel.enableLoginScreenUI()
+                    val result = loginViewModel.resetPassword(email)
+                    loginViewModel.enableLoginScreenUI()
                     if (result) {
-                        onboardingViewModel.showPasswordResetSuccessDialog()
+                        loginViewModel.showPasswordResetSuccessDialog()
                     } else {
-                        onboardingViewModel.showPasswordResetFailureDialog()
+                        loginViewModel.showPasswordResetFailureDialog()
                     }
                 }
             },
-            dismissDialog = { onboardingViewModel.dismissLoginDialogs() },
+            dismissDialog = { loginViewModel.dismissLoginDialogs() },
             uiState = uiState
         )
     }
@@ -168,8 +169,36 @@ fun NavGraphBuilder.registrationScreen(
     composable(
         route = Screen.Registration.route
     ) {
-        val onboardingViewModel: OnboardingViewModel = it.sharedViewModel(navController)
-        RegistrationScreen()
+        val registrationViewModel: RegistrationViewModel = hiltViewModel()
+        val uiState by registrationViewModel.uiState.collectAsStateWithLifecycle()
+        val coroutineScope = rememberCoroutineScope()
+
+        RegistrationScreen(
+            uiState = uiState,
+            dismissDialog = { registrationViewModel.hideDialog() },
+            registrationClicked = { email, password, firstName, lastName, username ->
+                coroutineScope.launch {
+                    registrationViewModel.disableUI()
+                    val result = registrationViewModel.registerUser(
+                        email = email,
+                        password = password,
+                        firstName = firstName,
+                        lastName = lastName,
+                        username = username
+                    )
+                    registrationViewModel.enableUI()
+                    if (result) {
+                        navController.navigate(Map.BottomBar.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                inclusive = true
+                            }
+                        }
+                    } else {
+                        registrationViewModel.showDialog()
+                    }
+                }
+            }
+        )
     }
 }
 

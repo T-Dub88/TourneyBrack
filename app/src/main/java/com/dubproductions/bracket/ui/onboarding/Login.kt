@@ -1,6 +1,7 @@
 package com.dubproductions.bracket.ui.onboarding
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Email
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -25,6 +27,7 @@ import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
+import com.dubproductions.bracket.ui_state.LoginScreenUIState
 
 @Composable
 fun LoginScreen(
@@ -45,8 +48,10 @@ fun LoginScreen(
     var emailError by rememberSaveable { mutableStateOf(false) }
     var passwordError by rememberSaveable { mutableStateOf(false) }
 
-    Column {
-        Text(text = uiState.title)
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(text = stringResource(id = R.string.login))
 
         // Text field for email
         OnboardingTextField(
@@ -193,7 +198,7 @@ private fun validateFields(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
     LoginScreen(

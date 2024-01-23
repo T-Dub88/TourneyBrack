@@ -3,7 +3,7 @@ package com.dubproductions.bracket.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
-import com.dubproductions.bracket.ui.onboarding.LoginScreenUIState
+import com.dubproductions.bracket.ui_state.LoginScreenUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,20 +12,22 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class OnboardingViewModel @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    private val _loginUIState: MutableStateFlow<LoginScreenUIState> = MutableStateFlow(LoginScreenUIState())
+    private val _loginUIState: MutableStateFlow<LoginScreenUIState> = MutableStateFlow(
+        LoginScreenUIState()
+    )
     val loginUIState: StateFlow<LoginScreenUIState> = _loginUIState.asStateFlow()
 
     init {
-        Log.i("OnboardingViewModel", "Created")
+        Log.i("LoginViewModel", "Created")
     }
 
     override fun onCleared() {
         super.onCleared()
-        Log.i("OnboardingViewModel", "Cleared")
+        Log.i("LoginViewModel", "Cleared")
     }
 
     private fun updateLoginUIState(newState: LoginScreenUIState) {
@@ -66,22 +68,6 @@ class OnboardingViewModel @Inject constructor(
     fun enableLoginScreenUI() {
         val newState = loginUIState.value.copy(enable = true)
         updateLoginUIState(newState)
-    }
-
-    suspend fun registerUser(
-        email: String,
-        password: String,
-        username: String,
-        firstName: String,
-        lastName: String
-    ): Boolean {
-        return tournamentRepository.registerUser(
-                email = email,
-                password = password,
-                username = username,
-                firstName = firstName,
-                lastName = lastName
-            )
     }
 
     suspend fun loginUser(
