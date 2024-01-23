@@ -13,33 +13,27 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
+import androidx.compose.ui.tooling.preview.Preview
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
-import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.viewmodel.OnboardingViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    onboardingViewModel: OnboardingViewModel,
-    preLoginNavController: NavHostController,
-    mainNavHostController: NavHostController
+    uiState: LoginScreenUIState,
+    loginClick: (String, String) -> Unit,
+    registrationClick: () -> Unit,
+    forgotPasswordClick: (String) -> Unit,
+    dismissDialog: () -> Unit
 ) {
-
-    val coroutineScope = rememberCoroutineScope()
-
     // Text field texts
     var emailText by rememberSaveable { mutableStateOf("") }
     var passwordText by rememberSaveable { mutableStateOf("") }
@@ -51,16 +45,8 @@ fun LoginScreen(
     var emailError by rememberSaveable { mutableStateOf(false) }
     var passwordError by rememberSaveable { mutableStateOf(false) }
 
-    // Fields enable or disable state
-    var enabled by rememberSaveable { mutableStateOf(true) }
-
-    // Dialog visibility
-    var showPasswordSuccessDialog by rememberSaveable { mutableStateOf(false) }
-    var showPasswordFailureDialog by rememberSaveable { mutableStateOf(false) }
-    var showLoginFailureDialog by rememberSaveable { mutableStateOf(false) }
-
     Column {
-        Text(text = stringResource(id = R.string.login))
+        Text(text = uiState.title)
 
         // Text field for email
         OnboardingTextField(
@@ -78,7 +64,7 @@ fun LoginScreen(
             visualTransformation = VisualTransformation.None,
             error = emailError,
             errorText = stringResource(id = R.string.email_not_valid),
-            enabled = enabled
+            enabled = uiState.enable
         )
 
         // Text field for password
@@ -105,13 +91,12 @@ fun LoginScreen(
             },
             error = passwordError,
             errorText = stringResource(id = R.string.password_needed),
-            enabled = enabled
+            enabled = uiState.enable
         )
 
         // Button to log user in
         OnboardingButton(
             whenClicked = {
-                enabled = false
                 emailError = validateFields(
                     text = emailText,
                     type = Type.EMAIL
@@ -122,100 +107,70 @@ fun LoginScreen(
                 )
 
                 if (!passwordError && !emailError) {
-                    coroutineScope.launch {
-                        val result = onboardingViewModel.loginUser(
-                            email = emailText,
-                            password = passwordText
-                        )
-                        enabled = true
-                        if (result) {
-                            mainNavHostController.navigate(Screen.Home.route) {
-                                popUpTo(mainNavHostController.graph.findStartDestination().id) {
-                                    inclusive = true
-                                }
-                            }
-                        } else {
-                            showLoginFailureDialog = true
-                        }
-                    }
-
-                } else {
-                    enabled = true
+                    loginClick(emailText, passwordText)
                 }
 
             },
             buttonText = stringResource(id = R.string.login),
-            enabled = enabled
+            enabled = uiState.enable
         )
 
         // Button to navigate to the registration screen
         OnboardingButton(
-            whenClicked = { preLoginNavController.navigate(Screen.Registration.route) },
+            whenClicked = registrationClick,
             buttonText = stringResource(id = R.string.registration),
-            enabled = enabled
+            enabled = uiState.enable
         )
 
         // Button for password reset
         OnboardingButton(
             whenClicked = {
-                enabled = false
                 emailError = validateFields(
                     text = emailText,
                     type = Type.EMAIL
                 )
 
                 if (!emailError) {
-                    coroutineScope.launch {
-                        val resetResult = onboardingViewModel.resetPassword(emailText)
-                        enabled = true
-                        if (resetResult) {
-                            showPasswordSuccessDialog = true
-                        } else {
-                            showPasswordFailureDialog = true
-                        }
-                    }
-                } else {
-                    enabled = true
+                    forgotPasswordClick(emailText)
                 }
 
             },
             buttonText = stringResource(id = R.string.forgot_password),
-            enabled = enabled
+            enabled = uiState.enable
         )
 
         // Dialog to tell user password email has sent.
         when {
-            showPasswordSuccessDialog -> {
+            uiState.showPasswordResetSuccessDialog -> {
                 ReusableDialog(
                     titleText = stringResource(id = R.string.email_sent),
                     contentText = stringResource(id = R.string.password_email_sent_message),
                     icon = Icons.Outlined.Email,
-                    dismissDialog = { showPasswordSuccessDialog = false }
+                    dismissDialog = { dismissDialog() }
                 )
             }
         }
 
-
         // Dialog to tell user login has failed.
         when {
-            showLoginFailureDialog -> {
+            uiState.showLoginFailureDialog -> {
                 ReusableDialog(
                     titleText = stringResource(id = R.string.login_failed),
                     contentText = stringResource(id = R.string.login_failed_message),
                     icon = Icons.Outlined.Error,
-                    dismissDialog = { showLoginFailureDialog = false }
+                    dismissDialog = { dismissDialog() }
                 )
             }
         }
 
         // Dialog to tell user password email not sent.
         when {
-            showPasswordFailureDialog -> {
+            uiState.showPasswordResetFailureDialog -> {
                 ReusableDialog(
                     titleText = stringResource(id = R.string.password_email_not_sent),
                     contentText = stringResource(id = R.string.password_email_not_sent_message),
                     icon = Icons.Outlined.Error,
-                    dismissDialog = { showPasswordFailureDialog = false }
+                    dismissDialog = { dismissDialog() }
                 )
             }
         }
@@ -236,4 +191,16 @@ private fun validateFields(
             false
         }
     }
+}
+
+@Preview
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(
+        uiState = LoginScreenUIState(),
+        loginClick = {_, _ -> },
+        registrationClick = {},
+        forgotPasswordClick = {},
+        dismissDialog = {}
+    )
 }
