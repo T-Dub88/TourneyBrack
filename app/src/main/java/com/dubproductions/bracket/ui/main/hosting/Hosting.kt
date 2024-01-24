@@ -13,43 +13,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.TournamentSummaryCard
-import com.dubproductions.bracket.viewmodel.UserViewModel
-
-@Composable
-fun HostingScreen(
-    userViewModel: UserViewModel,
-    hostingNavController: NavHostController
-) {
-
-    val hostingTournamentList by userViewModel.hostingTournamentList.collectAsStateWithLifecycle()
-
-    HostingScreenContent(
-        hostingTournamentList = hostingTournamentList,
-        floatingActionButtonClick = {
-            hostingNavController.navigate(Screen.TournamentCreation.route)
-        },
-        tournamentCardClick = {
-            userViewModel.updateViewingTournament(it)
-            userViewModel.viewingTournamentId = it.id.toString()
-            hostingNavController.navigate(Screen.EditTournament.route)
-        }
-    )
-
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HostingScreenContent(
+fun HostingScreen(
     hostingTournamentList: List<Tournament>,
     floatingActionButtonClick: () -> Unit,
     tournamentCardClick: (Tournament) -> Unit
@@ -86,4 +59,5 @@ fun HostingScreenContent(
             }
         }
     }
+
 }

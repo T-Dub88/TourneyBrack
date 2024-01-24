@@ -7,44 +7,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.ui.TournamentSummaryCard
-import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
-fun HomeScreen(userViewModel: UserViewModel) {
-
-    val userInfo by userViewModel.user.collectAsStateWithLifecycle()
-    val tournamentList by userViewModel.completedTournamentList.collectAsStateWithLifecycle()
-
-    HomeScreenContent(
-        userName = userInfo.username,
-        tournamentList = tournamentList,
-        cardPressed = {
-            // Todo: Navigate to tournament info screen
-        }
-    )
-
-}
-
-@Composable
-fun HomeScreenContent(
-    userName: String,
+fun HomeScreen(
+    username: String,
     tournamentList: List<Tournament>,
-    cardPressed: () -> Unit
+    cardPressed: (String) -> Unit
 ) {
     Column {
-        Text(text = stringResource(
-            id = R.string.greeting,
-            userName)
+        Text(
+            text = stringResource(
+                id = R.string.greeting,
+                username
+            )
         )
         Text(text = stringResource(id = R.string.tournament_history))
         LazyColumn(
@@ -56,7 +39,7 @@ fun HomeScreenContent(
             items(tournamentList) { tournament ->
                 TournamentSummaryCard(
                     tournament = tournament,
-                    onPress = cardPressed,
+                    onPress = { tournament.id?.let { cardPressed(it) } },
                     tapCardInstruction = stringResource(id = R.string.more_info_card)
                 )
             }

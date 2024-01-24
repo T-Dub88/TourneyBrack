@@ -1,6 +1,7 @@
 package com.dubproductions.bracket.ui.onboarding
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Email
@@ -14,32 +15,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
+import androidx.compose.ui.tooling.preview.Preview
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
-import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.viewmodel.OnboardingViewModel
-import kotlinx.coroutines.launch
+import com.dubproductions.bracket.ui_state.RegistrationScreenUIState
 
 @Composable
 fun RegistrationScreen(
-    onboardingViewModel: OnboardingViewModel,
-    mainNavController: NavHostController
+    uiState: RegistrationScreenUIState,
+    dismissDialog: () -> Unit,
+    registrationClicked: (
+        email: String,
+        password: String,
+        firstName: String,
+        lastName: String,
+        username: String
+    ) -> Unit
 ) {
-
-    val coroutineScope = rememberCoroutineScope()
-
     // Field texts
     var emailText by rememberSaveable { mutableStateOf("") }
     var usernameText by rememberSaveable { mutableStateOf("") }
@@ -58,13 +60,9 @@ fun RegistrationScreen(
     var lastNameError by rememberSaveable { mutableStateOf(false) }
     var passwordError by rememberSaveable { mutableStateOf(false) }
 
-    // Fields enable or disable state
-    var enabled by rememberSaveable { mutableStateOf(true) }
-
-    // Dialog visibility
-    var showRegistrationFailureDialog by rememberSaveable { mutableStateOf(false) }
-
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
 
         Text(text = stringResource(id = R.string.registration))
 
@@ -84,7 +82,7 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = emailError,
             errorText = stringResource(id = R.string.email_not_valid),
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Text field for username
@@ -103,7 +101,7 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = usernameError,
             errorText = stringResource(id = R.string.username_not_valid),
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Text field for first name
@@ -122,7 +120,7 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = firstNameError,
             errorText = stringResource(id = R.string.cannot_be_blank),
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Text field for last name
@@ -141,7 +139,7 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = lastNameError,
             errorText = stringResource(id = R.string.cannot_be_blank),
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Text field for password
@@ -172,7 +170,7 @@ fun RegistrationScreen(
             } else {
                 stringResource(id = R.string.cannot_be_blank)
             },
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Text field for confirm password
@@ -203,13 +201,12 @@ fun RegistrationScreen(
             } else {
                 stringResource(id = R.string.cannot_be_blank)
             },
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Registration button
         OnboardingButton(
             whenClicked = {
-                enabled = false
                 emailError = verifyField(
                     text = emailText,
                     type = Type.EMAIL
@@ -232,42 +229,27 @@ fun RegistrationScreen(
                     extraText = passwordConfirmText
                 )
                 if (!emailError && !usernameError && !firstNameError && !lastNameError && !passwordError) {
-                    coroutineScope.launch {
-                        val result = onboardingViewModel.registerUser(
-                            email = emailText,
-                            password = passwordText,
-                            firstName = firstNameText,
-                            lastName = lastNameText,
-                            username = usernameText
-                        )
-                        enabled = true
-                        if (result) {
-                            mainNavController.navigate(Screen.Home.route) {
-                                popUpTo(mainNavController.graph.findStartDestination().id) {
-                                    inclusive = true
-                                }
-                            }
-                        } else {
-                            showRegistrationFailureDialog = true
-                        }
-                    }
-
-                } else {
-                    enabled = true
+                    registrationClicked(
+                        emailText,
+                        passwordText,
+                        firstNameText,
+                        lastNameText,
+                        usernameText
+                    )
                 }
             },
             buttonText = stringResource(id = R.string.register),
-            enabled = enabled
+            enabled = uiState.uiEnabled
         )
 
         // Dialog to tell user registration has failed.
         when {
-            showRegistrationFailureDialog -> {
+            uiState.displayRegistrationFailureDialog -> {
                 ReusableDialog(
                     titleText = stringResource(id = R.string.registration_not_successful),
                     contentText = stringResource(id = R.string.registration_failure_message),
                     icon = Icons.Outlined.Error,
-                    dismissDialog = { showRegistrationFailureDialog = false }
+                    dismissDialog = dismissDialog
                 )
             }
         }
@@ -299,4 +281,14 @@ private fun verifyField(
         }
         else -> true
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun RegistrationScreenPreview() {
+    RegistrationScreen(
+        uiState = RegistrationScreenUIState(),
+        dismissDialog = {  },
+        registrationClicked = { _, _, _, _, _ -> }
+    )
 }

@@ -88,21 +88,21 @@ class UserViewModel @Inject constructor(
     ) {
         for (id in tournamentIdList) {
             viewModelScope.launch {
+                if (!hosting) {
+                    val retrievedTournament = fetchTournament(id)
+                    retrievedTournament?.let { tournament ->
+                        if (tournament.status == TournamentStatus.COMPLETE.status) {
+                            updateCompletedTournamentList(tournament)
+                        } else {
+                            updateParticipatingTournamentList(tournament)
+                        }
+                    }
+                }
                 if (hosting && tournamentRepository.tournamentListenerMap[id] == null) {
                     tournamentRepository.listenToTournament(id) {
                         it?.let {
                             updateHostingTournamentList(it)
                         }
-                    }
-                }
-                val retrievedTournament = fetchTournament(id)
-                retrievedTournament?.let { tournament ->
-                    if (tournament.status == TournamentStatus.COMPLETE.status) {
-                        updateCompletedTournamentList(tournament)
-                    } else if (hosting) {
-                        updateHostingTournamentList(tournament)
-                    } else {
-                        updateParticipatingTournamentList(tournament)
                     }
                 }
             }
@@ -138,7 +138,7 @@ class UserViewModel @Inject constructor(
         }
     }
 
-    private fun removeDeletedTournamentFromFlow(id: String) {
+    fun removeDeletedTournamentFromFlow(id: String) {
         _hostingTournamentList.update { tourneyList ->
             val newList = tourneyList.toMutableList()
             newList.removeIf { it.id == id }
@@ -185,56 +185,6 @@ class UserViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun updateTournamentStatus(id: String, status: String) {
-        viewModelScope.launch {
-            tournamentRepository.updateTournamentStatus(id, status)
-        }
-    }
-
-    suspend fun generateBracket(tournament: Tournament) {
-
-        tournament.id?.let { tournamentId ->
-            viewModelScope.async {
-                tournament.createNextRound()
-            }.await()
-
-            tournament.rounds?.let { rounds ->
-                val roundsJob = viewModelScope.async {
-                    tournamentRepository.updateTournamentRounds(
-                        id = tournamentId,
-                        rounds = rounds
-                    )
-                }
-
-                val participantsJob = viewModelScope.async {
-                    tournamentRepository.updateParticipantList(
-                        id = tournamentId,
-                        participants = tournament.participants
-                    )
-                }
-
-                awaitAll(roundsJob, participantsJob)
-
-            }
-        }
-    }
-
-    suspend fun deleteTournament(tournamentId: String) {
-        tournamentRepository.removeTournamentListener(tournamentId)
-        tournamentRepository.removeTournamentFromDatabase(
-            tournamentId = tournamentId,
-            userId = _user.value.userId
-        )
-        removeDeletedTournamentFromFlow(tournamentId)
-    }
-
-    fun formatDateTime(timestamp: Long?): String {
-        return timestamp?.let {
-            val sdf = SimpleDateFormat("MM-dd-yy HH:mm", Locale.getDefault())
-            sdf.format(it)
-        } ?: "Not Started"
     }
 
 }

@@ -27,27 +27,19 @@ sealed class Screen(
     )
     data object Home: Screen(
         route = "home",
-        label = "Home",
-        selectedIcon = Icons.Filled.Home,
-        unselectedIcon = Icons.Outlined.Home
+        label = "Home"
     )
     data object Hosting: Screen(
         route = "hosting",
-        label = "Hosting",
-        selectedIcon = Icons.Filled.EventNote,
-        unselectedIcon = Icons.Outlined.EventNote
+        label = "Hosting"
     )
     data object Participating: Screen(
         route = "participating",
-        label = "Participating",
-        selectedIcon = Icons.Filled.Event,
-        unselectedIcon = Icons.Outlined.Event
+        label = "Participating"
     )
     data object Settings: Screen(
         route = "settings",
-        label = "Settings",
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
+        label = "Settings"
     )
 
     data object TournamentCreation: Screen(

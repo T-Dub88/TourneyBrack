@@ -16,11 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,133 +23,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import com.dubproductions.bracket.data.TournamentStatus
-import com.dubproductions.bracket.navigation.Screen
+import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.viewmodel.UserViewModel
-import kotlinx.coroutines.launch
+import com.dubproductions.bracket.ui_state.EditTournamentScreenUIState
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun EditTournamentScreen(
-    userViewModel: UserViewModel,
-    hostingNavController: NavHostController
-) {
-    val coroutineScope = rememberCoroutineScope()
-
-    val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
-
-    var displayOpenDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var displayClosedDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var displayBracketGenerationDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var displayDeleteTournamentDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    EditTournamentScreenContent(
-        tournamentName = tournament.name,
-        registrationCode = tournament.id?.takeLast(4),
-        numParticipants = tournament.participants.size,
-        rounds = tournament.setNumberOfRounds(),
-        format = tournament.type,
-        start = userViewModel.formatDateTime(tournament.timeStarted),
-        status = tournament.status,
-        openDialog = displayOpenDialog,
-        closedDialog = displayClosedDialog,
-        bracketDialog = displayBracketGenerationDialog,
-        deleteDialog = displayDeleteTournamentDialog,
-        lockOnClick = {
-            when (tournament.status) {
-                TournamentStatus.REGISTERING.status -> {
-                    displayClosedDialog = true
-                    userViewModel.updateTournamentStatus(
-                        id = tournament.id!!,
-                        status = TournamentStatus.CLOSED.status
-                    )
-                }
-                TournamentStatus.CLOSED.status -> {
-                    displayOpenDialog = true
-                    userViewModel.updateTournamentStatus(
-                        id = tournament.id!!,
-                        status = TournamentStatus.REGISTERING.status
-                    )
-                }
-            }
-        },
-        participantsOnClick = {
-            hostingNavController.navigate(Screen.Participants.route)
-        },
-        bracketOnClick = {
-            if (tournament.rounds.isNullOrEmpty()) {
-                displayBracketGenerationDialog = true
-            } else {
-                hostingNavController.navigate(Screen.Bracket.route)
-            }
-        },
-        startOnClick = {
-            // TODO: if bracket empty, ask for generation
-            // TODO: make end tournament if started
-        },
-        onCloseDialogChange = {
-            displayClosedDialog = it
-        },
-        onOpenDialogChange = {
-            displayOpenDialog = it
-        },
-        closeBracketDialog = {
-            if (it) {
-                coroutineScope.launch {
-                    userViewModel.generateBracket(tournament)
-                }
-            }
-            displayBracketGenerationDialog = false
-        },
-        deleteOnClick = {
-            displayDeleteTournamentDialog = true
-        },
-        onDeleteDialogClose = {
-            if (it) {
-                coroutineScope.launch {
-                    userViewModel.deleteTournament(tournament.id!!)
-                    hostingNavController.popBackStack()
-                }
-            } else {
-                displayDeleteTournamentDialog = false
-            }
-        }
-    )
-
-}
-
-@Composable
-fun EditTournamentScreenContent(
-    tournamentName: String?,
-    registrationCode: String?,
-    numParticipants: Int?,
-    rounds: Int?,
-    format: String?,
-    start: String?,
-    status: String?,
-    closedDialog: Boolean,
-    openDialog: Boolean,
-    bracketDialog: Boolean,
-    deleteDialog: Boolean,
+    tournament: Tournament,
+    uiState: EditTournamentScreenUIState,
     lockOnClick: () -> Unit,
     participantsOnClick: () -> Unit,
     bracketOnClick: () -> Unit,
     startOnClick: () -> Unit,
-    onCloseDialogChange: (Boolean) -> Unit,
-    onOpenDialogChange: (Boolean) -> Unit,
-    closeBracketDialog: (Boolean) -> Unit,
     deleteOnClick: () -> Unit,
-    onDeleteDialogClose: (Boolean) -> Unit
+    changeClosedDialogState: (Boolean) -> Unit,
+    changeOpenedDialogState: (Boolean) -> Unit,
+    changeBracketDialogState: (Boolean) -> Unit,
+    changeDeleteDialogState: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -167,19 +54,19 @@ fun EditTournamentScreenContent(
             fontSize = 25.sp
         )
 
-        EditTourneyText(text = "Tournament Name: $tournamentName")
+        EditTourneyText(text = "Tournament Name: ${tournament.name}")
 
-        EditTourneyText(text = "Registration Code: $registrationCode")
+        EditTourneyText(text = "Registration Code: ${tournament.id?.takeLast(4)}")
 
-        EditTourneyText(text = "Format: $format")
+        EditTourneyText(text = "Format: ${tournament.type}")
 
-        EditTourneyText(text = "Status: ${status?.replaceFirstChar { it.uppercase() }}")
+        EditTourneyText(text = "Status: ${tournament.status.replaceFirstChar { it.uppercase() }}")
 
-        EditTourneyText(text = "Number of Participants: $numParticipants")
+        EditTourneyText(text = "Number of Participants: ${tournament.participants.size}")
 
-        EditTourneyText(text = "Number of Rounds: $rounds")
+        EditTourneyText(text = "Number of Rounds: ${tournament.rounds?.size}")
 
-        EditTourneyText(text = "Start Date/Time: $start")
+        EditTourneyText(text = "Start Date/Time: ${formatDateTime(tournament.timeStarted)}")
 
         Button(
             onClick = lockOnClick,
@@ -187,13 +74,13 @@ fun EditTournamentScreenContent(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp),
-            enabled = when (status) {
+            enabled = when (tournament.status) {
                 "registering", "closed" -> true
                 else -> false
             }
         ) {
             EditTourneyText(
-                text = when (status) {
+                text = when (tournament.status) {
                     "registering" -> "Close Registration"
                     else -> "Open Registration"
                 }
@@ -245,43 +132,41 @@ fun EditTournamentScreenContent(
         }
 
         when {
-            closedDialog -> {
+            uiState.displayClosedDialog -> {
                 ReusableDialog(
                     titleText = "Registration Closed!",
                     contentText = "Players will no longer be able to sign up for your tournament.",
-                    icon = Icons.Filled.Close
-                ) {
-                   onCloseDialogChange(false)
-                }
+                    icon = Icons.Filled.Close,
+                    dismissDialog = { changeClosedDialogState(false) }
+                )
             }
-            openDialog -> {
+            uiState.displayOpenedDialog -> {
                 ReusableDialog(
                     titleText = "Registration Opened!",
                     contentText = "Players are now able to register for your tournament using the registration code.",
-                    icon = Icons.Filled.Check
-                ) {
-                    onOpenDialogChange(false)
-                }
+                    icon = Icons.Filled.Check,
+                    dismissDialog = { changeOpenedDialogState(false) }
+                )
             }
         }
         when {
-            bracketDialog -> {
+            uiState.displayBracketGenerationDialog -> {
                 BracketGenerationDialog(
                     title = "Bracket Not Generated",
                     body = "Would you like to generate a bracket?",
                     positiveButton = "Generate",
                     dismissButton = "Cancel",
-                    onConfirmClick = { closeBracketDialog(true) },
-                    onCancelClick = { closeBracketDialog(false) },
+                    onConfirmClick = { changeBracketDialogState(true) },
+                    onCancelClick = { changeBracketDialogState(false) },
                     icon = Icons.Filled.Create
                 )
             }
         }
         when {
-            deleteDialog -> {
+            uiState.displayDeleteTournamentDialog -> {
                 BracketGenerationDialog(
-                    onConfirmClick = { onDeleteDialogClose(true) },
-                    onCancelClick = { onDeleteDialogClose(false) },
+                    onConfirmClick = { changeDeleteDialogState(true) },
+                    onCancelClick = { changeDeleteDialogState(false) },
                     title = "Delete Tournament",
                     body = "Are you sure? This action cannot be undone",
                     positiveButton = "Delete",
@@ -341,26 +226,24 @@ fun BracketGenerationDialog(
 )
 @Composable
 fun EditTournamentScreenPreview() {
-    EditTournamentScreenContent(
-        tournamentName = "Classic",
-        registrationCode = "123ab",
-        numParticipants = 8,
-        rounds = 3,
-        format = "Swiss",
-        start = "January 4th 8:46 PM",
-        status = "registering",
-        openDialog = false,
-        closedDialog = false,
-        bracketDialog = false,
-        deleteDialog = false,
-        participantsOnClick = {},
-        bracketOnClick = {},
-        lockOnClick = {},
-        startOnClick = {},
-        onOpenDialogChange = {},
-        onCloseDialogChange = {},
-        closeBracketDialog = {},
-        deleteOnClick = {},
-        onDeleteDialogClose = {}
+    EditTournamentScreen(
+        tournament = Tournament(),
+        uiState = EditTournamentScreenUIState(),
+        lockOnClick = {  },
+        participantsOnClick = {  },
+        bracketOnClick = {  },
+        startOnClick = {  },
+        deleteOnClick = {  },
+        changeClosedDialogState = {},
+        changeOpenedDialogState = {},
+        changeBracketDialogState = {},
+        changeDeleteDialogState = {}
     )
+}
+
+fun formatDateTime(timestamp: Long?): String {
+    return timestamp?.let {
+        val sdf = SimpleDateFormat("MM-dd-yy HH:mm", Locale.getDefault())
+        sdf.format(it)
+    } ?: "Not Started"
 }
