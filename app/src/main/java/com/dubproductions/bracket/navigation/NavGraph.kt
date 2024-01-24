@@ -43,20 +43,35 @@ fun NavHost(
             Map.PreLogin.route
         }
     ) {
-        preLoginMap(navController)
+        preLoginMap(
+            navigateToHomeScreen = {
+                navController.navigate(Map.BottomBar.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        inclusive = true
+                    }
+                }
+            },
+            navigateToRegistrationScreen = {
+                navController.navigate(Screen.Registration.route)
+            }
+        )
         bottomBarNavMap()
     }
 }
 
 fun NavGraphBuilder.preLoginMap(
-    navController: NavHostController
+    navigateToHomeScreen: () -> Unit,
+    navigateToRegistrationScreen: () -> Unit
 ) {
     navigation(
         startDestination = Screen.Login.route,
         route = Map.PreLogin.route
     ) {
-        loginScreen(navController)
-        registrationScreen(navController)
+        loginScreen(
+            navigateToRegistrationScreen = navigateToRegistrationScreen,
+            navigateToHomeScreen = navigateToHomeScreen
+        )
+        registrationScreen(navigateToHomeScreen)
     }
 }
 
@@ -118,7 +133,8 @@ fun NavGraphBuilder.settingsNavMap() {
 }
 
 fun NavGraphBuilder.loginScreen(
-    navController: NavHostController
+    navigateToHomeScreen: () -> Unit,
+    navigateToRegistrationScreen: () -> Unit
 ) {
     composable(
         route = Screen.Login.route
@@ -134,17 +150,13 @@ fun NavGraphBuilder.loginScreen(
                     val result = loginViewModel.loginUser(email, password)
                     loginViewModel.enableLoginScreenUI()
                     if (result) {
-                        navController.navigate(Map.BottomBar.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
+                        navigateToHomeScreen()
                     } else {
                         loginViewModel.showLoginFailureDialog()
                     }
                 }
             },
-            registrationClick = { navController.navigate(Screen.Registration.route) },
+            registrationClick = { navigateToRegistrationScreen() },
             forgotPasswordClick = { email ->
                 loginViewModel.disableLoginScreenUI()
                 coroutineScope.launch {
@@ -164,7 +176,7 @@ fun NavGraphBuilder.loginScreen(
 }
 
 fun NavGraphBuilder.registrationScreen(
-    navController: NavHostController
+    navigateToHomeScreen: () -> Unit
 ) {
     composable(
         route = Screen.Registration.route
@@ -188,11 +200,7 @@ fun NavGraphBuilder.registrationScreen(
                     )
                     registrationViewModel.enableUI()
                     if (result) {
-                        navController.navigate(Map.BottomBar.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                inclusive = true
-                            }
-                        }
+                        navigateToHomeScreen()
                     } else {
                         registrationViewModel.showDialog()
                     }
