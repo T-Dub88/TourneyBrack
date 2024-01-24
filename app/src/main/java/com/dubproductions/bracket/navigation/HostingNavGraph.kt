@@ -1,107 +1,27 @@
 package com.dubproductions.bracket.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dubproductions.bracket.data.TournamentStatus
-import com.dubproductions.bracket.ui.main.HomeScreen
-import com.dubproductions.bracket.ui.main.ParticipatingScreen
-import com.dubproductions.bracket.ui.main.SettingsScreen
 import com.dubproductions.bracket.ui.main.hosting.BracketScreen
 import com.dubproductions.bracket.ui.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.ui.main.hosting.HostingScreen
 import com.dubproductions.bracket.ui.main.hosting.TournamentCreationScreen
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatchesScreen
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
-import com.dubproductions.bracket.ui.onboarding.LoginScreen
-import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
 import com.dubproductions.bracket.viewmodel.CreationScreenViewModel
 import com.dubproductions.bracket.viewmodel.EditTournamentScreenViewModel
-import com.dubproductions.bracket.viewmodel.LoginViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsScreenViewModel
-import com.dubproductions.bracket.viewmodel.RegistrationViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
-
-@Composable
-fun NavHost(
-    navController: NavHostController,
-    loggedIn: Boolean
-) {
-    NavHost(
-        navController = navController,
-        startDestination = if (loggedIn) {
-            Map.BottomBar.route
-        } else {
-            Map.PreLogin.route
-        }
-    ) {
-        preLoginMap(
-            navigateToHomeScreen = {
-                navController.navigate(Map.BottomBar.route) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        inclusive = true
-                    }
-                }
-            },
-            navigateToRegistrationScreen = {
-                navController.navigate(Screen.Registration.route)
-            }
-        )
-        bottomBarNavMap(navController)
-    }
-}
-
-fun NavGraphBuilder.preLoginMap(
-    navigateToHomeScreen: () -> Unit,
-    navigateToRegistrationScreen: () -> Unit
-) {
-    navigation(
-        startDestination = Screen.Login.route,
-        route = Map.PreLogin.route
-    ) {
-        loginScreen(
-            navigateToRegistrationScreen = navigateToRegistrationScreen,
-            navigateToHomeScreen = navigateToHomeScreen
-        )
-        registrationScreen(navigateToHomeScreen)
-    }
-}
-
-fun NavGraphBuilder.bottomBarNavMap(navController: NavHostController) {
-    navigation(
-        startDestination = Map.Home.route,
-        route = Map.BottomBar.route
-    ) {
-        homeNavMap(navController)
-        hostingNavMap(navController)
-        participatingNavMap()
-        settingsNavMap()
-    }
-}
-
-fun NavGraphBuilder.homeNavMap(navController: NavHostController) {
-    navigation(
-        startDestination = Screen.Home.route,
-        route = Map.Home.route
-    ) {
-        homeScreen(navController)
-    }
-}
-
-fun NavGraphBuilder.hostingNavMap(navController: NavHostController) {
+fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
     navigation(
         startDestination = Screen.Hosting.route,
         route = Map.Hosting.route
@@ -112,122 +32,6 @@ fun NavGraphBuilder.hostingNavMap(navController: NavHostController) {
         bracketScreen()
         participantsScreen(navController)
         participantMatchesScreen()
-    }
-}
-
-fun NavGraphBuilder.participatingNavMap() {
-    navigation(
-        startDestination = Screen.Participating.route,
-        route = Map.Participating.route
-    ) {
-        participatingScreen()
-    }
-}
-
-fun NavGraphBuilder.settingsNavMap() {
-    navigation(
-        startDestination = Screen.Settings.route,
-        route = Map.Settings.route
-    ) {
-        settingsScreen()
-    }
-}
-
-fun NavGraphBuilder.loginScreen(
-    navigateToHomeScreen: () -> Unit,
-    navigateToRegistrationScreen: () -> Unit
-) {
-    composable(
-        route = Screen.Login.route
-    ) {
-        val loginViewModel: LoginViewModel = hiltViewModel()
-        val uiState by loginViewModel.loginUIState.collectAsStateWithLifecycle()
-        val coroutineScope = rememberCoroutineScope()
-
-        LoginScreen(
-            loginClick = { email, password ->
-                loginViewModel.disableLoginScreenUI()
-                coroutineScope.launch {
-                    val result = loginViewModel.loginUser(email, password)
-                    loginViewModel.enableLoginScreenUI()
-                    if (result) {
-                        navigateToHomeScreen()
-                    } else {
-                        loginViewModel.showLoginFailureDialog()
-                    }
-                }
-            },
-            registrationClick = { navigateToRegistrationScreen() },
-            forgotPasswordClick = { email ->
-                loginViewModel.disableLoginScreenUI()
-                coroutineScope.launch {
-                    val result = loginViewModel.resetPassword(email)
-                    loginViewModel.enableLoginScreenUI()
-                    if (result) {
-                        loginViewModel.showPasswordResetSuccessDialog()
-                    } else {
-                        loginViewModel.showPasswordResetFailureDialog()
-                    }
-                }
-            },
-            dismissDialog = { loginViewModel.dismissLoginDialogs() },
-            uiState = uiState
-        )
-    }
-}
-
-fun NavGraphBuilder.registrationScreen(
-    navigateToHomeScreen: () -> Unit
-) {
-    composable(
-        route = Screen.Registration.route
-    ) {
-        val registrationViewModel: RegistrationViewModel = hiltViewModel()
-        val uiState by registrationViewModel.uiState.collectAsStateWithLifecycle()
-        val coroutineScope = rememberCoroutineScope()
-
-        RegistrationScreen(
-            uiState = uiState,
-            dismissDialog = { registrationViewModel.hideDialog() },
-            registrationClicked = { email, password, firstName, lastName, username ->
-                coroutineScope.launch {
-                    registrationViewModel.disableUI()
-                    val result = registrationViewModel.registerUser(
-                        email = email,
-                        password = password,
-                        firstName = firstName,
-                        lastName = lastName,
-                        username = username
-                    )
-                    registrationViewModel.enableUI()
-                    if (result) {
-                        navigateToHomeScreen()
-                    } else {
-                        registrationViewModel.showDialog()
-                    }
-                }
-            }
-        )
-    }
-}
-
-fun NavGraphBuilder.homeScreen(
-    navController: NavHostController
-) {
-    composable(
-        route = Screen.Home.route
-    ) {
-        val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
-        val user by userViewModel.user.collectAsStateWithLifecycle()
-        val tournamentList by userViewModel.completedTournamentList.collectAsStateWithLifecycle()
-
-        HomeScreen(
-            username = user.username,
-            tournamentList = tournamentList,
-            cardPressed = { tournamentId ->
-                // TODO: Navigate to info screen
-            }
-        )
     }
 }
 
@@ -450,29 +254,4 @@ fun NavGraphBuilder.participantMatchesScreen() {
     ) {
         ParticipantMatchesScreen()
     }
-}
-
-fun NavGraphBuilder.participatingScreen() {
-    composable(
-        route = Screen.Participating.route
-    ) {
-        ParticipatingScreen()
-    }
-}
-
-fun NavGraphBuilder.settingsScreen() {
-    composable(
-        route = Screen.Settings.route
-    ) {
-        SettingsScreen()
-    }
-}
-
-@Composable
-inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
-    val navGraphRoute = destination.parent?.parent?.route ?: return hiltViewModel()
-    val parentEntry = remember(this) {
-        navController.getBackStackEntry(navGraphRoute)
-    }
-    return hiltViewModel(parentEntry)
 }
