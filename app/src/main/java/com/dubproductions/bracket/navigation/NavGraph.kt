@@ -26,6 +26,7 @@ import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatches
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
+import com.dubproductions.bracket.viewmodel.CreationScreenViewModel
 import com.dubproductions.bracket.viewmodel.EditTournamentScreenViewModel
 import com.dubproductions.bracket.viewmodel.LoginViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsScreenViewModel
@@ -86,7 +87,7 @@ fun NavGraphBuilder.bottomBarNavMap(navController: NavHostController) {
     ) {
         homeNavMap(navController)
         hostingNavMap(navController)
-        participatingNavMap(navController)
+        participatingNavMap()
         settingsNavMap()
     }
 }
@@ -106,7 +107,7 @@ fun NavGraphBuilder.hostingNavMap(navController: NavHostController) {
         route = Map.Hosting.route
     ) {
         hostingScreen(navController)
-        tournamentCreationScreen()
+        tournamentCreationScreen(navController)
         editTournamentScreen(navController)
         bracketScreen()
         participantsScreen(navController)
@@ -114,12 +115,12 @@ fun NavGraphBuilder.hostingNavMap(navController: NavHostController) {
     }
 }
 
-fun NavGraphBuilder.participatingNavMap(navController: NavHostController) {
+fun NavGraphBuilder.participatingNavMap() {
     navigation(
         startDestination = Screen.Participating.route,
         route = Map.Participating.route
     ) {
-        participantsScreen(navController)
+        participatingScreen()
     }
 }
 
@@ -253,11 +254,35 @@ fun NavGraphBuilder.hostingScreen(
     }
 }
 
-fun NavGraphBuilder.tournamentCreationScreen() {
+fun NavGraphBuilder.tournamentCreationScreen(navController: NavHostController) {
     composable(
         route = Screen.TournamentCreation.route
     ) {
-        TournamentCreationScreen()
+        val creationViewModel: CreationScreenViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+        val uiState by creationViewModel.uiState.collectAsStateWithLifecycle()
+
+        TournamentCreationScreen(
+            uiState = uiState,
+            createTournament = { name, participants, type ->
+                creationViewModel.changeUIEnabled(false)
+                coroutineScope.launch {
+                    creationViewModel.createTournament(
+                        name = name,
+                        participants = participants,
+                        type = type
+                    )
+                }
+            },
+            dismissDialog = { success ->
+                creationViewModel.updateCreationState(null)
+                if (success) {
+                    navController.popBackStack()
+                } else {
+                    creationViewModel.changeUIEnabled(true)
+                }
+            }
+        )
     }
 }
 
@@ -451,204 +476,3 @@ inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navControll
     }
     return hiltViewModel(parentEntry)
 }
-
-//@Composable
-//fun MainNavHost(
-//    mainNavController: NavHostController,
-//    bottomBarNavController: NavHostController,
-//    loggedIn: Boolean
-//) {
-//    NavHost(
-//        navController = mainNavController,
-//        startDestination = if (loggedIn) {
-//            Screen.Home.route
-//        } else {
-//            Screen.Login.route
-//        }
-//    ) {
-//        composable(
-//            route = Screen.Login.route
-//        ) {
-//            PreLoginNavHost(
-//                mainNavController = mainNavController
-//            )
-//        }
-//
-//        composable(
-//            route = Screen.Home.route
-//        ) {
-//            BottomBarNavHost(
-//                bottomBarNavController = bottomBarNavController
-//            )
-//        }
-//    }
-//}
-//
-//@Composable
-//fun BottomBarNavHost(
-//    bottomBarNavController: NavHostController,
-//    userViewModel: UserViewModel = hiltViewModel()
-//) {
-//    NavHost(
-//        navController = bottomBarNavController,
-//        startDestination = Screen.Home.route,
-//    ) {
-//        composable(route = Screen.Home.route) {
-//            HomeNavHost(userViewModel = userViewModel)
-//        }
-//        composable(route = Screen.Hosting.route) {
-//            HostingNavHost(userViewModel = userViewModel)
-//        }
-//        composable(route = Screen.Participating.route) {
-//            ParticipatingNavHost()
-//        }
-//        composable(route = Screen.Settings.route) {
-//            SettingsNavHost()
-//        }
-//    }
-//}
-//
-//@Composable
-//fun PreLoginNavHost(
-//    mainNavController: NavHostController,
-//    onboardingViewModel: OnboardingViewModel = hiltViewModel()
-//) {
-//    val preLoginNavController = rememberNavController()
-//    NavHost(
-//        navController = preLoginNavController,
-//        startDestination = Screen.Login.route
-//    ) {
-//        composable(
-//            route = Screen.Login.route
-//        ) {
-//            LoginScreen(
-//                onboardingViewModel = onboardingViewModel,
-//                preLoginNavController = preLoginNavController,
-//                mainNavHostController = mainNavController
-//            )
-//        }
-//
-//        composable(
-//            route = Screen.Registration.route
-//        ) {
-//            RegistrationScreen(
-//                onboardingViewModel = onboardingViewModel,
-//                mainNavController = mainNavController
-//            )
-//        }
-//    }
-//}
-//
-//// Home tab NavGraph
-//@Composable
-//fun HomeNavHost(
-//    userViewModel: UserViewModel
-//) {
-//    val homeNavController = rememberNavController()
-//    NavHost(
-//        navController = homeNavController,
-//        startDestination = Screen.Home.route
-//    ) {
-//        composable(
-//            route = Screen.Home.route
-//        ) {
-//            HomeScreen(
-//                userViewModel = userViewModel
-//            )
-//        }
-//    }
-//}
-//
-//// Hosting tab NavGraph
-//@Composable
-//fun HostingNavHost(
-//    userViewModel: UserViewModel,
-//    participantViewModel: ParticipantViewModel = hiltViewModel()
-//) {
-//    val hostingNavController = rememberNavController()
-//
-//    NavHost(
-//        navController = hostingNavController,
-//        startDestination = Screen.Hosting.route
-//    ) {
-//        composable(
-//            route = Screen.Hosting.route
-//        ) {
-//            HostingScreen(
-//                userViewModel = userViewModel,
-//                hostingNavController = hostingNavController
-//            )
-//        }
-//
-//        composable(
-//            route = Screen.TournamentCreation.route
-//        ) {
-//            TournamentCreationScreen(
-//                navController = hostingNavController
-//            )
-//        }
-//
-//        composable(
-//            route = Screen.EditTournament.route
-//        ) {
-//            EditTournamentScreen(
-//                userViewModel = userViewModel,
-//                hostingNavController = hostingNavController
-//            )
-//        }
-//
-//        composable(
-//            route = Screen.Participants.route
-//        ) {
-//            ParticipantsScreen(
-//                userViewModel = userViewModel,
-//                hostingNavController = hostingNavController,
-//                participantViewModel = participantViewModel
-//            )
-//        }
-//
-//        composable(
-//            route = Screen.Bracket.route
-//        ) {
-//            BracketScreen(userViewModel = userViewModel)
-//        }
-//
-//        composable(
-//            route = Screen.ParticipantMatches.route
-//        ) {
-//            ParticipantMatchesScreen(
-//                participantViewModel = participantViewModel
-//            )
-//        }
-//    }
-//}
-//
-//@Composable
-//fun ParticipatingNavHost() {
-//    val participatingNavController = rememberNavController()
-//    NavHost(
-//        navController = participatingNavController,
-//        startDestination = Screen.Participating.route
-//    ) {
-//        composable(
-//            route = Screen.Participating.route
-//        ) {
-//            ParticipatingScreen()
-//        }
-//    }
-//}
-//
-//@Composable
-//fun SettingsNavHost() {
-//    val settingsNavController = rememberNavController()
-//    NavHost(
-//        navController = settingsNavController,
-//        startDestination = Screen.Settings.route
-//    ) {
-//        composable(
-//            route = Screen.Settings.route
-//        ) {
-//            SettingsScreen()
-//        }
-//    }
-//}

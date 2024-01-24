@@ -4,6 +4,6 @@ import androidx.compose.runtime.Composable
 import com.dubproductions.bracket.viewmodel.UserViewModel
 
 @Composable
-fun BracketScreen(userViewModel: UserViewModel) {
+fun BracketScreen() {
 
 }

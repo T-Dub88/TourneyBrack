@@ -27,25 +27,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.viewmodel.CreationViewModel
+import com.dubproductions.bracket.ui_state.TournamentCreationScreenUIState
 
 @Composable
-fun TournamentCreationScreen() {
+fun TournamentCreationScreen(
+    uiState: TournamentCreationScreenUIState,
+    createTournament: (name: String, participants: String, type: String) -> Unit,
+    dismissDialog: (Boolean) -> Unit
+) {
+
     val dropDownItems = listOf(
         stringResource(id = R.string.selected_tournament_type),
         stringResource(id = R.string.swiss)
     )
 
-//    val creationStatus by tournamentCreationViewModel.successfulCreation.collectAsStateWithLifecycle()
-
-    var screenEnabled by rememberSaveable { mutableStateOf(true) }
     var tournamentName by rememberSaveable { mutableStateOf("") }
     var tournamentParticipants by rememberSaveable { mutableStateOf("") }
     var dropDownExpanded by rememberSaveable { mutableStateOf(false) }
@@ -82,7 +81,7 @@ fun TournamentCreationScreen() {
             },
             hint = stringResource(id = R.string.tournament_name_hint),
             trailingIconOnClick = { tournamentName = "" },
-            enabled = screenEnabled,
+            enabled = uiState.screenEnabled,
             error = nameError
         )
 
@@ -98,7 +97,7 @@ fun TournamentCreationScreen() {
             },
             expandOnClick = { dropDownExpanded = it },
             expanded = dropDownExpanded,
-            enabled = screenEnabled,
+            enabled = uiState.screenEnabled,
             error = typeError
         )
 
@@ -108,7 +107,7 @@ fun TournamentCreationScreen() {
             onValueChanged = { tournamentParticipants = it },
             hint = stringResource(id = R.string.participants_hint),
             trailingIconOnClick = { tournamentParticipants = "" },
-            enabled = screenEnabled,
+            enabled = uiState.screenEnabled,
             error = false
         )
 
@@ -119,10 +118,8 @@ fun TournamentCreationScreen() {
         )
 
         CreateTournamentButton(
-            enabled = screenEnabled,
+            enabled = uiState.screenEnabled,
             onButtonClick = {
-                screenEnabled = false
-
                 nameError = validateFields(
                     text = tournamentName,
                     type = Type.EMPTY
@@ -133,41 +130,39 @@ fun TournamentCreationScreen() {
                     type = Type.TOURNEY_TYPE
                 )
 
-//                if (!nameError && !typeError) {
-//                    tournamentCreationViewModel.createTournament(
-//                        name = tournamentName,
-//                        type = dropDownSelectedItem,
-//                        participants = tournamentParticipants
-//                    )
-//                } else {
-//                    screenEnabled = true
-//                }
+                if (!nameError && !typeError) {
+                    createTournament(
+                        tournamentName,
+                        tournamentParticipants,
+                        dropDownSelectedItem
+                    )
+                }
             }
         )
 
-//        when(creationStatus) {
-//            true -> {
-//                ReusableDialog(
-//                    titleText = stringResource(id = R.string.creation_success_header),
-//                    contentText = stringResource(id = R.string.creation_success_text),
-//                    icon = Icons.Outlined.CheckCircle
-//                ) {
-//                    tournamentCreationViewModel.updateCreationState(null)
-//                    navController.popBackStack()
-//                }
-//            }
-//            false -> {
-//                ReusableDialog(
-//                    titleText = stringResource(id = R.string.creation_failure_header),
-//                    contentText = stringResource(id = R.string.creation_failure_text),
-//                    icon = Icons.Outlined.Error
-//                ) {
-//                    tournamentCreationViewModel.updateCreationState(null)
-//                    screenEnabled = true
-//                }
-//            }
-//            null -> {}
-//        }
+        when(uiState.successfulCreation) {
+            true -> {
+                ReusableDialog(
+                    titleText = stringResource(id = R.string.creation_success_header),
+                    contentText = stringResource(id = R.string.creation_success_text),
+                    icon = Icons.Outlined.CheckCircle,
+                    dismissDialog = {
+                        dismissDialog(true)
+                    }
+                )
+            }
+            false -> {
+                ReusableDialog(
+                    titleText = stringResource(id = R.string.creation_failure_header),
+                    contentText = stringResource(id = R.string.creation_failure_text),
+                    icon = Icons.Outlined.Error,
+                    dismissDialog = {
+                        dismissDialog(false)
+                    }
+                )
+            }
+            null -> {}
+        }
     }
 
 }
