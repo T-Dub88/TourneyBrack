@@ -1,9 +1,9 @@
 package com.dubproductions.bracket.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
+import com.dubproductions.bracket.ui_state.ParticipantsScreenUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,36 +12,61 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class ParticipantViewModel @Inject constructor(
+class ParticipantsScreenViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    init {
-        Log.i("ParticipantsViewmodel", "Created")
-    }
+    private val _uiState: MutableStateFlow<ParticipantsScreenUIState> = MutableStateFlow(
+        ParticipantsScreenUIState()
+    )
+    val uiState: StateFlow<ParticipantsScreenUIState> = _uiState.asStateFlow()
 
-    override fun onCleared() {
-        super.onCleared()
-        Log.i("ParticipantsViewmodel", "Destroyed")
-    }
-
-    private val _selectedParticipant: MutableStateFlow<Participant> = MutableStateFlow(Participant())
-    val selectedParticipant: StateFlow<Participant> = _selectedParticipant.asStateFlow()
-
-    fun updateSelectedParticipant(participant: Participant) {
-        _selectedParticipant.update {
-            participant
+    private fun updateUIState(newUIState: ParticipantsScreenUIState) {
+        _uiState.update {
+            newUIState
         }
     }
 
-    suspend fun removePlayerFromTournament(
-        tournamentId: String,
-        participant: Participant
-    ) {
-        tournamentRepository.removeParticipant(
-            tournamentId = tournamentId,
-            participant = participant
+    fun changeSelectedParticipant(participant: Participant) {
+        val newUIState = uiState.value.copy(
+            selectedParticipant = participant
         )
+        updateUIState(newUIState)
+    }
+
+    fun changeAddPlayerDialogVisibility(visible: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayAddPlayerDialog = visible
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeDropPlayerDialogVisibility(visible: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayDropPlayerDialog = visible
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeCannotAddPlayerDialogVisibility(visible: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayCannotAddDialog = visible
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeUIEnabled(enabled: Boolean) {
+        val newUIState = uiState.value.copy(
+            enabled = enabled
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeAddParticipantText(username: String) {
+        val newUIState = uiState.value.copy(
+            addPlayerTextFieldValue = username
+        )
+        updateUIState(newUIState)
     }
 
     suspend fun addNewPlayerToTournament(
@@ -72,9 +97,9 @@ class ParticipantViewModel @Inject constructor(
 
     suspend fun dropExistingPlayer(
         tournamentId: String,
-        participant: Participant,
         tournamentStatus: String
     ) {
+        val participant = uiState.value.selectedParticipant
 
         tournamentRepository.removeParticipant(
             tournamentId = tournamentId,

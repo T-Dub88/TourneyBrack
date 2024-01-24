@@ -18,6 +18,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.dubproductions.bracket.navigation.Map
 import com.dubproductions.bracket.navigation.NavHost
+import com.dubproductions.bracket.navigation.Screen
 import com.dubproductions.bracket.ui.theme.BracketTheme
 
 
@@ -31,6 +32,13 @@ fun MainAppContent(loggedIn: Boolean) {
         Map.Settings
     )
 
+    val navBarVisible: List<Screen> = listOf(
+        Screen.Home,
+        Screen.Hosting,
+        Screen.Participating,
+        Screen.Settings
+    )
+
     BracketTheme {
 
         val navController = rememberNavController()
@@ -38,7 +46,7 @@ fun MainAppContent(loggedIn: Boolean) {
 
         Scaffold(
             bottomBar = {
-                val selectedIndex: Int = navBarItems.indexOfFirst {
+                val selectedIndex: Int = navBarVisible.indexOfFirst {
                     currentDestination?.destination?.route == it.route
                 }
                 if (selectedIndex != -1) {

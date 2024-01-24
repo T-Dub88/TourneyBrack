@@ -27,131 +27,33 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
+import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.data.TournamentStatus
-import com.dubproductions.bracket.navigation.Screen
-import com.dubproductions.bracket.viewmodel.ParticipantViewModel
-import com.dubproductions.bracket.viewmodel.UserViewModel
-import kotlinx.coroutines.launch
-
-@Composable
-fun ParticipantsScreen(
-    userViewModel: UserViewModel,
-    participantViewModel: ParticipantViewModel,
-    hostingNavController: NavHostController
-) {
-    val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
-    val selectedParticipant by participantViewModel.selectedParticipant.collectAsStateWithLifecycle()
-
-    val coroutineScope = rememberCoroutineScope()
-
-    var displayCannotAddDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var displayAddPlayerDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var displayDropPlayerDialog by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var addPlayerTextFieldValue by rememberSaveable {
-        mutableStateOf("")
-    }
-    var fieldsEnabled by rememberSaveable {
-        mutableStateOf(true)
-    }
-
-    ParticipantsScreenContent(
-        floatingActionButtonClick = {
-            when(tournament.status) {
-                TournamentStatus.REGISTERING.status,
-                TournamentStatus.CLOSED.status -> {
-                    displayAddPlayerDialog = true
-                }
-                else -> {
-                    displayCannotAddDialog = true
-                }
-            }
-        },
-        dropPlayerOnClick = { participant ->
-            participantViewModel.updateSelectedParticipant(participant)
-            displayDropPlayerDialog = true
-        },
-        viewMatchesOnClick = { participant ->
-            participantViewModel.updateSelectedParticipant(participant)
-            hostingNavController.navigate(Screen.ParticipantMatches.route)
-        },
-        participantList = tournament.sortPlayerStandings(),
-        displayAddPlayerDialog = displayAddPlayerDialog,
-        displayCannotAddDialog = displayCannotAddDialog,
-        displayDropPlayerDialog = displayDropPlayerDialog,
-        addPlayerTextFieldString = addPlayerTextFieldValue,
-        fieldsEnabled = fieldsEnabled,
-        cannotAddPlayerCloseDialog = { displayCannotAddDialog = false },
-        addPlayerTextFieldEdit = { addPlayerTextFieldValue = it },
-        addPlayerCloseDialog = {
-            if (it) {
-                fieldsEnabled = false
-                coroutineScope.launch {
-                    participantViewModel.addNewPlayerToTournament(
-                        participantUserName = addPlayerTextFieldValue,
-                        tournamentId = tournament.id!!
-                    )
-                    displayAddPlayerDialog = false
-                    addPlayerTextFieldValue = ""
-                    fieldsEnabled = true
-                }
-            } else {
-                displayAddPlayerDialog = false
-                addPlayerTextFieldValue = ""
-            }
-        },
-        dropPlayerCloseDialog = {
-            if (it) {
-                fieldsEnabled = false
-                coroutineScope.launch {
-                    participantViewModel.dropExistingPlayer(
-                        tournamentId = tournament.id!!,
-                        participant = selectedParticipant,
-                        tournamentStatus = tournament.status
-                    )
-                    displayDropPlayerDialog = false
-                    fieldsEnabled = true
-                }
-            } else {
-                displayDropPlayerDialog = false
-            }
-        }
-    )
-}
+import com.dubproductions.bracket.ui_state.ParticipantsScreenUIState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ParticipantsScreenContent(
-    participantList: List<Participant>?,
-    displayCannotAddDialog: Boolean,
-    displayAddPlayerDialog: Boolean,
-    displayDropPlayerDialog: Boolean,
-    addPlayerTextFieldString: String,
-    fieldsEnabled: Boolean,
+fun ParticipantsScreen(
+    uiState: ParticipantsScreenUIState,
+    participantList: List<Participant>,
     floatingActionButtonClick: () -> Unit,
     dropPlayerOnClick: (Participant) -> Unit,
     viewMatchesOnClick: (Participant) -> Unit,
-    addPlayerCloseDialog: (Boolean) -> Unit,
-    cannotAddPlayerCloseDialog: () -> Unit,
-    addPlayerTextFieldEdit: (String) -> Unit,
-    dropPlayerCloseDialog: (Boolean) -> Unit
+    closeCannotAddDialog: () -> Unit,
+    closeAddPlayerDialog: (Boolean, String?) -> Unit,
+    closeDropPlayerDialog: (Boolean) -> Unit,
+    changeAddPlayerTextFieldValue: (String) -> Unit
 ) {
+    var addPlayerTextError by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -170,21 +72,19 @@ fun ParticipantsScreenContent(
             LazyColumn(
                 contentPadding = PaddingValues(8.dp)
             ) {
-                participantList?.let {
-                    itemsIndexed(it) {index, participant ->
-                        ParticipantCard(
-                            standing = index + 1,
-                            participant = participant,
-                            dropPlayerOnClick = { dropPlayerOnClick(participant) },
-                            viewMatchesOnClick = { viewMatchesOnClick(participant) }
-                        )
-                    }
+                itemsIndexed(participantList) {index, participant ->
+                    ParticipantCard(
+                        standing = index + 1,
+                        participant = participant,
+                        dropPlayerOnClick = { dropPlayerOnClick(participant) },
+                        viewMatchesOnClick = { viewMatchesOnClick(participant) }
+                    )
                 }
             }
         }
     }
 
-    if (displayCannotAddDialog) {
+    if (uiState.displayCannotAddDialog) {
         AlertDialog(
             icon = {
                 Icon(
@@ -194,16 +94,16 @@ fun ParticipantsScreenContent(
             },
             text = { Text(text = "New players cannot be added to a tournament after the start of the first round.") },
             title = { Text(text = "Cannot Add New Player") },
-            onDismissRequest = cannotAddPlayerCloseDialog,
+            onDismissRequest = closeCannotAddDialog,
             confirmButton = {
-                TextButton(onClick = cannotAddPlayerCloseDialog) {
+                TextButton(onClick = closeCannotAddDialog) {
                     Text(text = "Ok")
                 }
             }
         )
     }
 
-    if (displayAddPlayerDialog) {
+    if (uiState.displayAddPlayerDialog) {
         AlertDialog(
             icon = {
                 Icon(
@@ -214,27 +114,44 @@ fun ParticipantsScreenContent(
             title = { Text(text = "Add Player") },
             text = {
                 OutlinedTextField(
-                    value = addPlayerTextFieldString,
-                    onValueChange = { addPlayerTextFieldEdit(it) },
+                    value = uiState.addPlayerTextFieldValue,
+                    onValueChange = {
+                        changeAddPlayerTextFieldValue(it)
+                        if (addPlayerTextError) {
+                            addPlayerTextError = false
+                        }
+                    },
                     label = { Text(text = "Enter Player Name") },
-                    enabled = fieldsEnabled
+                    enabled = uiState.enabled,
+                    isError = addPlayerTextError,
+                    supportingText = {
+                        if (addPlayerTextError) {
+                            Text(text = "Must Enter Player Name")
+                        }
+                    }
                 )
             },
             onDismissRequest = {
-                if (fieldsEnabled) addPlayerCloseDialog(false)
+                if (uiState.enabled) closeAddPlayerDialog(false, null)
             },
             confirmButton = {
                 TextButton(
-                    onClick = { addPlayerCloseDialog(true) },
-                    enabled = fieldsEnabled
+                    onClick = {
+                        if (Validation.isFieldEmpty(uiState.addPlayerTextFieldValue)) {
+                            closeAddPlayerDialog(true, uiState.addPlayerTextFieldValue)
+                        } else {
+                            addPlayerTextError = true
+                        }
+                    },
+                    enabled = uiState.enabled
                 ) {
                     Text(text = "Add")
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { addPlayerCloseDialog(false) },
-                    enabled = fieldsEnabled
+                    onClick = { closeAddPlayerDialog(false, null) },
+                    enabled = uiState.enabled
                 ) {
                     Text(text = "Cancel")
                 }
@@ -242,13 +159,13 @@ fun ParticipantsScreenContent(
         )
     }
 
-    if (displayDropPlayerDialog) {
+    if (uiState.displayDropPlayerDialog) {
         AlertDialog(
             title = {
-                Text(text = "Drop Player")
+                Text(text = "Drop ${uiState.selectedParticipant.username}")
             },
             text = {
-                Text(text = "The player will be dropped from the tournament. This action cannot be undone.")
+                Text(text = "${uiState.selectedParticipant.username} will be dropped from the tournament. This action cannot be undone.")
             },
             icon = {
                 Icon(
@@ -256,27 +173,27 @@ fun ParticipantsScreenContent(
                     contentDescription = null
                 )
             },
-            onDismissRequest = { dropPlayerCloseDialog(false) },
+            onDismissRequest = { closeDropPlayerDialog(false) },
             confirmButton = {
                 TextButton(
-                    onClick = { dropPlayerCloseDialog(true) },
-                    enabled = fieldsEnabled
+                    onClick = { closeDropPlayerDialog(true) },
+                    enabled = uiState.enabled
                 ) {
                     Text(text = "Drop")
                 }
             },
             dismissButton = {
                 TextButton(
-                    onClick = { dropPlayerCloseDialog(false) },
-                    enabled = fieldsEnabled
+                    onClick = { closeDropPlayerDialog(false) },
+                    enabled = uiState.enabled
                 ) {
                     Text(text = "Cancel")
                 }
             }
         )
     }
-
 }
+
 
 @Composable
 fun ParticipantCard(
@@ -353,14 +270,8 @@ fun ParticipantCard(
 @Preview(showBackground = true)
 @Composable
 fun ParticipantsScreenPreview() {
-    ParticipantsScreenContent(
-        floatingActionButtonClick = {},
-        dropPlayerOnClick = {},
-        viewMatchesOnClick = {},
-        addPlayerCloseDialog = {},
-        cannotAddPlayerCloseDialog = {},
-        addPlayerTextFieldEdit = {},
-        dropPlayerCloseDialog = {},
+    ParticipantsScreen(
+        uiState = ParticipantsScreenUIState(),
         participantList = listOf(
             Participant(
                 username = "T_Dub88",
@@ -371,10 +282,12 @@ fun ParticipantsScreenPreview() {
                 userId = ""
             )
         ),
-        displayAddPlayerDialog = false,
-        displayCannotAddDialog = false,
-        addPlayerTextFieldString = "",
-        fieldsEnabled = true,
-        displayDropPlayerDialog = false
+        floatingActionButtonClick = {},
+        dropPlayerOnClick = {},
+        viewMatchesOnClick = {},
+        closeCannotAddDialog = {},
+        closeAddPlayerDialog = { _, _ -> },
+        closeDropPlayerDialog = {},
+        changeAddPlayerTextFieldValue = {}
     )
 }
