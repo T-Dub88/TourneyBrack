@@ -239,9 +239,19 @@ fun NavGraphBuilder.hostingScreen(
         route = Screen.Hosting.route
     ) {
         val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
+        val hostingList by userViewModel.hostingTournamentList.collectAsStateWithLifecycle()
 
-
-        HostingScreen()
+        HostingScreen(
+            hostingTournamentList = hostingList,
+            floatingActionButtonClick = {
+                navController.navigate(Screen.TournamentCreation.route)
+            },
+            tournamentCardClick = { tournament ->
+                userViewModel.updateViewingTournament(tournament)
+                userViewModel.viewingTournamentId = tournament.id.toString()
+                navController.navigate(Screen.EditTournament.route)
+            }
+        )
     }
 }
 
