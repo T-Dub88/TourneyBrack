@@ -23,9 +23,11 @@ fun HomeScreen(
     cardPressed: (String) -> Unit
 ) {
     Column {
-        Text(text = stringResource(
-            id = R.string.greeting,
-            username)
+        Text(
+            text = stringResource(
+                id = R.string.greeting,
+                username
+            )
         )
         Text(text = stringResource(id = R.string.tournament_history))
         LazyColumn(

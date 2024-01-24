@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.ui.main.HomeScreen
 import com.dubproductions.bracket.ui.main.ParticipatingScreen
 import com.dubproductions.bracket.ui.main.SettingsScreen
@@ -25,6 +26,7 @@ import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatches
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.ui.onboarding.LoginScreen
 import com.dubproductions.bracket.ui.onboarding.RegistrationScreen
+import com.dubproductions.bracket.viewmodel.EditTournamentScreenViewModel
 import com.dubproductions.bracket.viewmodel.LoginViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsScreenViewModel
 import com.dubproductions.bracket.viewmodel.RegistrationViewModel
@@ -94,11 +96,7 @@ fun NavGraphBuilder.homeNavMap(navController: NavHostController) {
         startDestination = Screen.Home.route,
         route = Map.Home.route
     ) {
-        composable(
-            route = Screen.Home.route
-        ) {
-            homeScreen(navController)
-        }
+        homeScreen(navController)
     }
 }
 
@@ -109,7 +107,7 @@ fun NavGraphBuilder.hostingNavMap(navController: NavHostController) {
     ) {
         hostingScreen(navController)
         tournamentCreationScreen()
-        editTournamentScreen()
+        editTournamentScreen(navController)
         bracketScreen()
         participantsScreen(navController)
         participantMatchesScreen()
@@ -263,11 +261,86 @@ fun NavGraphBuilder.tournamentCreationScreen() {
     }
 }
 
-fun NavGraphBuilder.editTournamentScreen() {
+fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
     composable(
         route = Screen.EditTournament.route
     ) {
-        EditTournamentScreen()
+        val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
+        val editTourneyViewModel: EditTournamentScreenViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+
+        val uiState by editTourneyViewModel.uiState.collectAsStateWithLifecycle()
+        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
+
+        EditTournamentScreen(
+            tournament = tournament,
+            uiState = uiState,
+            changeBracketDialogState = { generate ->
+                if (generate) {
+                    coroutineScope.launch {
+                        editTourneyViewModel.generateBracket(tournament)
+                    }
+                }
+                editTourneyViewModel.changeBracketGenerationDialogState(false)
+            },
+            changeClosedDialogState = { state ->
+                editTourneyViewModel.changeClosedDialogState(state)
+            },
+            changeDeleteDialogState = { delete ->
+                if (delete) {
+                    coroutineScope.launch {
+                        editTourneyViewModel.deleteTournament(
+                            tournamentId = tournament.id!!,
+                            userId = userViewModel.user.value.userId!!,
+                            removeDeletedTournamentFromFlow = { id ->
+                                userViewModel.removeDeletedTournamentFromFlow(id)
+                            }
+                        )
+                        navController.popBackStack()
+                    }
+                } else {
+                    editTourneyViewModel.changeDeleteDialogState(false)
+                }
+            },
+            changeOpenedDialogState = { state ->
+                editTourneyViewModel.changeOpenedDialogState(state)
+            },
+            bracketOnClick = {
+                if (tournament.rounds.isNullOrEmpty()) {
+                    editTourneyViewModel.changeBracketGenerationDialogState(true)
+                } else {
+                    navController.navigate(Screen.Bracket.route)
+                }
+            },
+            lockOnClick = {
+                when (tournament.status) {
+                    TournamentStatus.REGISTERING.status -> {
+                        editTourneyViewModel.changeClosedDialogState(true)
+                        editTourneyViewModel.updateTournamentStatus(
+                            id = tournament.id!!,
+                            status = TournamentStatus.CLOSED.status
+                        )
+                    }
+                    TournamentStatus.CLOSED.status -> {
+                        editTourneyViewModel.changeOpenedDialogState(true)
+                        editTourneyViewModel.updateTournamentStatus(
+                            id = tournament.id!!,
+                            status = TournamentStatus.REGISTERING.status
+                        )
+                    }
+                }
+            },
+            participantsOnClick = {
+                navController.navigate(Screen.Participants.route)
+            },
+            startOnClick = {
+                // TODO: if bracket empty, ask for generation
+                // TODO: make end tournament if started
+            },
+            deleteOnClick = {
+                editTourneyViewModel.changeDeleteDialogState(true)
+            }
+        )
     }
 }
 

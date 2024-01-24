@@ -37,16 +37,13 @@ import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.viewmodel.CreationViewModel
 
 @Composable
-fun TournamentCreationScreen(
-    tournamentCreationViewModel: CreationViewModel = hiltViewModel(),
-    navController: NavHostController
-) {
+fun TournamentCreationScreen() {
     val dropDownItems = listOf(
         stringResource(id = R.string.selected_tournament_type),
         stringResource(id = R.string.swiss)
     )
 
-    val creationStatus by tournamentCreationViewModel.successfulCreation.collectAsStateWithLifecycle()
+//    val creationStatus by tournamentCreationViewModel.successfulCreation.collectAsStateWithLifecycle()
 
     var screenEnabled by rememberSaveable { mutableStateOf(true) }
     var tournamentName by rememberSaveable { mutableStateOf("") }
@@ -136,41 +133,41 @@ fun TournamentCreationScreen(
                     type = Type.TOURNEY_TYPE
                 )
 
-                if (!nameError && !typeError) {
-                    tournamentCreationViewModel.createTournament(
-                        name = tournamentName,
-                        type = dropDownSelectedItem,
-                        participants = tournamentParticipants
-                    )
-                } else {
-                    screenEnabled = true
-                }
+//                if (!nameError && !typeError) {
+//                    tournamentCreationViewModel.createTournament(
+//                        name = tournamentName,
+//                        type = dropDownSelectedItem,
+//                        participants = tournamentParticipants
+//                    )
+//                } else {
+//                    screenEnabled = true
+//                }
             }
         )
 
-        when(creationStatus) {
-            true -> {
-                ReusableDialog(
-                    titleText = stringResource(id = R.string.creation_success_header),
-                    contentText = stringResource(id = R.string.creation_success_text),
-                    icon = Icons.Outlined.CheckCircle
-                ) {
-                    tournamentCreationViewModel.updateCreationState(null)
-                    navController.popBackStack()
-                }
-            }
-            false -> {
-                ReusableDialog(
-                    titleText = stringResource(id = R.string.creation_failure_header),
-                    contentText = stringResource(id = R.string.creation_failure_text),
-                    icon = Icons.Outlined.Error
-                ) {
-                    tournamentCreationViewModel.updateCreationState(null)
-                    screenEnabled = true
-                }
-            }
-            null -> {}
-        }
+//        when(creationStatus) {
+//            true -> {
+//                ReusableDialog(
+//                    titleText = stringResource(id = R.string.creation_success_header),
+//                    contentText = stringResource(id = R.string.creation_success_text),
+//                    icon = Icons.Outlined.CheckCircle
+//                ) {
+//                    tournamentCreationViewModel.updateCreationState(null)
+//                    navController.popBackStack()
+//                }
+//            }
+//            false -> {
+//                ReusableDialog(
+//                    titleText = stringResource(id = R.string.creation_failure_header),
+//                    contentText = stringResource(id = R.string.creation_failure_text),
+//                    icon = Icons.Outlined.Error
+//                ) {
+//                    tournamentCreationViewModel.updateCreationState(null)
+//                    screenEnabled = true
+//                }
+//            }
+//            null -> {}
+//        }
     }
 
 }
