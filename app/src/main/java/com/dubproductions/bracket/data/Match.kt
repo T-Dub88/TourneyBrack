@@ -1,6 +1,7 @@
 package com.dubproductions.bracket.data
 
 data class Match(
+    val matchId: String = "",
     val playerOneId: String = "",
     val playerTwoId: String = "",
     var winnerId: String? = null,

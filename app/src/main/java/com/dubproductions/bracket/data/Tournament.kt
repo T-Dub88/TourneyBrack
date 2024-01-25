@@ -21,7 +21,10 @@ data class Tournament(
     fun createNextRound() {
 
         for (participant in participants) {
-            participant.updateTiebreakers(participants)
+            participant.updateTiebreakers(
+                participantList = participants,
+                matchList = rounds?.last()?.matches
+            )
         }
 
         if (rounds.isNullOrEmpty()) {
@@ -40,6 +43,20 @@ data class Tournament(
                 )
             )
 
+            rounds!!.last().matches.forEach { match ->
+                val playerOneIndex = randomizedParticipantList.indexOfFirst { it.userId == match.playerOneId }
+                val playerTwoIndex = randomizedParticipantList.indexOfFirst { it.userId == match.playerTwoId }
+
+                if (playerOneIndex != -1) {
+                    randomizedParticipantList[playerOneIndex].matches.add(match.matchId)
+                }
+                if (playerTwoIndex != -1) {
+                    randomizedParticipantList[playerTwoIndex].matches.add(match.matchId)
+                }
+            }
+
+            participants = randomizedParticipantList
+
         } else {
             // after the first round
             val sortedParticipantList = sortPlayerStandings()
@@ -55,6 +72,17 @@ data class Tournament(
                     }
                 )
             )
+
+            rounds!!.last().matches.forEach { match ->
+                val playerOneIndex = sortedParticipantList.indexOfFirst { it.userId == match.playerOneId }
+                val playerTwoIndex = sortedParticipantList.indexOfFirst { it.userId == match.playerTwoId }
+
+                sortedParticipantList[playerOneIndex].matches.add(match.matchId)
+                if (playerTwoIndex != -1) {
+                    sortedParticipantList[playerTwoIndex].matches.add(match.matchId)
+                }
+            }
+
             participants = sortedParticipantList
         }
     }
@@ -70,6 +98,7 @@ data class Tournament(
             while (j < numberOfParticipants) {
                 matchList.add(
                     Match(
+                        matchId = makeRandomString(),
                         playerOneId = participantList[i].userId,
                         playerTwoId = participantList[j].userId,
                         round = roundNumber
@@ -84,6 +113,7 @@ data class Tournament(
             while (j < numberOfParticipants - 1) {
                 matchList.add(
                     Match(
+                        matchId = makeRandomString(),
                         playerOneId = participantList[i].userId,
                         playerTwoId = participantList[j].userId,
                         round = roundNumber
@@ -92,6 +122,16 @@ data class Tournament(
                 i += 2
                 j += 2
             }
+            matchList.add(
+                Match(
+                    matchId = makeRandomString(),
+                    playerOneId = participantList[i].userId,
+                    playerTwoId = "bye",
+                    round = roundNumber,
+                    winnerId = participantList[i].userId,
+                    tie = false
+                )
+            )
             matchList
         }
     }
@@ -123,6 +163,11 @@ data class Tournament(
                 { player -> -player.sonnebornBerger }
             )
         )
+    }
+
+    private fun makeRandomString(): String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (0..4).map { allowedChars.random() }.joinToString("")
     }
 
 }
