@@ -35,7 +35,7 @@
     <string name="tournament_history">Tournament History:</string>
     <string name="tournament_name">Name: %1$s</string>
     <string name="status">Status: %1$s</string>
-    <string name="rounds">Rounds: %1$s</string>
+    <string name="rounds">Rounds: %1$d</string>
     <string name="type">Type: %1$s</string>
     <string name="started_date">Started: %1$s</string>
     <string name="completed_date">Completed: %1$s</string>
@@ -58,10 +58,35 @@
     <string name="must_select_type">Must select type</string>
     <string name="create_tournament">Create Tournament</string>
 
+    <!--Edit Tournament Screen-->
+    <string name="edit_tournament">Edit Tournament</string>
+    <string name="tournament_name_2">Tournament Name: %1$s</string>
+    <string name="registration_code">Registration Code: %1$s</string>
+    <string name="format">Format: %1$s</string>
+    <string name="num_participants">Number of Participants: %1$d</string>
+    <string name="num_rounds">Number of Rounds: %1$s</string>
+    <string name="start_date_time">Start Date/Time: %1$s</string>
+    <string name="close_registration">Close Registration</string>
+    <string name="open_registration">Open Registration</string>
+    <string name="view_edit_participants">View/Edit Participants</string>
+    <string name="view_edit_bracket">View/Edit Bracket</string>
+    <string name="start_tournament">Start Tournament</string>
+    <string name="delete_tournament">Delete Tournament</string>
+    <string name="registration_closed">Registration Closed!</string>
+    <string name="registration_closed_message">Players will no longer be able to sign up for your tournament.</string>
+    <string name="registration_opened">Registration Opened!</string>
+    <string name="registration_opened_message">Players are now able to register for your tournament using the registration code.</string>
+    <string name="bracket_gen_title">Bracket Not Generated</string>
+    <string name="bracket_gen_body">Would you like to generate a bracket?</string>
+    <string name="generate">Generate</string>
+    <string name="delete_message">Are you sure? This action cannot be undone.</string>
+    <string name="delete">Delete</string>
+
     <!--Composables-->
     <string name="ok">Ok</string>
     <string name="pending">Pending</string>
     <string name="update_tournament">Tap card to update tournament</string>
-
+    <string name="cancel">Cancel</string>
+    <string name="not_started">Not Started</string>
 
 </resources>

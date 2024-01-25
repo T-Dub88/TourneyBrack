@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.ui.main.hosting
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,12 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Tournament
+import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.ui_state.EditTournamentUIState
+import org.checkerframework.checker.units.qual.s
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -48,25 +54,60 @@ fun EditTournamentScreen(
             .fillMaxSize()
     ) {
         Text(
-            text = "Edit Tournament",
+            text = stringResource(id = R.string.edit_tournament),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
             fontSize = 25.sp
         )
 
-        EditTourneyText(text = "Tournament Name: ${tournament.name}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.tournament_name_2,
+                tournament.name
+            )
+        )
 
-        EditTourneyText(text = "Registration Code: ${tournament.id?.takeLast(4)}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.registration_code,
+                tournament.id.toString().takeLast(4)
+            )
+        )
 
-        EditTourneyText(text = "Format: ${tournament.type}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.format,
+                tournament.type
+            )
+        )
 
-        EditTourneyText(text = "Status: ${tournament.status.replaceFirstChar { it.uppercase() }}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.status,
+                tournament.status.replaceFirstChar { it.uppercase() }
+            )
+        )
 
-        EditTourneyText(text = "Number of Participants: ${tournament.participants.size}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.num_participants,
+                tournament.participants.size
+            )
+        )
 
-        EditTourneyText(text = "Number of Rounds: ${tournament.rounds?.size}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.num_rounds,
+                tournament.setNumberOfRounds()
+            )
+        )
 
-        EditTourneyText(text = "Start Date/Time: ${formatDateTime(tournament.timeStarted)}")
+        EditTourneyText(
+            text = stringResource(
+                id = R.string.start_date_time,
+                formatDateTime(tournament.timeStarted, LocalContext.current)
+            )
+        )
 
         Button(
             onClick = lockOnClick,
@@ -75,14 +116,17 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp),
             enabled = when (tournament.status) {
-                "registering", "closed" -> true
+                TournamentStatus.REGISTERING.status,
+                TournamentStatus.CLOSED.status -> true
                 else -> false
             }
         ) {
             EditTourneyText(
                 text = when (tournament.status) {
-                    "registering" -> "Close Registration"
-                    else -> "Open Registration"
+                    TournamentStatus.REGISTERING.status -> {
+                        stringResource(id = R.string.close_registration)
+                    }
+                    else -> stringResource(id = R.string.open_registration)
                 }
             )
         }
@@ -94,7 +138,7 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp)
         ) {
-            EditTourneyText(text = "View/Edit Participants")
+            EditTourneyText(text = stringResource(id = R.string.view_edit_participants))
         }
 
         Button(
@@ -104,7 +148,7 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp)
         ) {
-            EditTourneyText(text = "View/Edit Bracket")
+            EditTourneyText(text = stringResource(id = R.string.view_edit_bracket))
         }
 
         Button(
@@ -114,7 +158,7 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp)
         ) {
-            EditTourneyText(text = "Start Tournament")
+            EditTourneyText(text = stringResource(id = R.string.start_tournament))
         }
 
         Button(
@@ -128,22 +172,22 @@ fun EditTournamentScreen(
                 contentColor = Color.White
             )
         ) {
-            EditTourneyText(text = "Delete Tournament")
+            EditTourneyText(text = stringResource(id = R.string.delete_tournament))
         }
 
         when {
             uiState.displayClosedDialog -> {
                 ReusableDialog(
-                    titleText = "Registration Closed!",
-                    contentText = "Players will no longer be able to sign up for your tournament.",
+                    titleText = stringResource(id = R.string.registration_closed),
+                    contentText = stringResource(id = R.string.registration_closed_message),
                     icon = Icons.Filled.Close,
                     dismissDialog = { changeClosedDialogState(false) }
                 )
             }
             uiState.displayOpenedDialog -> {
                 ReusableDialog(
-                    titleText = "Registration Opened!",
-                    contentText = "Players are now able to register for your tournament using the registration code.",
+                    titleText = stringResource(id = R.string.registration_opened),
+                    contentText = stringResource(id = R.string.registration_opened_message),
                     icon = Icons.Filled.Check,
                     dismissDialog = { changeOpenedDialogState(false) }
                 )
@@ -152,10 +196,10 @@ fun EditTournamentScreen(
         when {
             uiState.displayBracketGenerationDialog -> {
                 BracketGenerationDialog(
-                    title = "Bracket Not Generated",
-                    body = "Would you like to generate a bracket?",
-                    positiveButton = "Generate",
-                    dismissButton = "Cancel",
+                    title = stringResource(id = R.string.bracket_gen_title),
+                    body = stringResource(id = R.string.bracket_gen_body),
+                    positiveButton = stringResource(id = R.string.generate),
+                    dismissButton = stringResource(id = R.string.cancel),
                     onConfirmClick = { changeBracketDialogState(true) },
                     onCancelClick = { changeBracketDialogState(false) },
                     icon = Icons.Filled.Create
@@ -167,10 +211,10 @@ fun EditTournamentScreen(
                 BracketGenerationDialog(
                     onConfirmClick = { changeDeleteDialogState(true) },
                     onCancelClick = { changeDeleteDialogState(false) },
-                    title = "Delete Tournament",
-                    body = "Are you sure? This action cannot be undone",
-                    positiveButton = "Delete",
-                    dismissButton = "Cancel",
+                    title = stringResource(id = R.string.delete_tournament),
+                    body = stringResource(id = R.string.delete_message),
+                    positiveButton = stringResource(id = R.string.delete),
+                    dismissButton = stringResource(id = R.string.cancel),
                     icon = Icons.Filled.DeleteForever
                 )
             }
@@ -241,9 +285,9 @@ fun EditTournamentScreenPreview() {
     )
 }
 
-fun formatDateTime(timestamp: Long?): String {
+fun formatDateTime(timestamp: Long?, context: Context): String {
     return timestamp?.let {
         val sdf = SimpleDateFormat("MM-dd-yy HH:mm", Locale.getDefault())
         sdf.format(it)
-    } ?: "Not Started"
+    } ?: context.getString(R.string.not_started)
 }
