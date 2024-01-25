@@ -15,9 +15,9 @@ import com.dubproductions.bracket.ui.main.hosting.HostingScreen
 import com.dubproductions.bracket.ui.main.hosting.TournamentCreationScreen
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatchesScreen
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
-import com.dubproductions.bracket.viewmodel.CreationScreenViewModel
-import com.dubproductions.bracket.viewmodel.EditTournamentScreenViewModel
-import com.dubproductions.bracket.viewmodel.ParticipantsScreenViewModel
+import com.dubproductions.bracket.viewmodel.CreationViewModel
+import com.dubproductions.bracket.viewmodel.EditTournamentViewModel
+import com.dubproductions.bracket.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -62,7 +62,7 @@ fun NavGraphBuilder.tournamentCreationScreen(navController: NavHostController) {
     composable(
         route = Screen.TournamentCreation.route
     ) {
-        val creationViewModel: CreationScreenViewModel = hiltViewModel()
+        val creationViewModel: CreationViewModel = hiltViewModel()
         val coroutineScope = rememberCoroutineScope()
         val uiState by creationViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -95,7 +95,7 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
         route = Screen.EditTournament.route
     ) {
         val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
-        val editTourneyViewModel: EditTournamentScreenViewModel = hiltViewModel()
+        val editTourneyViewModel: EditTournamentViewModel = hiltViewModel()
         val coroutineScope = rememberCoroutineScope()
 
         val uiState by editTourneyViewModel.uiState.collectAsStateWithLifecycle()
@@ -188,7 +188,7 @@ fun NavGraphBuilder.participantsScreen(
         route = Screen.Participants.route
     ) {
         val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
-        val participantsViewModel: ParticipantsScreenViewModel = hiltViewModel()
+        val participantsViewModel: ParticipantsViewModel = hiltViewModel()
         val coroutineScope = rememberCoroutineScope()
 
         val uiState by participantsViewModel.uiState.collectAsStateWithLifecycle()
