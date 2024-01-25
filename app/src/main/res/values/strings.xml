@@ -82,6 +82,24 @@
     <string name="delete_message">Are you sure? This action cannot be undone.</string>
     <string name="delete">Delete</string>
 
+    <!--Participants Screen-->
+    <string name="cannot_add_title">Cannot Add New Player</string>
+    <string name="cannot_add_body">New players cannot be added to a tournament after the start of the first round.</string>
+    <string name="add_player_title">Add Player</string>
+    <string name="enter_player_name">Enter Player Name</string>
+    <string name="add_player_error">Must Enter Player Name</string>
+    <string name="add">Add</string>
+    <string name="drop_title">Drop %1$s</string>
+    <string name="drop_body">%1$s will be dropped from the tournament. This action cannot be undone.</string>
+    <string name="drop">Drop</string>
+    <string name="dropped">Dropped</string>
+    <string name="place">Place: %1$d</string>
+    <string name="points">Points: %1$.1f</string>
+    <string name="buchholz">Buchholz: %1$.1f</string>
+    <string name="sb">SB: %1$.1f</string>
+    <string name="drop_player">Drop Player</string>
+    <string name="view_matches">View Matches</string>
+
     <!--Composables-->
     <string name="ok">Ok</string>
     <string name="pending">Pending</string>

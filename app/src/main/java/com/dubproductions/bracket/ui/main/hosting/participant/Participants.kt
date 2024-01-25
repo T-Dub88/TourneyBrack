@@ -30,9 +30,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.ui_state.ParticipantsUIState
@@ -92,12 +94,12 @@ fun ParticipantsScreen(
                     contentDescription = null
                 )
             },
-            text = { Text(text = "New players cannot be added to a tournament after the start of the first round.") },
-            title = { Text(text = "Cannot Add New Player") },
+            text = { Text(text = stringResource(id = R.string.cannot_add_body)) },
+            title = { Text(text = stringResource(id = R.string.cannot_add_title)) },
             onDismissRequest = closeCannotAddDialog,
             confirmButton = {
                 TextButton(onClick = closeCannotAddDialog) {
-                    Text(text = "Ok")
+                    Text(text = stringResource(id = R.string.ok))
                 }
             }
         )
@@ -111,7 +113,7 @@ fun ParticipantsScreen(
                     contentDescription = null
                 )
             },
-            title = { Text(text = "Add Player") },
+            title = { Text(text = stringResource(id = R.string.add_player_title)) },
             text = {
                 OutlinedTextField(
                     value = uiState.addPlayerTextFieldValue,
@@ -121,12 +123,12 @@ fun ParticipantsScreen(
                             addPlayerTextError = false
                         }
                     },
-                    label = { Text(text = "Enter Player Name") },
+                    label = { Text(text = stringResource(id = R.string.enter_player_name)) },
                     enabled = uiState.enabled,
                     isError = addPlayerTextError,
                     supportingText = {
                         if (addPlayerTextError) {
-                            Text(text = "Must Enter Player Name")
+                            Text(text = stringResource(id = R.string.add_player_error))
                         }
                     }
                 )
@@ -145,7 +147,7 @@ fun ParticipantsScreen(
                     },
                     enabled = uiState.enabled
                 ) {
-                    Text(text = "Add")
+                    Text(text = stringResource(id = R.string.add))
                 }
             },
             dismissButton = {
@@ -153,7 +155,7 @@ fun ParticipantsScreen(
                     onClick = { closeAddPlayerDialog(false, null) },
                     enabled = uiState.enabled
                 ) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(id = R.string.cancel))
                 }
             }
         )
@@ -162,10 +164,20 @@ fun ParticipantsScreen(
     if (uiState.displayDropPlayerDialog) {
         AlertDialog(
             title = {
-                Text(text = "Drop ${uiState.selectedParticipant.username}")
+                Text(
+                    text = stringResource(
+                        id = R.string.drop_title,
+                        uiState.selectedParticipant.username
+                    )
+                )
             },
             text = {
-                Text(text = "${uiState.selectedParticipant.username} will be dropped from the tournament. This action cannot be undone.")
+                Text(
+                    text = stringResource(
+                        id = R.string.drop_body,
+                        uiState.selectedParticipant.username
+                    )
+                )
             },
             icon = {
                 Icon(
@@ -179,7 +191,7 @@ fun ParticipantsScreen(
                     onClick = { closeDropPlayerDialog(true) },
                     enabled = uiState.enabled
                 ) {
-                    Text(text = "Drop")
+                    Text(text = stringResource(id = R.string.drop))
                 }
             },
             dismissButton = {
@@ -187,7 +199,7 @@ fun ParticipantsScreen(
                     onClick = { closeDropPlayerDialog(false) },
                     enabled = uiState.enabled
                 ) {
-                    Text(text = "Cancel")
+                    Text(text = stringResource(id = R.string.cancel))
                 }
             }
         )
@@ -224,9 +236,9 @@ fun ParticipantCard(
             )
             Text(
                 text = if (participant.dropped) {
-                    "Dropped"
+                    stringResource(id = R.string.dropped)
                 } else {
-                    "Place: $standing"
+                    stringResource(id = R.string.place, standing)
                 },
                 fontSize = 22.sp
             )
@@ -237,15 +249,15 @@ fun ParticipantCard(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             Text(
-                text = "Points: ${participant.points}",
+                text = stringResource(id = R.string.points, participant.points),
                 fontSize = 18.sp
             )
             Text(
-                text = "Buchholz: ${participant.buchholz}",
+                text = stringResource(id = R.string.buchholz, participant.buchholz),
                 fontSize = 18.sp
             )
             Text(
-                text = "SB: ${participant.sonnebornBerger}",
+                text = stringResource(id = R.string.sb, participant.sonnebornBerger),
                 fontSize = 18.sp
             )
         }
@@ -256,12 +268,12 @@ fun ParticipantCard(
             TextButton(
                 onClick = dropPlayerOnClick
             ) {
-                Text(text = "Drop Player", fontSize = 16.sp)
+                Text(text = stringResource(id = R.string.drop_player), fontSize = 16.sp)
             }
             TextButton(
                 onClick = viewMatchesOnClick
             ) {
-                Text(text = "View Matches", fontSize = 16.sp)
+                Text(text = stringResource(id = R.string.view_matches), fontSize = 16.sp)
             }
         }
     }
