@@ -2,7 +2,7 @@ package com.dubproductions.bracket.ui_state
 
 import com.dubproductions.bracket.data.Participant
 
-data class ParticipantsScreenUIState(
+data class ParticipantsUIState(
     var displayCannotAddDialog: Boolean = false,
     var displayAddPlayerDialog: Boolean = false,
     var displayDropPlayerDialog: Boolean = false,

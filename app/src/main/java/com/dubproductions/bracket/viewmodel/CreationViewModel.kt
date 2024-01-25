@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
-import com.dubproductions.bracket.ui_state.TournamentCreationScreenUIState
+import com.dubproductions.bracket.ui_state.TournamentCreationUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +20,12 @@ class CreationViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    private val _uiState: MutableStateFlow<TournamentCreationScreenUIState> = MutableStateFlow(
-        TournamentCreationScreenUIState()
+    private val _uiState: MutableStateFlow<TournamentCreationUIState> = MutableStateFlow(
+        TournamentCreationUIState()
     )
-    val uiState: StateFlow<TournamentCreationScreenUIState> = _uiState.asStateFlow()
+    val uiState: StateFlow<TournamentCreationUIState> = _uiState.asStateFlow()
 
-    private fun updateUIState(newUIState: TournamentCreationScreenUIState) {
+    private fun updateUIState(newUIState: TournamentCreationUIState) {
         _uiState.update {
             newUIState
         }

@@ -1,6 +1,6 @@
 package com.dubproductions.bracket.ui_state
 
-data class TournamentCreationScreenUIState(
+data class TournamentCreationUIState(
     var successfulCreation: Boolean? = null,
     var screenEnabled: Boolean = true
 )

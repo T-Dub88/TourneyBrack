@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
-import com.dubproductions.bracket.ui_state.EditTournamentScreenUIState
+import com.dubproductions.bracket.ui_state.EditTournamentUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -20,12 +20,12 @@ class EditTournamentViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    private val _uiState: MutableStateFlow<EditTournamentScreenUIState> = MutableStateFlow(
-        EditTournamentScreenUIState()
+    private val _uiState: MutableStateFlow<EditTournamentUIState> = MutableStateFlow(
+        EditTournamentUIState()
     )
-    val uiState: StateFlow<EditTournamentScreenUIState> = _uiState.asStateFlow()
+    val uiState: StateFlow<EditTournamentUIState> = _uiState.asStateFlow()
 
-    private fun updateUIState(newUIState: EditTournamentScreenUIState) {
+    private fun updateUIState(newUIState: EditTournamentUIState) {
         _uiState.update {
             newUIState
         }

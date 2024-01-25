@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.ui_state.ParticipantsScreenUIState
+import com.dubproductions.bracket.ui_state.ParticipantsUIState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParticipantsScreen(
-    uiState: ParticipantsScreenUIState,
+    uiState: ParticipantsUIState,
     participantList: List<Participant>,
     floatingActionButtonClick: () -> Unit,
     dropPlayerOnClick: (Participant) -> Unit,
@@ -271,7 +271,7 @@ fun ParticipantCard(
 @Composable
 fun ParticipantsScreenPreview() {
     ParticipantsScreen(
-        uiState = ParticipantsScreenUIState(),
+        uiState = ParticipantsUIState(),
         participantList = listOf(
             Participant(
                 username = "T_Dub88",

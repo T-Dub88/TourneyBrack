@@ -3,7 +3,7 @@ package com.dubproductions.bracket.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
-import com.dubproductions.bracket.ui_state.LoginScreenUIState
+import com.dubproductions.bracket.ui_state.LoginUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,10 +16,10 @@ class LoginViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    private val _loginUIState: MutableStateFlow<LoginScreenUIState> = MutableStateFlow(
-        LoginScreenUIState()
+    private val _loginUIState: MutableStateFlow<LoginUIState> = MutableStateFlow(
+        LoginUIState()
     )
-    val loginUIState: StateFlow<LoginScreenUIState> = _loginUIState.asStateFlow()
+    val loginUIState: StateFlow<LoginUIState> = _loginUIState.asStateFlow()
 
     init {
         Log.i("LoginViewModel", "Created")
@@ -30,7 +30,7 @@ class LoginViewModel @Inject constructor(
         Log.i("LoginViewModel", "Cleared")
     }
 
-    private fun updateLoginUIState(newState: LoginScreenUIState) {
+    private fun updateLoginUIState(newState: LoginUIState) {
         _loginUIState.update {
             newState
         }

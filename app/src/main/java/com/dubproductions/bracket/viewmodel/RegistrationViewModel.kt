@@ -3,7 +3,7 @@ package com.dubproductions.bracket.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
-import com.dubproductions.bracket.ui_state.RegistrationScreenUIState
+import com.dubproductions.bracket.ui_state.RegistrationUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,10 +16,10 @@ class RegistrationViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepositoryImpl
 ): ViewModel() {
 
-    private val _uiState: MutableStateFlow<RegistrationScreenUIState> = MutableStateFlow(
-        RegistrationScreenUIState()
+    private val _uiState: MutableStateFlow<RegistrationUIState> = MutableStateFlow(
+        RegistrationUIState()
     )
-    val uiState: StateFlow<RegistrationScreenUIState> = _uiState.asStateFlow()
+    val uiState: StateFlow<RegistrationUIState> = _uiState.asStateFlow()
 
     init {
         Log.i("RegistrationViewModel", "Created")
@@ -30,7 +30,7 @@ class RegistrationViewModel @Inject constructor(
         Log.i("RegistrationViewModel", "Destroyed")
     }
 
-    private fun updateUIState(newUIState: RegistrationScreenUIState) {
+    private fun updateUIState(newUIState: RegistrationUIState) {
         _uiState.update {
             newUIState
         }

@@ -31,11 +31,11 @@ import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.ui_state.TournamentCreationScreenUIState
+import com.dubproductions.bracket.ui_state.TournamentCreationUIState
 
 @Composable
 fun TournamentCreationScreen(
-    uiState: TournamentCreationScreenUIState,
+    uiState: TournamentCreationUIState,
     createTournament: (name: String, participants: String, type: String) -> Unit,
     dismissDialog: (Boolean) -> Unit
 ) {

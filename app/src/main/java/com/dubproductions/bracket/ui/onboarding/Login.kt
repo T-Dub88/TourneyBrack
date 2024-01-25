@@ -27,11 +27,11 @@ import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.ui_state.LoginScreenUIState
+import com.dubproductions.bracket.ui_state.LoginUIState
 
 @Composable
 fun LoginScreen(
-    uiState: LoginScreenUIState,
+    uiState: LoginUIState,
     loginClick: (String, String) -> Unit,
     registrationClick: () -> Unit,
     forgotPasswordClick: (String) -> Unit,
@@ -202,7 +202,7 @@ private fun validateFields(
 @Composable
 fun LoginScreenPreview() {
     LoginScreen(
-        uiState = LoginScreenUIState(),
+        uiState = LoginUIState(),
         loginClick = {_, _ -> },
         registrationClick = {},
         forgotPasswordClick = {},

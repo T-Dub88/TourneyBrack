@@ -1,6 +1,6 @@
 package com.dubproductions.bracket.ui_state
 
-data class LoginScreenUIState(
+data class LoginUIState(
     var enable: Boolean = true,
     var showPasswordResetSuccessDialog: Boolean = false,
     var showPasswordResetFailureDialog: Boolean = false,

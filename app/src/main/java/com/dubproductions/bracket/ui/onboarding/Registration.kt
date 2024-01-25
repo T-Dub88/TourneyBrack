@@ -28,11 +28,11 @@ import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.OnboardingButton
 import com.dubproductions.bracket.ui.OnboardingTextField
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.ui_state.RegistrationScreenUIState
+import com.dubproductions.bracket.ui_state.RegistrationUIState
 
 @Composable
 fun RegistrationScreen(
-    uiState: RegistrationScreenUIState,
+    uiState: RegistrationUIState,
     dismissDialog: () -> Unit,
     registrationClicked: (
         email: String,
@@ -287,7 +287,7 @@ private fun verifyField(
 @Composable
 fun RegistrationScreenPreview() {
     RegistrationScreen(
-        uiState = RegistrationScreenUIState(),
+        uiState = RegistrationUIState(),
         dismissDialog = {  },
         registrationClicked = { _, _, _, _, _ -> }
     )

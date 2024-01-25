@@ -25,14 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.ui_state.EditTournamentScreenUIState
+import com.dubproductions.bracket.ui_state.EditTournamentUIState
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
 fun EditTournamentScreen(
     tournament: Tournament,
-    uiState: EditTournamentScreenUIState,
+    uiState: EditTournamentUIState,
     lockOnClick: () -> Unit,
     participantsOnClick: () -> Unit,
     bracketOnClick: () -> Unit,
@@ -228,7 +228,7 @@ fun BracketGenerationDialog(
 fun EditTournamentScreenPreview() {
     EditTournamentScreen(
         tournament = Tournament(),
-        uiState = EditTournamentScreenUIState(),
+        uiState = EditTournamentUIState(),
         lockOnClick = {  },
         participantsOnClick = {  },
         bracketOnClick = {  },
