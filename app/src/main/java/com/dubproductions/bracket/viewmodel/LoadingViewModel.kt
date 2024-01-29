@@ -31,7 +31,7 @@ class LoadingViewModel @Inject constructor(
         Log.i("CreationViewModel", "Cleared")
     }
 
-    private fun updatedLogInStatus(status: Boolean) {
+    fun updatedLogInStatus(status: Boolean) {
         _isLoggedIn.update {
             status
         }

@@ -24,7 +24,10 @@ import com.dubproductions.bracket.ui.theme.BracketTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainAppContent(loggedIn: Boolean) {
+fun MainAppContent(
+    loggedIn: Boolean,
+    setLoggedInStatus: (Boolean) -> Unit
+) {
     val navBarItems: List<Map> = listOf(
         Map.Home,
         Map.Hosting,
@@ -84,7 +87,8 @@ fun MainAppContent(loggedIn: Boolean) {
             ) {
                 NavHost(
                     navController = navController,
-                    loggedIn = loggedIn
+                    loggedIn = loggedIn,
+                    setLoggedInStatus = setLoggedInStatus
                 )
             }
         }

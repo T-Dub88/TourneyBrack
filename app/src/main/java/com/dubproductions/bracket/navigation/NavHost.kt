@@ -10,12 +10,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navigation
+import com.dubproductions.bracket.MainActivity
 
 
 @Composable
 fun NavHost(
     navController: NavHostController,
-    loggedIn: Boolean
+    loggedIn: Boolean,
+    setLoggedInStatus: (Boolean) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -27,6 +29,7 @@ fun NavHost(
     ) {
         preLoginNavGraph(
             navigateToHomeScreen = {
+                setLoggedInStatus(true)
                 navController.navigate(Map.BottomBar.route) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         inclusive = true
