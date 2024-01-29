@@ -51,8 +51,6 @@ fun LoginScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = stringResource(id = R.string.login))
-
         // Text field for email
         OnboardingTextField(
             text = emailText,

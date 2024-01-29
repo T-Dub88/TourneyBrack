@@ -58,8 +58,6 @@ fun ParticipantMatchesScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(text = "Participant Matches")
-        
         if (showDeclareDialog) {
             AlertDialog(
                 title = { Text(text = "Report Results") },

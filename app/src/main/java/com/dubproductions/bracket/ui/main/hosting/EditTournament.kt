@@ -53,13 +53,6 @@ fun EditTournamentScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Text(
-            text = stringResource(id = R.string.edit_tournament),
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally),
-            fontSize = 25.sp
-        )
-
         EditTourneyText(
             text = stringResource(
                 id = R.string.tournament_name_2,

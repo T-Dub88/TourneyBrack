@@ -63,13 +63,6 @@ fun TournamentCreationScreen(
             .padding(horizontal = 8.dp)
             .padding(top = 8.dp)
     ) {
-        Text(
-            text = stringResource(R.string.create),
-            modifier = Modifier
-                .align(alignment = Alignment.CenterHorizontally),
-            fontSize = 25.sp
-        )
-
         // Tournament name field
         TournamentCreationTextField(
             text = tournamentName,

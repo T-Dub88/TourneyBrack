@@ -63,9 +63,6 @@ fun RegistrationScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-
-        Text(text = stringResource(id = R.string.registration))
-
         // Text field for email
         OnboardingTextField(
             text = emailText,
