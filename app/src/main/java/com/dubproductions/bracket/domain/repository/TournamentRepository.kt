@@ -99,4 +99,9 @@ interface TournamentRepository {
         participant: Participant
     )
 
+    suspend fun updateMatchResult(
+        tournamentId: String,
+        winnerId: String?
+    )
+
 }

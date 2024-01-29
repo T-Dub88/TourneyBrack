@@ -3,6 +3,7 @@ package com.dubproductions.bracket.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.data.User
@@ -43,20 +44,16 @@ class UserViewModel @Inject constructor(
     private val _participatingTournamentList: MutableStateFlow<List<Tournament>> = MutableStateFlow(mutableListOf())
     val participatingTournamentList: StateFlow<List<Tournament>> = _participatingTournamentList.asStateFlow()
 
-    private val _viewingTournament: MutableStateFlow<Tournament> = MutableStateFlow(
-        Tournament(
-            name = "",
-            participants = listOf(),
-            status = "",
-            type = ""
-        )
-    )
+    private val _viewingTournament: MutableStateFlow<Tournament> = MutableStateFlow(Tournament())
     val viewingTournament: StateFlow<Tournament> = _viewingTournament.asStateFlow()
+
+    private val _viewingParticipant: MutableStateFlow<Participant> = MutableStateFlow(Participant())
+    val viewingParticipant: StateFlow<Participant> = _viewingParticipant.asStateFlow()
 
     private var loggedIn: Boolean = false
     private var attemptedFetchUserData: Boolean = false
     var viewingTournamentId: String = ""
-
+    var viewingParticipantId: String = ""
 
     init {
         Log.i("UserViewModel", "Created")
@@ -132,6 +129,12 @@ class UserViewModel @Inject constructor(
                 updateViewingTournament(tournament)
             }
 
+            for (participant in tournament.participants) {
+                if (participant.userId == viewingParticipantId) {
+                    updateViewingParticipant(participant)
+                }
+            }
+
             newList.add(tournament)
 
             newList
@@ -149,6 +152,12 @@ class UserViewModel @Inject constructor(
     fun updateViewingTournament(tournament: Tournament) {
         _viewingTournament.update {
             tournament
+        }
+    }
+
+    fun updateViewingParticipant(participant: Participant) {
+        _viewingParticipant.update {
+            participant
         }
     }
 

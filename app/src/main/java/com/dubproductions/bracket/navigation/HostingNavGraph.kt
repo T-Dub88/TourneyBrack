@@ -8,6 +8,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dubproductions.bracket.data.Match
+import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.ui.main.hosting.BracketScreen
 import com.dubproductions.bracket.ui.main.hosting.EditTournamentScreen
@@ -17,6 +19,7 @@ import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantMatches
 import com.dubproductions.bracket.ui.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.viewmodel.CreationViewModel
 import com.dubproductions.bracket.viewmodel.EditTournamentViewModel
+import com.dubproductions.bracket.viewmodel.ParticipantMatchesViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
@@ -31,7 +34,7 @@ fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
         editTournamentScreen(navController)
         bracketScreen()
         participantsScreen(navController)
-        participantMatchesScreen()
+        participantMatchesScreen(navController)
     }
 }
 
@@ -205,7 +208,9 @@ fun NavGraphBuilder.participantsScreen(
                 participantsViewModel.changeSelectedParticipant(participant)
             },
             viewMatchesOnClick = { participant ->
-                // TODO: Nav to matches screen
+                userViewModel.updateViewingParticipant(participant)
+                userViewModel.viewingParticipantId = participant.userId
+                navController.navigate(Screen.ParticipantMatches.route)
             },
             closeCannotAddDialog = {
                 participantsViewModel.changeCannotAddPlayerDialogVisibility(false)
@@ -248,10 +253,43 @@ fun NavGraphBuilder.participantsScreen(
     }
 }
 
-fun NavGraphBuilder.participantMatchesScreen() {
+fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
     composable(
         route = Screen.ParticipantMatches.route
     ) {
-        ParticipantMatchesScreen()
+        val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
+        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
+
+        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
+        val viewingParticipant by userViewModel.viewingParticipant.collectAsStateWithLifecycle()
+
+        ParticipantMatchesScreen(
+            participantList = tournament.participants,
+            matchList = createMatchList(
+                tournament = tournament,
+                userId = viewingParticipant.userId
+            ),
+            declareWinner = { winnerId ->
+                // TODO: NOT YET IMPLEMENTED
+            }
+        )
     }
+}
+
+private fun createMatchList(
+    tournament: Tournament,
+    userId: String
+): List<Match> {
+    val matchList: MutableList<Match> = mutableListOf()
+    tournament.rounds?.let { roundsList ->
+        for (round in roundsList) {
+            val match = round.matches.find {
+                it.playerOneId == userId || it.playerTwoId == userId
+            }
+            match?.let {
+                matchList.add(it)
+            }
+        }
+    }
+    return matchList
 }

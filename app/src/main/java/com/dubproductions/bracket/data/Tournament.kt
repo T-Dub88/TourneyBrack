@@ -126,10 +126,11 @@ data class Tournament(
                 Match(
                     matchId = makeRandomString(),
                     playerOneId = participantList[i].userId,
-                    playerTwoId = "bye",
+                    playerTwoId = null,
                     round = roundNumber,
                     winnerId = participantList[i].userId,
-                    tie = false
+                    tie = false,
+                    status = MatchStatus.COMPLETE.status
                 )
             )
             matchList

@@ -1,6 +1,7 @@
 package com.dubproductions.bracket.data.repository
 
 import android.util.Log
+import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Round
 import com.dubproductions.bracket.data.Tournament
@@ -351,6 +352,10 @@ class TournamentRepositoryImpl: TournamentRepository {
         } catch (e: Exception) {
             Log.e(TAG, "dropParticipant: $e")
         }
+    }
+
+    override suspend fun updateMatchResult(tournamentId: String, winnerId: String?) {
+        TODO("Not yet implemented")
     }
 
 }

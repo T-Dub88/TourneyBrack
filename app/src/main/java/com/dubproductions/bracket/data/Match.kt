@@ -3,10 +3,11 @@ package com.dubproductions.bracket.data
 data class Match(
     val matchId: String = "",
     val playerOneId: String = "",
-    val playerTwoId: String = "",
+    val playerTwoId: String? = "",
     var winnerId: String? = null,
     var tie: Boolean? = null,
-    val round: Int = 0
+    val round: Int = 0,
+    var status: String = MatchStatus.PENDING.status
 ) {
     fun declareWinner(id: String) {
         winnerId = id
@@ -15,4 +16,9 @@ data class Match(
     fun declareTie() {
         tie = true
     }
+
+    fun setMatchStatus(newStatus: String) {
+        status = newStatus
+    }
+
 }
