@@ -13,33 +13,93 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dubproductions.bracket.data.Match
-import com.dubproductions.bracket.data.Participant
-import androidx.compose.foundation.lazy.items
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.MatchStatus
+import com.dubproductions.bracket.data.Participant
 
 @Composable
 fun ParticipantMatchesScreen(
     participantList: List<Participant>,
     matchList: List<Match>,
-    declareWinner: (String?) -> Unit
+    declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit
 ) {
+
+    var showDeclareDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var selectedWinnerId: String? by rememberSaveable {
+        mutableStateOf(null)
+    }
+    var selectedMatchId by rememberSaveable {
+        mutableStateOf("")
+    }
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         Text(text = "Participant Matches")
+        
+        if (showDeclareDialog) {
+            AlertDialog(
+                title = { Text(text = "Report Results") },
+                text = {
+                    if (selectedWinnerId == null) {
+                        Text(text = "Are you sure you want to declare this match a tie?")
+                    } else {
+                        Text(text = "Are you sure you want to declare ${participantList.find { it.userId == selectedWinnerId }?.username} as the winner of this match?")
+                    }
+                },
+                icon = { Icon(imageVector = Icons.Default.Check, contentDescription = null) },
+                onDismissRequest = { showDeclareDialog = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val selectedMatch = matchList.find { it.matchId == selectedMatchId }
+                            selectedMatch?.let { match ->
+                                declareWinner(
+                                    selectedWinnerId,
+                                    match.round,
+                                    match.matchId
+                                )
+                            }
+
+                            showDeclareDialog = false
+                        }
+                    ) {
+                        Text(text = "Ok")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeclareDialog = false }) {
+                        Text(text = "Cancel")
+                    }
+                },
+
+            )
+
+        }
+        
         LazyColumn(
             contentPadding = PaddingValues(8.dp)
         ) {
@@ -51,7 +111,9 @@ fun ParticipantMatchesScreen(
                         participantList.find { it.userId == playerId } ?: Participant()
                     },
                     setWinnerClick = { winnerId ->
-                        declareWinner(winnerId)
+                        selectedWinnerId = winnerId
+                        selectedMatchId = match.matchId
+                        showDeclareDialog = true
                     }
                 )
             }
@@ -178,15 +240,4 @@ private fun setPlayerMatchResult(
     } else {
         "Pending"
     }
-}
-
-@Preview
-@Composable
-fun PreviewMatchCard() {
-    MatchCard(
-        match = Match(),
-        winnerClickEnabled = true,
-        getPlayerInfo = { return@MatchCard Participant() },
-        setWinnerClick = {  }
-    )
 }

@@ -354,8 +354,34 @@ class TournamentRepositoryImpl: TournamentRepository {
         }
     }
 
-    override suspend fun updateMatchResult(tournamentId: String, winnerId: String?) {
-        TODO("Not yet implemented")
+    override suspend fun updateMatchResult(
+        tournamentId: String,
+        updatedRound: Round
+    ) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(tournamentId)
+                .update("rounds", FieldValue.arrayUnion(updatedRound))
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "updateMatchResult: $e")
+        }
+    }
+
+    suspend fun removeOldRoundData(
+        tournamentId: String,
+        oldRound: Round
+    ) {
+        try {
+            firestore
+                .collection("Tournaments")
+                .document(tournamentId)
+                .update("rounds", FieldValue.arrayRemove(oldRound))
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "removeOldRoundData: $e")
+        }
     }
 
 }

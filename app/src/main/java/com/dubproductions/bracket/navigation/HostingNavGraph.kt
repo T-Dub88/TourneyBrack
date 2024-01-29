@@ -22,6 +22,7 @@ import com.dubproductions.bracket.viewmodel.EditTournamentViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantMatchesViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
@@ -259,6 +260,7 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
     ) {
         val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
         val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
 
         val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
         val viewingParticipant by userViewModel.viewingParticipant.collectAsStateWithLifecycle()
@@ -269,8 +271,15 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
                 tournament = tournament,
                 userId = viewingParticipant.userId
             ),
-            declareWinner = { winnerId ->
-                // TODO: NOT YET IMPLEMENTED
+            declareWinner = { winnerId, roundNum, matchId ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.declareMatchWinner(
+                        winnerId = winnerId,
+                        tournamentId = tournament.id!!,
+                        round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
+                        matchId = matchId
+                    )
+                }
             }
         )
     }

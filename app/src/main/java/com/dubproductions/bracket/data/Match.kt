@@ -9,7 +9,7 @@ data class Match(
     val round: Int = 0,
     var status: String = MatchStatus.PENDING.status
 ) {
-    fun declareWinner(id: String) {
+    fun declareWinner(id: String?) {
         winnerId = id
     }
 
