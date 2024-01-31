@@ -14,10 +14,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -31,7 +31,6 @@ import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.TournamentStatus
 import com.dubproductions.bracket.ui.ReusableDialog
 import com.dubproductions.bracket.ui_state.EditTournamentUIState
-import org.checkerframework.checker.units.qual.s
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -161,8 +160,8 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red,
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         ) {
             EditTourneyText(text = stringResource(id = R.string.delete_tournament))

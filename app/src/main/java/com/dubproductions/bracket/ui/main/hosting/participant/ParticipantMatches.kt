@@ -136,7 +136,7 @@ fun MatchCard(
             .wrapContentHeight()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Text(
@@ -172,9 +172,9 @@ fun MatchCard(
             )
             Divider(
                 modifier = Modifier
-                    .width(2.dp)
+                    .width(1.dp)
                     .fillMaxHeight(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             PlayerColumn(
