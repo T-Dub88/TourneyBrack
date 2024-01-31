@@ -33,7 +33,7 @@ fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
         hostingScreen(navController)
         tournamentCreationScreen(navController)
         editTournamentScreen(navController)
-        bracketScreen()
+        bracketScreen(navController)
         participantsScreen(navController)
         participantMatchesScreen(navController)
     }
@@ -177,11 +177,29 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
     }
 }
 
-fun NavGraphBuilder.bracketScreen() {
+fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
     composable(
         route = Screen.Bracket.route
     ) {
-        BracketScreen()
+        val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
+        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+
+        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
+
+        BracketScreen(
+            tournament = tournament,
+            declareWinner = { winnerId, roundNum, matchId ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.declareMatchWinner(
+                        matchId = matchId,
+                        round = tournament.rounds?.find { round ->  round.roundNumber == roundNum }!!,
+                        tournamentId = tournament.id!!,
+                        winnerId = winnerId
+                    )
+                }
+            }
+        )
     }
 }
 
