@@ -1,4 +1,4 @@
-package com.dubproductions.bracket.ui
+package com.dubproductions.bracket.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

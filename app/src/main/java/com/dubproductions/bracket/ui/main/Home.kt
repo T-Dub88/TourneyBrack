@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.TournamentStatus
-import com.dubproductions.bracket.ui.TournamentSummaryCard
+import com.dubproductions.bracket.ui.components.TournamentSummaryCard
 
 @Composable
 fun HomeScreen(

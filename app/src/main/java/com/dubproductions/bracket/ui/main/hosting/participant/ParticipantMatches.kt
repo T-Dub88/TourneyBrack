@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.MatchStatus
 import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.ui.DeclareWinnerDialog
-import com.dubproductions.bracket.ui.MatchCard
+import com.dubproductions.bracket.ui.components.DeclareWinnerDialog
+import com.dubproductions.bracket.ui.components.MatchCard
 
 @Composable
 fun ParticipantMatchesScreen(
