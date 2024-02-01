@@ -1,4 +1,4 @@
-package com.dubproductions.bracket.ui_state
+package com.dubproductions.bracket.data.ui_state
 
 data class RegistrationUIState(
     var uiEnabled: Boolean = true,

@@ -2,7 +2,7 @@ package com.dubproductions.bracket.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dubproductions.bracket.data.MatchStatus
+import com.dubproductions.bracket.data.status.MatchStatus
 import com.dubproductions.bracket.data.Round
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel

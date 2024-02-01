@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.TournamentStatus
+import com.dubproductions.bracket.data.status.TournamentStatus
 import com.dubproductions.bracket.ui.components.ReusableDialog
-import com.dubproductions.bracket.ui_state.EditTournamentUIState
+import com.dubproductions.bracket.data.ui_state.EditTournamentUIState
 import java.text.SimpleDateFormat
 import java.util.Locale
 

@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.ui_state.ParticipantsUIState
+import com.dubproductions.bracket.data.ui_state.ParticipantsUIState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

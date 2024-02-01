@@ -5,19 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.TournamentStatus
+import com.dubproductions.bracket.data.status.TournamentStatus
 import com.dubproductions.bracket.data.User
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel

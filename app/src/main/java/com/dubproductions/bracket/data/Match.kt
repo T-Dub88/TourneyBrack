@@ -1,5 +1,7 @@
 package com.dubproductions.bracket.data
 
+import com.dubproductions.bracket.data.status.MatchStatus
+
 data class Match(
     val matchId: String = "",
     val playerOneId: String = "",

@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.TournamentStatus
+import com.dubproductions.bracket.data.status.TournamentStatus
 import com.dubproductions.bracket.ui.main.hosting.BracketScreen
 import com.dubproductions.bracket.ui.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.ui.main.hosting.HostingScreen
@@ -22,7 +22,6 @@ import com.dubproductions.bracket.viewmodel.EditTournamentViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantMatchesViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {

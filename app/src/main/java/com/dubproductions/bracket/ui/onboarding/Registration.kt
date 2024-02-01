@@ -27,7 +27,7 @@ import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.components.OnboardingButton
 import com.dubproductions.bracket.ui.components.OnboardingTextField
 import com.dubproductions.bracket.ui.components.ReusableDialog
-import com.dubproductions.bracket.ui_state.RegistrationUIState
+import com.dubproductions.bracket.data.ui_state.RegistrationUIState
 
 @Composable
 fun RegistrationScreen(

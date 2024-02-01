@@ -3,7 +3,7 @@ package com.dubproductions.bracket.viewmodel
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
-import com.dubproductions.bracket.ui_state.ParticipantsUIState
+import com.dubproductions.bracket.data.ui_state.ParticipantsUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

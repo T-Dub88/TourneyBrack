@@ -1,4 +1,4 @@
-package com.dubproductions.bracket.data
+package com.dubproductions.bracket.data.status
 
 enum class TournamentStatus(val status: String) {
     REGISTERING("registering"),
