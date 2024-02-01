@@ -86,7 +86,7 @@ fun TournamentSummaryCard(
                     text = stringResource(
                         id = R.string.started_date,
                         if (tournament.timeStarted != null) {
-                            formatDateTime(tournament.timeStarted)
+                            formatDateTime(tournament.timeStarted!!)
                         } else {
                             stringResource(id = R.string.pending)
                         }
@@ -99,7 +99,7 @@ fun TournamentSummaryCard(
                     text = stringResource(
                         id = R.string.completed_date,
                         if (tournament.timeCompleted != null) {
-                            formatDateTime(tournament.timeCompleted)
+                            formatDateTime(tournament.timeCompleted!!)
                         } else {
                             stringResource(R.string.pending)
                         }
@@ -119,7 +119,7 @@ fun TournamentSummaryCard(
     }
 }
 
-fun formatDateTime(timestamp: Long?): String {
+fun formatDateTime(timestamp: Long): String {
     val sdf = SimpleDateFormat("MM-dd-yy HH:mm", Locale.getDefault())
     return sdf.format(timestamp)
 }
