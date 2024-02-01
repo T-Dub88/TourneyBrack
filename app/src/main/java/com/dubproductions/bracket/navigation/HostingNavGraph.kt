@@ -288,6 +288,7 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
                 tournament = tournament,
                 userId = viewingParticipant.userId
             ),
+            tournamentStatus = tournament.status,
             declareWinner = { winnerId, roundNum, matchId ->
                 coroutineScope.launch {
                     participantMatchesViewModel.declareMatchWinner(

@@ -124,4 +124,8 @@
     <string name="bye">Bye</string>
     <string name="match_result">Match Result: %1$s</string>
 
+    <!--Bracket Screen-->
+    <string name="not_playing">Not Playing</string>
+    <string name="not_playing_warning">This tournament must be started in order to report results.</string>
+
 </resources>

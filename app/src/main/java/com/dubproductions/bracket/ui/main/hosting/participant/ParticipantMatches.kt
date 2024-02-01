@@ -5,23 +5,30 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.status.MatchStatus
 import com.dubproductions.bracket.data.Participant
+import com.dubproductions.bracket.data.status.TournamentStatus
 import com.dubproductions.bracket.ui.components.DeclareWinnerDialog
 import com.dubproductions.bracket.ui.components.MatchCard
+import com.dubproductions.bracket.ui.components.ReusableDialog
 
 @Composable
 fun ParticipantMatchesScreen(
     participantList: List<Participant>,
     matchList: List<Match>,
+    tournamentStatus: String,
     declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit
 ) {
 
@@ -33,6 +40,9 @@ fun ParticipantMatchesScreen(
     }
     var selectedMatchId by rememberSaveable {
         mutableStateOf("")
+    }
+    var showNeedPlayingDialog by rememberSaveable {
+        mutableStateOf(false)
     }
 
     Column(
@@ -50,6 +60,17 @@ fun ParticipantMatchesScreen(
                 declareWinner = declareWinner
             )
         }
+
+        if (showNeedPlayingDialog) {
+            ReusableDialog(
+                titleText = stringResource(id = R.string.not_playing),
+                contentText = stringResource(id = R.string.not_playing_warning),
+                icon = Icons.Default.ErrorOutline,
+                dismissDialog = {
+                    showNeedPlayingDialog = false
+                }
+            )
+        }
         
         LazyColumn(
             contentPadding = PaddingValues(8.dp)
@@ -62,9 +83,13 @@ fun ParticipantMatchesScreen(
                         participantList.find { it.userId == playerId } ?: Participant()
                     },
                     setWinnerClick = { winnerId ->
-                        selectedWinnerId = winnerId
-                        selectedMatchId = match.matchId
-                        showDeclareDialog = true
+                        if (tournamentStatus == TournamentStatus.PLAYING.status) {
+                            selectedWinnerId = winnerId
+                            selectedMatchId = match.matchId
+                            showDeclareDialog = true
+                        } else {
+                            showNeedPlayingDialog = true
+                        }
                     }
                 )
             }
