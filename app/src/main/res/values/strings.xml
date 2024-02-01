@@ -107,4 +107,9 @@
     <string name="cancel">Cancel</string>
     <string name="not_started">Not Started</string>
 
+    <!--Declare Winner Dialog-->
+    <string name="report_results">Report Results</string>
+    <string name="report_tie">Are you sure you want to declare this match a tie?</string>
+    <string name="report_winner">Are you sure you want to declare %1$s as the winner of this match?</string>
+
 </resources>

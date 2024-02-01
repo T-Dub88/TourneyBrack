@@ -7,6 +7,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.Participant
 
@@ -20,12 +22,17 @@ fun DeclareWinnerDialog(
     declareWinner: (winnerId: String?, roundNumber: Int, matchId: String) -> Unit
 ) {
     AlertDialog(
-        title = { Text(text = "Report Results") },
+        title = { Text(text = stringResource(id = R.string.report_results)) },
         text = {
             if (selectedWinnerId == null) {
-                Text(text = "Are you sure you want to declare this match a tie?")
+                Text(text = stringResource(id = R.string.report_tie))
             } else {
-                Text(text = "Are you sure you want to declare ${participantList.find { it.userId == selectedWinnerId }?.username} as the winner of this match?")
+                Text(
+                    text = stringResource(
+                        id = R.string.report_winner,
+                        participantList.find { it.userId == selectedWinnerId }?.username.toString()
+                    )
+                )
             }
         },
         icon = { Icon(imageVector = Icons.Default.Check, contentDescription = null) },
@@ -45,14 +52,14 @@ fun DeclareWinnerDialog(
                     changeDialogVisibility(false)
                 }
             ) {
-                Text(text = "Ok")
+                Text(text = stringResource(id = R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = { changeDialogVisibility(false) }) {
-                Text(text = "Cancel")
+                Text(text = stringResource(id = R.string.cancel))
             }
         },
 
-        )
+    )
 }
