@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
-import com.dubproductions.bracket.ui.components.ReusableDialog
+import com.dubproductions.bracket.ui.components.dialogs.ReusableDialog
 import com.dubproductions.bracket.data.ui_state.TournamentCreationUIState
 
 @Composable

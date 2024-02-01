@@ -26,7 +26,7 @@ import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
 import com.dubproductions.bracket.ui.components.OnboardingButton
 import com.dubproductions.bracket.ui.components.OnboardingTextField
-import com.dubproductions.bracket.ui.components.ReusableDialog
+import com.dubproductions.bracket.ui.components.dialogs.ReusableDialog
 import com.dubproductions.bracket.data.ui_state.RegistrationUIState
 
 @Composable

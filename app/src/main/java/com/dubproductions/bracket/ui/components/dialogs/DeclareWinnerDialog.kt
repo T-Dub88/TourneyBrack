@@ -1,4 +1,4 @@
-package com.dubproductions.bracket.ui.components
+package com.dubproductions.bracket.ui.components.dialogs
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
