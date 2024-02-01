@@ -119,4 +119,9 @@
     <string name="win">Win</string>
     <string name="lose">Lose</string>
 
+    <!--Player Column-->
+    <string name="winner">Winner</string>
+    <string name="bye">Bye</string>
+    <string name="match_result">Match Result: %1$s</string>
+
 </resources>

@@ -5,7 +5,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Participant
 
 @Composable
@@ -19,15 +21,15 @@ fun PlayerColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = participant?.username ?: "Bye",
+            text = participant?.username ?: stringResource(id = R.string.bye),
             fontSize = 25.sp
         )
-        Text(text = "Match Result: $matchResult")
+        Text(text = stringResource(id = R.string.match_result, matchResult))
         Button(
             onClick = { setWinnerClick(participant?.userId ?: "") },
             enabled = winnerClickEnabled
         ) {
-            Text(text = "Winner")
+            Text(text = stringResource(id = R.string.winner))
         }
     }
 }
