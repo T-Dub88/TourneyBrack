@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.TournamentStatus
+import com.dubproductions.bracket.data.status.TournamentStatus
 import com.dubproductions.bracket.ui.main.hosting.BracketScreen
 import com.dubproductions.bracket.ui.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.ui.main.hosting.HostingScreen
@@ -22,7 +22,6 @@ import com.dubproductions.bracket.viewmodel.EditTournamentViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantMatchesViewModel
 import com.dubproductions.bracket.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.viewmodel.UserViewModel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
@@ -33,7 +32,7 @@ fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
         hostingScreen(navController)
         tournamentCreationScreen(navController)
         editTournamentScreen(navController)
-        bracketScreen()
+        bracketScreen(navController)
         participantsScreen(navController)
         participantMatchesScreen(navController)
     }
@@ -177,11 +176,29 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
     }
 }
 
-fun NavGraphBuilder.bracketScreen() {
+fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
     composable(
         route = Screen.Bracket.route
     ) {
-        BracketScreen()
+        val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
+        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+
+        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
+
+        BracketScreen(
+            tournament = tournament,
+            declareWinner = { winnerId, roundNum, matchId ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.declareMatchWinner(
+                        matchId = matchId,
+                        round = tournament.rounds?.find { round ->  round.roundNumber == roundNum }!!,
+                        tournamentId = tournament.id!!,
+                        winnerId = winnerId
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -271,6 +288,7 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
                 tournament = tournament,
                 userId = viewingParticipant.userId
             ),
+            tournamentStatus = tournament.status,
             declareWinner = { winnerId, roundNum, matchId ->
                 coroutineScope.launch {
                     participantMatchesViewModel.declareMatchWinner(

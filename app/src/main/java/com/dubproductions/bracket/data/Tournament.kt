@@ -1,5 +1,7 @@
 package com.dubproductions.bracket.data
 
+import com.dubproductions.bracket.data.status.MatchStatus
+import com.dubproductions.bracket.data.status.TournamentStatus
 import java.util.Date
 import kotlin.math.ceil
 import kotlin.math.log2

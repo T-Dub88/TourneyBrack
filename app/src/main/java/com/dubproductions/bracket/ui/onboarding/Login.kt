@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Error
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,10 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.Type
 import com.dubproductions.bracket.Validation
-import com.dubproductions.bracket.ui.OnboardingButton
-import com.dubproductions.bracket.ui.OnboardingTextField
-import com.dubproductions.bracket.ui.ReusableDialog
-import com.dubproductions.bracket.ui_state.LoginUIState
+import com.dubproductions.bracket.ui.components.OnboardingButton
+import com.dubproductions.bracket.ui.components.OnboardingTextField
+import com.dubproductions.bracket.ui.components.ReusableDialog
+import com.dubproductions.bracket.data.ui_state.LoginUIState
 
 @Composable
 fun LoginScreen(
