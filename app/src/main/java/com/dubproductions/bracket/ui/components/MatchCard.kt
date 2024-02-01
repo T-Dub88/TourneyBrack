@@ -18,8 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dubproductions.bracket.R
 import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.Participant
 
@@ -44,7 +46,7 @@ fun MatchCard(
         )
     ) {
         Text(
-            text = "Round: ${match.round}",
+            text = stringResource(id = R.string.round, match.round),
             modifier = Modifier
                 .align(
                     alignment = Alignment.CenterHorizontally
@@ -52,7 +54,10 @@ fun MatchCard(
             fontSize = 25.sp
         )
         Text(
-            text = "Match Status: ${match.status.replaceFirstChar { it.uppercase() }}",
+            text = stringResource(
+                id = R.string.match_status,
+                match.status.replaceFirstChar { it.uppercase() }
+            ),
             modifier = Modifier
                 .align(
                     alignment = Alignment.CenterHorizontally
@@ -66,10 +71,12 @@ fun MatchCard(
         ) {
             PlayerColumn(
                 participant = playerOne,
-                matchResult = setPlayerMatchResult(
-                    tie = match.tie,
-                    winnerId = match.winnerId,
-                    playerId = playerOne.userId
+                matchResult = stringResource(
+                    id = setPlayerMatchResult(
+                        tie = match.tie,
+                        winnerId = match.winnerId,
+                        playerId = playerOne.userId
+                    )
                 ),
                 setWinnerClick = setWinnerClick,
                 winnerClickEnabled = winnerClickEnabled
@@ -83,10 +90,12 @@ fun MatchCard(
 
             PlayerColumn(
                 participant = playerTwo,
-                matchResult = setPlayerMatchResult(
-                    tie = match.tie,
-                    winnerId = match.winnerId,
-                    playerId = playerTwo?.userId ?: ""
+                matchResult = stringResource(
+                    id = setPlayerMatchResult(
+                        tie = match.tie,
+                        winnerId = match.winnerId,
+                        playerId = playerOne.userId
+                    )
                 ),
                 setWinnerClick = setWinnerClick,
                 winnerClickEnabled = winnerClickEnabled
@@ -99,7 +108,7 @@ fun MatchCard(
                 .padding(bottom = 4.dp),
             enabled = winnerClickEnabled
         ) {
-            Text(text = "Tie")
+            Text(text = stringResource(id = R.string.tie))
         }
     }
 }
@@ -108,14 +117,14 @@ fun setPlayerMatchResult(
     tie: Boolean?,
     winnerId: String?,
     playerId: String
-): String {
+): Int {
     return if (tie == true) {
-        "Tie"
+        R.string.tie
     } else if (winnerId == playerId) {
-        "Win"
+        R.string.win
     } else if (!winnerId.isNullOrEmpty()) {
-        "Lose"
+        R.string.lose
     } else {
-        "Pending"
+        R.string.pending
     }
 }

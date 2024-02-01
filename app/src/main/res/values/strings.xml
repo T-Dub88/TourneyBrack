@@ -112,4 +112,11 @@
     <string name="report_tie">Are you sure you want to declare this match a tie?</string>
     <string name="report_winner">Are you sure you want to declare %1$s as the winner of this match?</string>
 
+    <!--Match Card-->
+    <string name="round">Round: %1$d</string>
+    <string name="match_status">Match Status: %1$s</string>
+    <string name="tie">Tie</string>
+    <string name="win">Win</string>
+    <string name="lose">Lose</string>
+
 </resources>
