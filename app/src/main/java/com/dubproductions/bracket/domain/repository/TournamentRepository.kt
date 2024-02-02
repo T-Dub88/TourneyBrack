@@ -1,9 +1,9 @@
 package com.dubproductions.bracket.domain.repository
 
-import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.data.Round
-import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.User
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
+import com.dubproductions.bracket.domain.model.Tournament
+import com.dubproductions.bracket.domain.model.User
 
 interface TournamentRepository {
     // Onboarding methods

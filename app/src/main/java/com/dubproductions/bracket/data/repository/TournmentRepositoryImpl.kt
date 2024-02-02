@@ -1,11 +1,10 @@
 package com.dubproductions.bracket.data.repository
 
 import android.util.Log
-import com.dubproductions.bracket.data.Match
-import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.data.Round
-import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.User
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
+import com.dubproductions.bracket.domain.model.Tournament
+import com.dubproductions.bracket.domain.model.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
