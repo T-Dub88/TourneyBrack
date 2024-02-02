@@ -1,7 +1,7 @@
 package com.dubproductions.bracket.domain.model
 
 data class Round(
-    var matches: List<Match> = listOf(),
-    var roundNumber: Int = 1,
+    var matchIds: List<String>? = null,
+    var roundNumber: Int? = null,
     var bye: String? = null
 )
