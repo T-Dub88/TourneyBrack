@@ -106,6 +106,8 @@
     <string name="update_tournament">Tap card to update tournament</string>
     <string name="cancel">Cancel</string>
     <string name="not_started">Not Started</string>
+    <string name="edit_match">Edit Match</string>
+    <string name="edit_match_body">Editing this match will delete future round data that has already been generated.</string>
 
     <!--Declare Winner Dialog-->
     <string name="report_results">Report Results</string>

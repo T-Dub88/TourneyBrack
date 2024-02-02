@@ -197,6 +197,16 @@ fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
                         winnerId = winnerId
                     )
                 }
+            },
+            editMatch = { matchId, roundNum ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.editMatch(
+                        matchId = matchId,
+                        participantList = tournament.participants,
+                        round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
+                        tournamentId = tournament.id!!
+                    )
+                }
             }
         )
     }
@@ -296,6 +306,16 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
                         tournamentId = tournament.id!!,
                         round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
                         matchId = matchId
+                    )
+                }
+            },
+            editMatch = { matchId, roundNum ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.editMatch(
+                        matchId = matchId,
+                        participantList = tournament.participants,
+                        round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
+                        tournamentId = tournament.id!!
                     )
                 }
             }

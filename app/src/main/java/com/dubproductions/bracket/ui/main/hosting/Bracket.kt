@@ -31,22 +31,28 @@ import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.Round
 import com.dubproductions.bracket.data.Tournament
 import com.dubproductions.bracket.data.status.TournamentStatus
-import com.dubproductions.bracket.ui.components.DeclareWinnerDialog
+import com.dubproductions.bracket.ui.components.dialogs.DeclareWinnerDialog
 import com.dubproductions.bracket.ui.components.MatchCard
-import com.dubproductions.bracket.ui.components.ReusableDialog
+import com.dubproductions.bracket.ui.components.dialogs.EditMatchDialog
+import com.dubproductions.bracket.ui.components.dialogs.ReusableDialog
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BracketScreen(
     tournament: Tournament,
-    declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit
+    declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit,
+    editMatch: (String, Int) -> Unit
 ) {
 
-    var selectedRoundIndex by rememberSaveable {
-        mutableIntStateOf(0)
+    var selectedRoundIndex: Int? by rememberSaveable {
+        mutableStateOf(0)
     }
     val pagerState = rememberPagerState {
-        tournament.rounds?.size ?: 1
+        if (tournament.rounds.isNullOrEmpty()) {
+            1
+        } else {
+            tournament.rounds!!.size
+        }
     }
 
     var showDeclareWinnerDialog by rememberSaveable {
@@ -61,9 +67,12 @@ fun BracketScreen(
     var showNeedPlayingDialog by rememberSaveable {
         mutableStateOf(false)
     }
+    var showMatchEditDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(selectedRoundIndex) {
-        pagerState.animateScrollToPage(selectedRoundIndex)
+        selectedRoundIndex?.let { pagerState.animateScrollToPage(it) }
     }
 
     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
@@ -77,7 +86,7 @@ fun BracketScreen(
             selectedWinnerId = selectedWinnerId,
             selectedMatchId = selectedMatchId,
             participantList = tournament.participants,
-            matchList = tournament.rounds!![selectedRoundIndex].matches,
+            matchList = tournament.rounds!![selectedRoundIndex!!].matches,
             changeDialogVisibility = {
                 showDeclareWinnerDialog = it
             },
@@ -96,27 +105,39 @@ fun BracketScreen(
         )
     }
 
+    if (showMatchEditDialog) {
+        EditMatchDialog(
+            hideDialog = {
+                showMatchEditDialog = false
+            },
+            editMatch = {
+                editMatch(selectedMatchId, selectedRoundIndex!! + 1)
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         ScrollableTabRow(
-            selectedTabIndex = selectedRoundIndex,
-
+            selectedTabIndex = selectedRoundIndex ?: 1,
         ) {
-            tournament.rounds?.forEach { round ->
-                Tab(
-                    selected = selectedRoundIndex == round.roundNumber - 1,
-                    onClick = {
-                        selectedRoundIndex = round.roundNumber - 1
-                    },
-                    text = {
-                        Text(
-                            text = stringResource(id = R.string.round, round.roundNumber),
-                            fontSize = 16.sp
-                        )
-                    }
-                )
+            if (!tournament.rounds.isNullOrEmpty()) {
+                tournament.rounds!!.forEach { round ->
+                    Tab(
+                        selected = selectedRoundIndex == round.roundNumber - 1,
+                        onClick = {
+                            selectedRoundIndex = round.roundNumber - 1
+                        },
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.round, round.roundNumber),
+                                fontSize = 16.sp
+                            )
+                        }
+                    )
+                }
             }
         }
         HorizontalPager(
@@ -142,6 +163,10 @@ fun BracketScreen(
                             } else {
                                 showNeedPlayingDialog = true
                             }
+                        },
+                        onEditClick = {
+                            selectedMatchId = match.matchId
+                            showMatchEditDialog = true
                         }
                     )
                 }
@@ -164,6 +189,7 @@ fun PreviewBracketScreen() {
                 Round(roundNumber = 6)
             )
         ),
-        declareWinner = { _, _, _ -> }
+        declareWinner = { _, _, _ -> },
+        editMatch = { _, _ -> }
     )
 }

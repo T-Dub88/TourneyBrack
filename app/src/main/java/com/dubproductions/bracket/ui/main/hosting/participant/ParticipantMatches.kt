@@ -7,6 +7,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,18 +24,19 @@ import com.dubproductions.bracket.data.Match
 import com.dubproductions.bracket.data.status.MatchStatus
 import com.dubproductions.bracket.data.Participant
 import com.dubproductions.bracket.data.status.TournamentStatus
-import com.dubproductions.bracket.ui.components.DeclareWinnerDialog
+import com.dubproductions.bracket.ui.components.dialogs.DeclareWinnerDialog
 import com.dubproductions.bracket.ui.components.MatchCard
-import com.dubproductions.bracket.ui.components.ReusableDialog
+import com.dubproductions.bracket.ui.components.dialogs.EditMatchDialog
+import com.dubproductions.bracket.ui.components.dialogs.ReusableDialog
 
 @Composable
 fun ParticipantMatchesScreen(
     participantList: List<Participant>,
     matchList: List<Match>,
     tournamentStatus: String,
-    declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit
+    declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit,
+    editMatch: (String, Int) -> Unit
 ) {
-
     var showDeclareDialog by rememberSaveable {
         mutableStateOf(false)
     }
@@ -42,6 +47,9 @@ fun ParticipantMatchesScreen(
         mutableStateOf("")
     }
     var showNeedPlayingDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showMatchEditDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -71,6 +79,17 @@ fun ParticipantMatchesScreen(
                 }
             )
         }
+
+        if (showMatchEditDialog) {
+            EditMatchDialog(
+                hideDialog = {
+                    showMatchEditDialog = false
+                },
+                editMatch = {
+                    editMatch(selectedMatchId, matchList.find { it.matchId == selectedMatchId }!!.round)
+                }
+            )
+        }
         
         LazyColumn(
             contentPadding = PaddingValues(8.dp)
@@ -90,6 +109,10 @@ fun ParticipantMatchesScreen(
                         } else {
                             showNeedPlayingDialog = true
                         }
+                    },
+                    onEditClick = {
+                        selectedMatchId = match.matchId
+                        showMatchEditDialog = true
                     }
                 )
             }
