@@ -35,7 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
-import com.dubproductions.bracket.Validation
+import com.dubproductions.bracket.utils.Validation
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.presentation.ui.state.ParticipantsUIState
 

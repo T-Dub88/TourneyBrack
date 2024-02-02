@@ -21,8 +21,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.dubproductions.bracket.R
-import com.dubproductions.bracket.Type
-import com.dubproductions.bracket.Validation
+import com.dubproductions.bracket.utils.Type
+import com.dubproductions.bracket.utils.Validation
 import com.dubproductions.bracket.presentation.ui.components.OnboardingButton
 import com.dubproductions.bracket.presentation.ui.components.OnboardingTextField
 import com.dubproductions.bracket.presentation.ui.components.dialogs.ReusableDialog

@@ -1,4 +1,4 @@
-package com.dubproductions.bracket
+package com.dubproductions.bracket.utils
 
 import android.util.Patterns
 
