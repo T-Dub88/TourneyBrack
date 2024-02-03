@@ -1,34 +1,26 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
+import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.domain.repository.OnboardingRepository
 import com.dubproductions.bracket.presentation.ui.state.LoginUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val tournamentRepository: TournamentRepositoryImpl
+    private val onboardingRepository: OnboardingRepository
 ): ViewModel() {
 
     private val _loginUIState: MutableStateFlow<LoginUIState> = MutableStateFlow(
         LoginUIState()
     )
     val loginUIState: StateFlow<LoginUIState> = _loginUIState.asStateFlow()
-
-    init {
-        Log.i("LoginViewModel", "Created")
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.i("LoginViewModel", "Cleared")
-    }
 
     private fun updateLoginUIState(newState: LoginUIState) {
         _loginUIState.update {
@@ -50,22 +42,22 @@ class LoginViewModel @Inject constructor(
         updateLoginUIState(newState)
     }
 
-    fun showPasswordResetSuccessDialog() {
+    private fun showPasswordResetSuccessDialog() {
         val newState = loginUIState.value.copy(showPasswordResetSuccessDialog = true)
         updateLoginUIState(newState)
     }
 
-    fun showPasswordResetFailureDialog() {
+    private fun showPasswordResetFailureDialog() {
         val newState = loginUIState.value.copy(showPasswordResetFailureDialog = true)
         updateLoginUIState(newState)
     }
 
-    fun disableLoginScreenUI() {
+    private fun disableLoginScreenUI() {
         val newState = loginUIState.value.copy(enable = false)
         updateLoginUIState(newState)
     }
 
-    fun enableLoginScreenUI() {
+    private fun enableLoginScreenUI() {
         val newState = loginUIState.value.copy(enable = true)
         updateLoginUIState(newState)
     }
@@ -74,14 +66,26 @@ class LoginViewModel @Inject constructor(
         email: String,
         password: String
     ): Boolean {
-        return tournamentRepository.signInUser(
+        disableLoginScreenUI()
+        val signInResult =  onboardingRepository.signInUser(
                 email = email,
                 password = password
-            )
+        )
+        enableLoginScreenUI()
+        return signInResult
+
     }
 
-    suspend fun resetPassword(email: String): Boolean {
-        return tournamentRepository.resetPassword(email = email)
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            disableLoginScreenUI()
+            val resetResult = onboardingRepository.resetPassword(email)
+            if (resetResult) {
+                showPasswordResetSuccessDialog()
+            } else {
+                showPasswordResetFailureDialog()
+            }
+        }
     }
 
 }

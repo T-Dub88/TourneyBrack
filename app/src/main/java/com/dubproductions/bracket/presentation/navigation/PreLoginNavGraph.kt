@@ -42,10 +42,8 @@ fun NavGraphBuilder.loginScreen(
 
         LoginScreen(
             loginClick = { email, password ->
-                loginViewModel.disableLoginScreenUI()
                 coroutineScope.launch {
                     val result = loginViewModel.loginUser(email, password)
-                    loginViewModel.enableLoginScreenUI()
                     if (result) {
                         navigateToHomeScreen()
                     } else {
@@ -55,16 +53,7 @@ fun NavGraphBuilder.loginScreen(
             },
             registrationClick = { navigateToRegistrationScreen() },
             forgotPasswordClick = { email ->
-                loginViewModel.disableLoginScreenUI()
-                coroutineScope.launch {
-                    val result = loginViewModel.resetPassword(email)
-                    loginViewModel.enableLoginScreenUI()
-                    if (result) {
-                        loginViewModel.showPasswordResetSuccessDialog()
-                    } else {
-                        loginViewModel.showPasswordResetFailureDialog()
-                    }
-                }
+                loginViewModel.resetPassword(email)
             },
             dismissDialog = { loginViewModel.dismissLoginDialogs() },
             uiState = uiState
@@ -87,7 +76,6 @@ fun NavGraphBuilder.registrationScreen(
             dismissDialog = { registrationViewModel.hideDialog() },
             registrationClicked = { email, password, firstName, lastName, username ->
                 coroutineScope.launch {
-                    registrationViewModel.disableUI()
                     val result = registrationViewModel.registerUser(
                         email = email,
                         password = password,
@@ -95,12 +83,13 @@ fun NavGraphBuilder.registrationScreen(
                         lastName = lastName,
                         username = username
                     )
-                    registrationViewModel.enableUI()
+
                     if (result) {
                         navigateToHomeScreen()
                     } else {
                         registrationViewModel.showDialog()
                     }
+
                 }
             }
         )

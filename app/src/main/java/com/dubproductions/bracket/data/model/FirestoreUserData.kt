@@ -7,5 +7,6 @@ data class FirestoreUserData(
     var lastName: String? = null,
     var email: String? = null,
     var hostingTournamentIds: List<String>? = null,
-    var participatingTournamentIds: List<String>? = null
+    var participatingTournamentIds: List<String>? = null,
+    var completedTournamentIds: List<String>? = null
 )

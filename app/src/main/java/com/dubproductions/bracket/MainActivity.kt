@@ -24,8 +24,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
-
         setContent {
             val userLoggedIn by loadingViewModel.isLoggedIn.collectAsStateWithLifecycle()
             MainAppContent(

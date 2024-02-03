@@ -1,18 +1,19 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
+import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.domain.repository.OnboardingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class LoadingViewModel @Inject constructor(
-    private val tournamentRepository: TournamentRepositoryImpl
+    private val onboardingRepository: OnboardingRepository
 ): ViewModel() {
 
     private val _appReady: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -22,13 +23,7 @@ class LoadingViewModel @Inject constructor(
     val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     init {
-        Log.i("CreationViewModel", "Created")
         userLoginStatus()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.i("CreationViewModel", "Cleared")
     }
 
     fun updatedLogInStatus(status: Boolean) {
@@ -44,12 +39,9 @@ class LoadingViewModel @Inject constructor(
     }
 
     private fun userLoginStatus() {
-        val loggedIn = tournamentRepository.checkLoginStatus()
-        if (loggedIn) {
-            updatedLogInStatus(true)
-            updateReadyStatus()
-        } else {
-            updatedLogInStatus(false)
+        viewModelScope.launch {
+            val loginCheckResult = onboardingRepository.checkLoginStatus()
+            updatedLogInStatus(loginCheckResult)
             updateReadyStatus()
         }
     }
