@@ -66,7 +66,8 @@ fun LoginScreen(
             visualTransformation = VisualTransformation.None,
             error = emailError,
             errorText = stringResource(id = R.string.email_not_valid),
-            enabled = uiState.enable
+            enabled = uiState.enable,
+            capitalize = false
         )
 
         // Text field for password
@@ -93,7 +94,8 @@ fun LoginScreen(
             },
             error = passwordError,
             errorText = stringResource(id = R.string.password_needed),
-            enabled = uiState.enable
+            enabled = uiState.enable,
+            capitalize = false
         )
 
         // Button to log user in

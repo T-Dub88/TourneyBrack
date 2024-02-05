@@ -2,6 +2,9 @@ package com.dubproductions.bracket.presentation.ui.screen.onboarding
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Email
@@ -22,12 +25,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.dubproductions.bracket.R
-import com.dubproductions.bracket.utils.Type
-import com.dubproductions.bracket.utils.Validation
 import com.dubproductions.bracket.presentation.ui.components.OnboardingButton
 import com.dubproductions.bracket.presentation.ui.components.OnboardingTextField
 import com.dubproductions.bracket.presentation.ui.components.dialogs.ReusableDialog
 import com.dubproductions.bracket.presentation.ui.state.RegistrationUIState
+import com.dubproductions.bracket.utils.Type
+import com.dubproductions.bracket.utils.Validation
 
 @Composable
 fun RegistrationScreen(
@@ -59,8 +62,13 @@ fun RegistrationScreen(
     var lastNameError by rememberSaveable { mutableStateOf(false) }
     var passwordError by rememberSaveable { mutableStateOf(false) }
 
+    val scrollState = rememberScrollState()
+
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+            .verticalScroll(scrollState)
     ) {
         // Text field for email
         OnboardingTextField(
@@ -78,7 +86,8 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = emailError,
             errorText = stringResource(id = R.string.email_not_valid),
-            enabled = uiState.uiEnabled
+            enabled = uiState.uiEnabled,
+            capitalize = false
         )
 
         // Text field for username
@@ -97,7 +106,8 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = usernameError,
             errorText = stringResource(id = R.string.username_not_valid),
-            enabled = uiState.uiEnabled
+            enabled = uiState.uiEnabled,
+            capitalize = false
         )
 
         // Text field for first name
@@ -116,7 +126,8 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = firstNameError,
             errorText = stringResource(id = R.string.cannot_be_blank),
-            enabled = uiState.uiEnabled
+            enabled = uiState.uiEnabled,
+            capitalize = true
         )
 
         // Text field for last name
@@ -135,7 +146,8 @@ fun RegistrationScreen(
             visualTransformation = VisualTransformation.None,
             error = lastNameError,
             errorText = stringResource(id = R.string.cannot_be_blank),
-            enabled = uiState.uiEnabled
+            enabled = uiState.uiEnabled,
+            capitalize = true
         )
 
         // Text field for password
@@ -166,7 +178,8 @@ fun RegistrationScreen(
             } else {
                 stringResource(id = R.string.cannot_be_blank)
             },
-            enabled = uiState.uiEnabled
+            enabled = uiState.uiEnabled,
+            capitalize = false
         )
 
         // Text field for confirm password
@@ -197,7 +210,8 @@ fun RegistrationScreen(
             } else {
                 stringResource(id = R.string.cannot_be_blank)
             },
-            enabled = uiState.uiEnabled
+            enabled = uiState.uiEnabled,
+            capitalize = false
         )
 
         // Registration button
