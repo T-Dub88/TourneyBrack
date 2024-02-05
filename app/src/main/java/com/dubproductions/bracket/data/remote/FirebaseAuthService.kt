@@ -23,12 +23,34 @@ class FirebaseAuthService {
         }
     }
 
+    suspend fun signInUser(email: String, password: String): Boolean {
+        return try {
+            auth
+                .signInWithEmailAndPassword(email, password)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "signInUser: $e")
+            false
+        }
+    }
+
     suspend fun deleteUserAccount(): Boolean {
         return try {
             auth.currentUser?.delete()?.await()
             true
         } catch (e: Exception) {
             Log.e(TAG, "deleteUserAccount: $e")
+            false
+        }
+    }
+
+    suspend fun resetPassword(email: String): Boolean {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "resetPassword: $e")
             false
         }
     }

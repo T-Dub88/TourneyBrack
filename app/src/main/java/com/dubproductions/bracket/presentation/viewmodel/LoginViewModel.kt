@@ -85,6 +85,7 @@ class LoginViewModel @Inject constructor(
             } else {
                 showPasswordResetFailureDialog()
             }
+            enableLoginScreenUI()
         }
     }
 

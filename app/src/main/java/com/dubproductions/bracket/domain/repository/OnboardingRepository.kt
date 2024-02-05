@@ -18,6 +18,6 @@ interface OnboardingRepository {
         email: String
     ): Boolean
 
-    suspend fun checkLoginStatus(): Boolean
+    fun checkLoginStatus(): Boolean
 
 }

@@ -40,15 +40,15 @@ class OnboardingRepositoryImpl(
     }
 
     override suspend fun signInUser(email: String, password: String): Boolean {
-        return true
+        return firebaseAuthService.signInUser(email, password)
     }
 
     override suspend fun resetPassword(email: String): Boolean {
-        return true
+        return firebaseAuthService.resetPassword(email)
     }
 
-    override suspend fun checkLoginStatus(): Boolean {
-        return false
+    override fun checkLoginStatus(): Boolean {
+        return !firebaseAuthService.getSignedInUserId().isNullOrEmpty()
     }
 
 }

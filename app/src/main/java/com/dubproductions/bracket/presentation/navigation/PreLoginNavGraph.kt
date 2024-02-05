@@ -85,7 +85,7 @@ fun NavGraphBuilder.registrationScreen(
                     )
 
                     if (result) {
-//                        navigateToHomeScreen()
+                        navigateToHomeScreen()
                     } else {
                         registrationViewModel.showDialog()
                     }
