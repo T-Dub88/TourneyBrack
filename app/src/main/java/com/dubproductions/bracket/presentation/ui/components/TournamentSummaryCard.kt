@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,7 +19,6 @@ import com.dubproductions.bracket.domain.model.Tournament
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TournamentSummaryCard(
     tournament: Tournament,
@@ -57,7 +55,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.rounds,
-                        tournament.setNumberOfRounds()
+                        tournament.rounds.size
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
@@ -65,7 +63,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.status,
-                        tournament.status.replaceFirstChar { it.uppercase() }
+                        tournament.status.statusString.replaceFirstChar { it.uppercase() }
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
@@ -86,7 +84,7 @@ fun TournamentSummaryCard(
                     text = stringResource(
                         id = R.string.started_date,
                         if (tournament.timeStarted != null) {
-                            formatDateTime(tournament.timeStarted!!)
+                            formatDateTime(tournament.timeStarted)
                         } else {
                             stringResource(id = R.string.pending)
                         }
@@ -98,8 +96,8 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.completed_date,
-                        if (tournament.timeCompleted != null) {
-                            formatDateTime(tournament.timeCompleted!!)
+                        if (tournament.timeEnded != null) {
+                            formatDateTime(tournament.timeEnded)
                         } else {
                             stringResource(R.string.pending)
                         }

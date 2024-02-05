@@ -7,7 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.dubproductions.bracket.presentation.ui.screen.main.HomeScreen
-import com.dubproductions.bracket.presentation.viewmodel.UserViewModel
+import com.dubproductions.bracket.presentation.viewmodel.SharedViewModel
 
 fun NavGraphBuilder.homeNavGraph(navController: NavHostController) {
     navigation(
@@ -24,9 +24,9 @@ fun NavGraphBuilder.homeScreen(
     composable(
         route = Screen.Home.route
     ) {
-        val userViewModel: UserViewModel = it.sharedViewModel(navController = navController)
-        val user by userViewModel.user.collectAsStateWithLifecycle()
-        val tournamentList by userViewModel.completedTournamentList.collectAsStateWithLifecycle()
+        val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
+        val user by sharedViewModel.user.collectAsStateWithLifecycle()
+        val tournamentList by sharedViewModel.completedTournaments.collectAsStateWithLifecycle()
 
         HomeScreen(
             username = user.username,
