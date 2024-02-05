@@ -7,5 +7,5 @@ data class Participant(
     val buchholz: Double,
     val sonnebornBerger: Double,
     val dropped: Boolean,
-    val matches: List<Match>
+    val matchIds: List<String>
 )

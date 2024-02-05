@@ -1,107 +1,45 @@
 package com.dubproductions.bracket.domain.repository
 
-import com.dubproductions.bracket.domain.model.Participant
-import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
-import com.dubproductions.bracket.domain.model.User
 
 interface TournamentRepository {
-    // Onboarding methods
-    suspend fun registerUser(
-        email: String,
-        password: String,
-        username: String,
-        firstName: String,
-        lastName: String,
-    ): Boolean
 
-    suspend fun createUserData(
-        userData: User,
-    ): Boolean
+    suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament
 
-    fun deleteUserSignup()
-
-    suspend fun signInUser(
-        email: String,
-        password: String
-    ): Boolean
-
-    suspend fun resetPassword(
-        email: String
-    ): Boolean
-
-    fun checkLoginStatus(): Boolean
-
-    // Update app data methods
-    fun fetchUserData(
-        onComplete: (User?) -> Unit
-    )
-
-    suspend fun fetchTournamentData(
-        tournamentId: String
-    ): Tournament?
-
-    fun listenToTournament(
-        tournamentId: String,
-        onComplete: (Tournament?) -> Unit
-    )
-
-    suspend fun createTournament(
-        tournament: Tournament
-    ): Boolean
-
-    suspend fun addTournamentIdToHost(
-        tournamentId: String,
-        userId: String
-    ): Boolean
-
-    suspend fun removeTournamentFromDatabase(
-        tournamentId: String,
-        userId: String?
-    ): Boolean
-
-    suspend fun removeTournamentFromUser(
-        userId: String,
-        tournamentId: String
-    ): Boolean
-
-    fun removeTournamentListener(
-        tournamentId: String
-    )
-
-    suspend fun updateTournamentStatus(
-        id: String,
-        status: String
-    )
-
-    suspend fun updateTournamentRounds(
-        id: String,
-        rounds: MutableList<Round>
-    )
-
-    suspend fun updateParticipantList(
-        id: String,
-        participants: List<Participant>
-    )
-
-    suspend fun addParticipant(
-        tournamentId: String,
-        participant: Participant
-    )
-
-    suspend fun removeParticipant(
-        tournamentId: String,
-        participant: Participant
-    )
-
-    suspend fun dropParticipant(
-        tournamentId: String,
-        participant: Participant
-    )
-
-    suspend fun updateMatchResult(
-        tournamentId: String,
-        updatedRound: Round,
-    )
+//    suspend fun createTournament(
+//        tournament: Tournament
+//    ): Boolean
+//
+//    suspend fun deleteTournament(
+//        tournamentId: String,
+//        userId: String
+//    ): Boolean
+//
+//    suspend fun updateTournamentStatus(
+//        tournamentId: String,
+//        status: TournamentStatus
+//    ): Boolean
+//
+//    suspend fun addParticipant(
+//        tournamentId: String,
+//        participantId: String,
+//        participant: Participant
+//    ): Boolean
+//
+//    suspend fun removeParticipant(
+//        tournamentId: String,
+//        participantId: String
+//    ): Boolean
+//
+//    suspend fun dropParticipant(
+//        tournamentId: String,
+//        participantId: String
+//    ): Boolean
+//
+//    suspend fun updateMatchResult(
+//        matchId: String,
+//        winnerId: String?,
+//        loserId: String?
+//    ): Boolean
 
 }

@@ -6,7 +6,7 @@ data class User(
     val firstName: String,
     val lastName: String,
     val email: String,
-    val hostingTournaments: List<Tournament>,
-    val participatingTournaments: List<Tournament>,
-    val completedTournaments: List<Tournament>
+    val hostingTournamentIds: List<String>,
+    val participatingTournamentIds: List<String>,
+    val completedTournamentIds: List<String>
 )

@@ -4,6 +4,7 @@ import com.dubproductions.bracket.utils.status.TournamentStatus
 import com.dubproductions.bracket.utils.type.TournamentType
 
 data class Tournament(
+    val tournamentId: String,
     val name: String,
     val type: TournamentType,
     val rounds: List<Round>,
