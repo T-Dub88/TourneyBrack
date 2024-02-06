@@ -37,9 +37,6 @@ class SharedViewModel @Inject constructor(
     private val _completedTournaments = MutableStateFlow(listOf<Tournament>())
     val completedTournaments = _completedTournaments.asStateFlow()
 
-    private val _hostingTournaments = MutableStateFlow(listOf<Tournament>())
-    val hostingTournaments = _hostingTournaments.asStateFlow()
-
     private val _participatingTournaments = MutableStateFlow(listOf<Tournament>())
     val participatingTournaments = _participatingTournaments.asStateFlow()
 
@@ -65,27 +62,35 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    private fun updateHostingTournaments() {
-
-    }
-
-    private fun updateParticipatingTournaments() {
-
-    }
+//    private fun updateHostingTournaments(tournamentId: String, roundId: String, matchId: String, participantId: String) {
+//        val selectedParticipant = selectedTournament?.participants?.find { it.userId == participantId }
+//        val selectedRound = selectedTournament?.rounds?.find { it.roundId == roundId }
+//        val selectedMatch = selectedRound?.matchList?.find { it.matchId == matchId }
+//    }
+//
+//    fun findTournament(tournamentId: String): Tournament {
+//        val selectedTournament = completedTournaments.value.find { it.tournamentId == tournamentId }
+//
+//    }
 
     private fun fetchUserData() {
-        viewModelScope.launch {
-            val user = userRepository.fetchUserData()
-            updateUser(user)
-            fetchCompletedTournaments(user.completedTournamentIds)
-        }
+        userRepository.fetchUserData(
+            onComplete = { userData ->
+                updateUser(userData)
+                if (userData.completedTournamentIds.size != completedTournaments.value.size) {
+                    fetchCompletedTournaments(userData.completedTournamentIds)
+                }
+            }
+        )
     }
 
     private fun fetchCompletedTournaments(tournamentIdList: List<String>) {
         for (tournamentId in tournamentIdList) {
-            viewModelScope.launch {
-                val tournament = tournamentRepository.fetchCompletedTournamentData(tournamentId)
-                updateCompletedTournaments(tournament)
+            if (completedTournaments.value.find { it.tournamentId == tournamentId } == null) {
+                viewModelScope.launch {
+                    val tournament = tournamentRepository.fetchCompletedTournamentData(tournamentId)
+                    updateCompletedTournaments(tournament)
+                }
             }
         }
     }

@@ -10,23 +10,31 @@ class UserRepositoryImpl(
     private val firebaseAuthService: FirebaseAuthService
 ): UserRepository {
 
-    override suspend fun fetchUserData(): User {
+    override fun fetchUserData(onComplete: (User) -> Unit) {
+
         val userId = firebaseAuthService.getSignedInUserId()
 
-        val rawUserData = userId?.let {
-             firestoreService.fetchUserData(it)
-        }
+        userId?.let {
+            firestoreService.createUserRealtimeListener(
+                userId = it,
+                onComplete = { rawUserData ->
 
-        return User(
-            userId = rawUserData?.userId ?: "",
-            firstName = rawUserData?.firstName ?: "",
-            lastName = rawUserData?.lastName ?: "",
-            email = rawUserData?.email ?: "",
-            username = rawUserData?.username ?: "",
-            completedTournamentIds = rawUserData?.completedTournamentIds ?: listOf(),
-            hostingTournamentIds = rawUserData?.hostingTournamentIds ?: listOf(),
-            participatingTournamentIds = rawUserData?.participatingTournamentIds ?: listOf()
-        )
+                    val user = User(
+                        userId = rawUserData.userId ?: "",
+                        firstName = rawUserData.firstName ?: "",
+                        lastName = rawUserData.lastName ?: "",
+                        email = rawUserData.email ?: "",
+                        username = rawUserData.username ?: "",
+                        completedTournamentIds = rawUserData.completedTournamentIds ?: listOf(),
+                        hostingTournamentIds = rawUserData.hostingTournamentIds ?: listOf(),
+                        participatingTournamentIds = rawUserData.participatingTournamentIds ?: listOf()
+                    )
+
+                    onComplete(user)
+
+                }
+            )
+        }
 
     }
 

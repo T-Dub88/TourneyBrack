@@ -6,6 +6,8 @@ import com.dubproductions.bracket.data.model.FirestoreParticipantData
 import com.dubproductions.bracket.data.model.FirestoreRoundData
 import com.dubproductions.bracket.data.model.FirestoreTournamentData
 import com.dubproductions.bracket.data.model.FirestoreUserData
+import com.dubproductions.bracket.domain.model.Tournament
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
@@ -21,6 +23,12 @@ private const val MATCHES = "matches"
 class FirestoreService {
 
     private val firestore = Firebase.firestore
+
+    private val tournamentListeners = mutableMapOf<String, ListenerRegistration>()
+    private val roundListeners =  mutableMapOf<String, ListenerRegistration>()
+    private val matchListeners = mutableMapOf<String, ListenerRegistration>()
+    private val participantListeners = mutableMapOf<String, ListenerRegistration>()
+    private lateinit var userListener: ListenerRegistration
 
     suspend fun createNewUserData(user: FirestoreUserData): Boolean {
 
@@ -41,19 +49,19 @@ class FirestoreService {
         }
     }
 
-    suspend fun fetchUserData(userId: String): FirestoreUserData? {
-        return try {
-            firestore
-                .collection(USERS)
-                .document(userId)
-                .get()
-                .await()
-                .toObject<FirestoreUserData>()
-        } catch (e: Exception) {
-            Log.e(TAG, "fetchUserData: $e")
-            null
-        }
-    }
+//    suspend fun fetchUserData(userId: String): FirestoreUserData? {
+//        return try {
+//            firestore
+//                .collection(USERS)
+//                .document(userId)
+//                .get()
+//                .await()
+//                .toObject<FirestoreUserData>()
+//        } catch (e: Exception) {
+//            Log.e(TAG, "fetchUserData: $e")
+//            null
+//        }
+//    }
 
     suspend fun fetchCompletedTournamentData(tournamentId: String): FirestoreTournamentData? {
         return try {
@@ -152,6 +160,66 @@ class FirestoreService {
             matchDataList
         }
 
+    }
+
+    fun createTournamentRealtimeListener(
+        tournamentId: String,
+        onComplete: (FirestoreTournamentData) -> Unit
+    ) {
+        if (!tournamentListeners.containsKey(tournamentId)) {
+            val listener = firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .addSnapshotListener { value, error ->
+                    if (error != null) {
+                        Log.e(TAG, "createTournamentRealtimeListener: $error")
+                        return@addSnapshotListener
+                    }
+
+                    if (value != null && value.exists()) {
+                        val tournament = value.toObject<FirestoreTournamentData>()
+                        tournament?.let {
+                            onComplete(it)
+                        }
+                    }
+                }
+
+            tournamentListeners[tournamentId] = listener
+
+        }
+
+    }
+
+    fun removeTournamentListener(tournamentId: String) {
+        tournamentListeners[tournamentId]?.remove()
+    }
+
+    fun createUserRealtimeListener(
+        userId: String,
+        onComplete: (FirestoreUserData) -> Unit
+    ) {
+        val listener = firestore
+            .collection(USERS)
+            .document(userId)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.e(TAG, "createUserRealtimeListener: $error")
+                    return@addSnapshotListener
+                }
+
+                if (value != null && value.exists()) {
+                    val user = value.toObject<FirestoreUserData>()
+                    user?.let {
+                        onComplete(it)
+                    }
+                }
+            }
+
+        userListener = listener
+    }
+
+    fun removeUserListener() {
+        userListener.remove()
     }
 
 }
