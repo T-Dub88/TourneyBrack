@@ -6,6 +6,8 @@ interface TournamentRepository {
 
     suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament
 
+    fun fetchHostingTournamentData(tournamentId: String, onComplete: (Tournament) -> Unit)
+
 //    suspend fun createTournament(
 //        tournament: Tournament
 //    ): Boolean

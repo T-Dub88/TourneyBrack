@@ -17,6 +17,16 @@ class TournamentRepositoryImpl(
         return tournament ?: Tournament()
     }
 
+    override fun fetchHostingTournamentData(
+        tournamentId: String,
+        onComplete: (Tournament) -> Unit
+    ) {
+        firestoreService.createTournamentRealtimeListener(
+            tournamentId = tournamentId,
+            onComplete = onComplete
+        )
+    }
+
     private suspend fun fetchTournamentParticipants(tournamentId: String): List<Participant> {
         return firestoreService.fetchParticipants(tournamentId)
     }

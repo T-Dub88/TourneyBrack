@@ -37,8 +37,8 @@ class SharedViewModel @Inject constructor(
     private val _completedTournaments = MutableStateFlow(listOf<Tournament>())
     val completedTournaments = _completedTournaments.asStateFlow()
 
-    private val _hostingTournaments = MutableStateFlow(listOf<Tournament>())
-    val hostingTournaments = _hostingTournaments.asStateFlow()
+    private val _hostingTournamentList = MutableStateFlow(listOf<Tournament>())
+    val hostingTournamentList = _hostingTournamentList.asStateFlow()
 
     var viewingTournamentId: String = ""
     var viewingParticipantId: String = ""
@@ -62,35 +62,38 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    private fun addHostingTournamentToFlow(tournament: Tournament) {
-        _hostingTournaments.update { oldList ->
+    private fun updateHostingTournamentList(tournament: Tournament) {
+        _hostingTournamentList.update { oldList ->
             val newList = oldList.toMutableList()
+            val removeData = newList.find { it.tournamentId == tournament.tournamentId }
+
+            removeData?.let {
+                newList.remove(it)
+            }
+
             newList.add(tournament)
             newList.sortBy { it.timeStarted }
+
             newList
+
         }
     }
 
-//    private fun updateHostingTournaments(tournamentId: String, roundId: String, matchId: String, participantId: String) {
-//        val selectedParticipant = selectedTournament?.participants?.find { it.userId == participantId }
-//        val selectedRound = selectedTournament?.rounds?.find { it.roundId == roundId }
-//        val selectedMatch = selectedRound?.matchList?.find { it.matchId == matchId }
-//    }
-//
-//    fun findTournament(tournamentId: String): Tournament {
-//        val selectedTournament = completedTournaments.value.find { it.tournamentId == tournamentId }
-//
-//    }
 
     private fun fetchUserData() {
-        userRepository.fetchUserData(
-            onComplete = { userData ->
-                updateUser(userData)
-                if (userData.completedTournamentIds.size != completedTournaments.value.size) {
-                    fetchCompletedTournaments(userData.completedTournamentIds)
+        viewModelScope.launch {
+            userRepository.fetchUserData(
+                onComplete = { userData ->
+                    updateUser(userData)
+                    if (userData.completedTournamentIds.size != completedTournaments.value.size) {
+                        fetchCompletedTournaments(userData.completedTournamentIds)
+                    }
+
+                    fetchHostingTournaments(userData.hostingTournamentIds)
+
                 }
-            }
-        )
+            )
+        }
     }
 
     private fun fetchCompletedTournaments(tournamentIdList: List<String>) {
@@ -100,6 +103,19 @@ class SharedViewModel @Inject constructor(
                     val tournament = tournamentRepository.fetchCompletedTournamentData(tournamentId)
                     updateCompletedTournaments(tournament)
                 }
+            }
+        }
+    }
+
+    private fun fetchHostingTournaments(tournamentIdList: List<String>) {
+        for (tournamentId in tournamentIdList) {
+            viewModelScope.launch {
+                tournamentRepository.fetchHostingTournamentData(
+                    tournamentId = tournamentId,
+                    onComplete = { tournament ->
+                        updateHostingTournamentList(tournament)
+                    }
+                )
             }
         }
     }

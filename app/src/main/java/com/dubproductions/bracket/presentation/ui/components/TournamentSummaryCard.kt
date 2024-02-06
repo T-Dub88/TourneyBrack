@@ -55,7 +55,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.rounds,
-                        tournament.rounds.size
+                        tournament.roundIds.size
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)
@@ -63,7 +63,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.status,
-                        tournament.status.statusString.replaceFirstChar { it.uppercase() }
+                        tournament.status.replaceFirstChar { it.uppercase() }
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

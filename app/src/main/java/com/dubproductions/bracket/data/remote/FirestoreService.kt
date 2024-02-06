@@ -166,7 +166,7 @@ class FirestoreService {
         onComplete: (Tournament) -> Unit
     ) {
         if (!tournamentListeners.containsKey(tournamentId)) {
-            val listener = firestore
+            tournamentListeners[tournamentId] = firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
                 .addSnapshotListener { value, error ->
@@ -182,9 +182,6 @@ class FirestoreService {
                         }
                     }
                 }
-
-            tournamentListeners[tournamentId] = listener
-
         }
 
     }
@@ -197,7 +194,7 @@ class FirestoreService {
         userId: String,
         onComplete: (User) -> Unit
     ) {
-        val listener = firestore
+        userListener = firestore
             .collection(USERS)
             .document(userId)
             .addSnapshotListener { value, error ->
@@ -213,8 +210,6 @@ class FirestoreService {
                     }
                 }
             }
-
-        userListener = listener
     }
 
     fun removeUserListener() {
