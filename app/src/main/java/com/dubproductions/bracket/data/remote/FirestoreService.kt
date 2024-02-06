@@ -1,12 +1,11 @@
 package com.dubproductions.bracket.data.remote
 
 import android.util.Log
-import com.dubproductions.bracket.data.model.FirestoreMatchData
-import com.dubproductions.bracket.data.model.FirestoreParticipantData
-import com.dubproductions.bracket.data.model.FirestoreRoundData
-import com.dubproductions.bracket.data.model.FirestoreTournamentData
-import com.dubproductions.bracket.data.model.FirestoreUserData
+import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
+import com.dubproductions.bracket.domain.model.User
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -30,16 +29,16 @@ class FirestoreService {
     private val participantListeners = mutableMapOf<String, ListenerRegistration>()
     private lateinit var userListener: ListenerRegistration
 
-    suspend fun createNewUserData(user: FirestoreUserData): Boolean {
+    suspend fun createNewUserData(user: User): Boolean {
 
-        if (user.userId.isNullOrEmpty()) {
+        if (user.userId.isEmpty()) {
             return false
         }
 
         return try {
             firestore
                 .collection(USERS)
-                .document(user.userId!!)
+                .document(user.userId)
                 .set(user)
                 .await()
             true
@@ -63,14 +62,14 @@ class FirestoreService {
 //        }
 //    }
 
-    suspend fun fetchCompletedTournamentData(tournamentId: String): FirestoreTournamentData? {
+    suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament? {
         return try {
             firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
                 .get()
                 .await()
-                .toObject<FirestoreTournamentData>()
+                .toObject<Tournament>()
         } catch (e: Exception) {
             Log.e(TAG, "fetchCompletedTournamentData: $e")
             null
@@ -79,9 +78,9 @@ class FirestoreService {
 
     suspend fun fetchParticipants(
         tournamentId: String
-    ): List<FirestoreParticipantData> {
+    ): List<Participant> {
 
-        val participantData = mutableListOf<FirestoreParticipantData>()
+        val participantData = mutableListOf<Participant>()
 
         return try {
             val result = firestore
@@ -92,7 +91,7 @@ class FirestoreService {
                 .await()
 
             result.forEach {
-                val participant = it.toObject<FirestoreParticipantData>()
+                val participant = it.toObject<Participant>()
                 participantData.add(participant)
             }
 
@@ -106,9 +105,9 @@ class FirestoreService {
 
     suspend fun fetchRounds(
         tournamentId: String
-    ): List<FirestoreRoundData> {
+    ): List<Round> {
 
-        val roundData = mutableListOf<FirestoreRoundData>()
+        val roundData = mutableListOf<Round>()
 
         return try {
             val result = firestore
@@ -119,7 +118,7 @@ class FirestoreService {
                 .await()
 
             result.forEach { queryDocumentSnapshot ->
-                val round = queryDocumentSnapshot.toObject<FirestoreRoundData>()
+                val round = queryDocumentSnapshot.toObject<Round>()
                 roundData.add(round)
             }
 
@@ -134,9 +133,9 @@ class FirestoreService {
     suspend fun fetchMatches(
         tournamentId: String,
         roundId: String
-    ): List<FirestoreMatchData> {
+    ): List<Match> {
 
-        val matchDataList = mutableListOf<FirestoreMatchData>()
+        val matchDataList = mutableListOf<Match>()
 
         return try {
             val result = firestore
@@ -149,7 +148,7 @@ class FirestoreService {
                 .await()
 
             result.forEach {
-                val match = it.toObject<FirestoreMatchData>()
+                val match = it.toObject<Match>()
                 matchDataList.add(match)
             }
 
@@ -164,7 +163,7 @@ class FirestoreService {
 
     fun createTournamentRealtimeListener(
         tournamentId: String,
-        onComplete: (FirestoreTournamentData) -> Unit
+        onComplete: (Tournament) -> Unit
     ) {
         if (!tournamentListeners.containsKey(tournamentId)) {
             val listener = firestore
@@ -177,7 +176,7 @@ class FirestoreService {
                     }
 
                     if (value != null && value.exists()) {
-                        val tournament = value.toObject<FirestoreTournamentData>()
+                        val tournament = value.toObject<Tournament>()
                         tournament?.let {
                             onComplete(it)
                         }
@@ -196,7 +195,7 @@ class FirestoreService {
 
     fun createUserRealtimeListener(
         userId: String,
-        onComplete: (FirestoreUserData) -> Unit
+        onComplete: (User) -> Unit
     ) {
         val listener = firestore
             .collection(USERS)
@@ -208,7 +207,7 @@ class FirestoreService {
                 }
 
                 if (value != null && value.exists()) {
-                    val user = value.toObject<FirestoreUserData>()
+                    val user = value.toObject<User>()
                     user?.let {
                         onComplete(it)
                     }

@@ -17,22 +17,7 @@ class UserRepositoryImpl(
         userId?.let {
             firestoreService.createUserRealtimeListener(
                 userId = it,
-                onComplete = { rawUserData ->
-
-                    val user = User(
-                        userId = rawUserData.userId ?: "",
-                        firstName = rawUserData.firstName ?: "",
-                        lastName = rawUserData.lastName ?: "",
-                        email = rawUserData.email ?: "",
-                        username = rawUserData.username ?: "",
-                        completedTournamentIds = rawUserData.completedTournamentIds ?: listOf(),
-                        hostingTournamentIds = rawUserData.hostingTournamentIds ?: listOf(),
-                        participatingTournamentIds = rawUserData.participatingTournamentIds ?: listOf()
-                    )
-
-                    onComplete(user)
-
-                }
+                onComplete = onComplete
             )
         }
 

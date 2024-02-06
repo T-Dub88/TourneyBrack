@@ -1,8 +1,8 @@
 package com.dubproductions.bracket.data.repository
 
-import com.dubproductions.bracket.data.model.FirestoreUserData
 import com.dubproductions.bracket.data.remote.FirebaseAuthService
 import com.dubproductions.bracket.data.remote.FirestoreService
+import com.dubproductions.bracket.domain.model.User
 import com.dubproductions.bracket.domain.repository.OnboardingRepository
 
 class OnboardingRepositoryImpl(
@@ -20,8 +20,8 @@ class OnboardingRepositoryImpl(
         val registrationResult = firebaseAuthService.registerUser(email, password)
 
         return if (registrationResult) {
-            val newUser = FirestoreUserData(
-                userId = firebaseAuthService.getSignedInUserId(),
+            val newUser = User(
+                userId = firebaseAuthService.getSignedInUserId() ?: "",
                 username = username,
                 email = email,
                 firstName = firstName,

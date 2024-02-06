@@ -37,8 +37,8 @@ class SharedViewModel @Inject constructor(
     private val _completedTournaments = MutableStateFlow(listOf<Tournament>())
     val completedTournaments = _completedTournaments.asStateFlow()
 
-    private val _participatingTournaments = MutableStateFlow(listOf<Tournament>())
-    val participatingTournaments = _participatingTournaments.asStateFlow()
+    private val _hostingTournaments = MutableStateFlow(listOf<Tournament>())
+    val hostingTournaments = _hostingTournaments.asStateFlow()
 
     var viewingTournamentId: String = ""
     var viewingParticipantId: String = ""
@@ -58,6 +58,15 @@ class SharedViewModel @Inject constructor(
             val newList = oldList.toMutableList()
             newList.add(tournament)
             newList.sortBy { it.timeEnded }
+            newList
+        }
+    }
+
+    private fun addHostingTournamentToFlow(tournament: Tournament) {
+        _hostingTournaments.update { oldList ->
+            val newList = oldList.toMutableList()
+            newList.add(tournament)
+            newList.sortBy { it.timeStarted }
             newList
         }
     }

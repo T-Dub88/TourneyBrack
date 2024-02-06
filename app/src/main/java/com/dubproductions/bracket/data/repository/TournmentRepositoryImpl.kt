@@ -1,15 +1,11 @@
 package com.dubproductions.bracket.data.repository
 
-import com.dubproductions.bracket.data.model.FirestoreTournamentData
 import com.dubproductions.bracket.data.remote.FirestoreService
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
-import com.dubproductions.bracket.utils.status.MatchStatus
-import com.dubproductions.bracket.utils.status.TournamentStatus
-import com.dubproductions.bracket.utils.type.TournamentType
 
 private const val TAG = "Firebase Manager"
 
@@ -17,96 +13,23 @@ class TournamentRepositoryImpl(
     private val firestoreService: FirestoreService
 ): TournamentRepository {
     override suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament {
-        val rawTournamentData = firestoreService.fetchCompletedTournamentData(tournamentId)
-        return createTournamentDataFromRawData(rawTournamentData)
-    }
-
-    private suspend fun createTournamentDataFromRawData(tournamentData: FirestoreTournamentData?): Tournament {
-        return Tournament(
-            tournamentId = tournamentData?.tournamentId ?: "",
-            name = tournamentData?.name ?: "",
-            type = when(tournamentData?.type) {
-                TournamentType.SWISS.typeString -> TournamentType.SWISS
-                else -> TournamentType.SWISS
-            },
-            status = when(tournamentData?.status) {
-                TournamentStatus.REGISTERING.statusString -> TournamentStatus.REGISTERING
-                TournamentStatus.CLOSED.statusString -> TournamentStatus.CLOSED
-                TournamentStatus.PLAYING.statusString -> TournamentStatus.PLAYING
-                TournamentStatus.COMPLETE.statusString -> TournamentStatus.COMPLETE
-                else -> TournamentStatus.COMPLETE
-            },
-            hostId = tournamentData?.hostId ?: "",
-            timeStarted = tournamentData?.timeStarted,
-            timeEnded = tournamentData?.timeCompleted,
-            participants = fetchTournamentParticipants(tournamentData?.tournamentId ?: ""),
-            rounds = fetchTournamentRounds(tournamentData?.tournamentId ?: "")
-        )
+        val tournament = firestoreService.fetchCompletedTournamentData(tournamentId)
+        return tournament ?: Tournament()
     }
 
     private suspend fun fetchTournamentParticipants(tournamentId: String): List<Participant> {
-
-        val participantList = mutableListOf<Participant>()
-        val rawParticipantData = firestoreService.fetchParticipants(tournamentId)
-
-        for (rawParticipant in rawParticipantData) {
-            val participant = Participant(
-                username = rawParticipant.username ?: "",
-                userId = rawParticipant.userId ?: "",
-                points = rawParticipant.points ?: 0.0,
-                buchholz = rawParticipant.buchholz ?: 0.0,
-                sonnebornBerger = rawParticipant.sonnebornBerger ?: 0.0,
-                dropped = rawParticipant.dropped ?: false,
-                matchIds = rawParticipant.matchIds?: listOf()
-            )
-            participantList.add(participant)
-        }
-        return participantList
+        return firestoreService.fetchParticipants(tournamentId)
     }
 
     private suspend fun fetchTournamentRounds(tournamentId: String): List<Round> {
-
-        val roundsList = mutableListOf<Round>()
-        val rawRoundsData = firestoreService.fetchRounds(tournamentId)
-
-        for (rawRound in rawRoundsData) {
-            val round = Round(
-                roundId = rawRound.roundId ?: "",
-                roundNum = rawRound.roundNumber ?: 0,
-                byeParticipantId = rawRound.byeParticipantId,
-                matchList = fetchRoundMatches(tournamentId, rawRound.roundId ?: "")
-            )
-        }
-
-        return roundsList
+        return firestoreService.fetchRounds(tournamentId)
     }
 
     private suspend fun fetchRoundMatches(
         tournamentId: String,
         roundId: String
     ): List<Match> {
-
-        val matchList = mutableListOf<Match>()
-        val rawMatchesData = firestoreService.fetchMatches(tournamentId, roundId)
-
-        for (rawMatch in rawMatchesData) {
-            val match = Match(
-                matchId = rawMatch.matchId ?: "",
-                playerOneId = rawMatch.playerOneId ?: "",
-                playerTwoId = rawMatch.playerTwoId ?: "",
-                roundNum = rawMatch.roundNum ?: 0,
-                tie = rawMatch.tie,
-                winnerId = rawMatch.winnerId,
-                status = when(rawMatch.status) {
-                    MatchStatus.PENDING.statusString -> MatchStatus.PENDING
-                    MatchStatus.COMPLETE.statusString -> MatchStatus.COMPLETE
-                    else -> MatchStatus.PENDING
-                }
-            )
-        }
-
-        return matchList
-
+        return firestoreService.fetchMatches(tournamentId, roundId)
     }
 
 //
