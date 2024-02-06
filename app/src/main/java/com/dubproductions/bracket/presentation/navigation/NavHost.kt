@@ -50,7 +50,7 @@ fun NavGraphBuilder.bottomBarNavGraph(navController: NavHostController) {
         route = Map.BottomBar.route
     ) {
         homeNavGraph(navController)
-//        hostingNavGraph(navController)
+        hostingNavGraph(navController)
         participatingNavGraph()
         settingsNavGraph()
     }

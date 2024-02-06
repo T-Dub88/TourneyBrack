@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.domain.repository
 
+import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
 
 interface TournamentRepository {
@@ -7,6 +8,10 @@ interface TournamentRepository {
     suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament
 
     fun fetchHostingTournamentData(tournamentId: String, onComplete: (Tournament) -> Unit)
+
+    suspend fun addParticipantData(tournamentId: String, participant: Participant)
+
+    suspend fun createTournament(tournament: Tournament): Boolean
 
 //    suspend fun createTournament(
 //        tournament: Tournament

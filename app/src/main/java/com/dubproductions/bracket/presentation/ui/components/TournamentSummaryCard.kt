@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.domain.model.Tournament
+import com.dubproductions.bracket.utils.TournamentHousekeeping
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -55,7 +56,7 @@ fun TournamentSummaryCard(
                 Text(
                     text = stringResource(
                         id = R.string.rounds,
-                        tournament.roundIds.size
+                        TournamentHousekeeping.setNumberOfRounds(tournament.participantIds)
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

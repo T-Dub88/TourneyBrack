@@ -7,7 +7,7 @@ import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 
-private const val TAG = "Firebase Manager"
+private const val TAG = "Repository Implementation"
 
 class TournamentRepositoryImpl(
     private val firestoreService: FirestoreService
@@ -40,6 +40,23 @@ class TournamentRepositoryImpl(
         roundId: String
     ): List<Match> {
         return firestoreService.fetchMatches(tournamentId, roundId)
+    }
+
+    override suspend fun addParticipantData(tournamentId: String, participant: Participant) {
+        firestoreService.addParticipantData(tournamentId, participant)
+    }
+
+    override suspend fun createTournament(tournament: Tournament): Boolean {
+        val addToHost = firestoreService
+            .addTournamentIdToHostingList(
+                userId = tournament.hostId,
+                tournamentId = tournament.tournamentId
+            )
+        return if (addToHost) {
+            firestoreService.addTournamentData(tournament)
+        } else {
+            false
+        }
     }
 
 //

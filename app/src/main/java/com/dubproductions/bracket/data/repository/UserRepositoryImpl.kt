@@ -23,4 +23,8 @@ class UserRepositoryImpl(
 
     }
 
+    override fun fetchUserId(): String {
+        return firebaseAuthService.getSignedInUserId() ?: ""
+    }
+
 }

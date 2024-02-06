@@ -6,6 +6,7 @@ import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
@@ -18,6 +19,7 @@ private const val TOURNAMENTS = "tournaments"
 private const val PARTICIPANTS = "participants"
 private const val ROUNDS = "rounds"
 private const val MATCHES = "matches"
+private const val HOSTING_IDS = "hostingTournamentIds"
 
 class FirestoreService {
 
@@ -48,19 +50,19 @@ class FirestoreService {
         }
     }
 
-//    suspend fun fetchUserData(userId: String): FirestoreUserData? {
-//        return try {
-//            firestore
-//                .collection(USERS)
-//                .document(userId)
-//                .get()
-//                .await()
-//                .toObject<FirestoreUserData>()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "fetchUserData: $e")
-//            null
-//        }
-//    }
+    suspend fun fetchUserData(userId: String): User? {
+        return try {
+            firestore
+                .collection(USERS)
+                .document(userId)
+                .get()
+                .await()
+                .toObject<User>()
+        } catch (e: Exception) {
+            Log.e(TAG, "fetchUserData: $e")
+            null
+        }
+    }
 
     suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament? {
         return try {
@@ -214,6 +216,51 @@ class FirestoreService {
 
     fun removeUserListener() {
         userListener.remove()
+    }
+
+    suspend fun addParticipantData(tournamentId: String, participant: Participant) {
+
+        try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participant.userId)
+                .set(participant)
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "addParticipantData: $e")
+        }
+
+    }
+
+    suspend fun addTournamentData(tournament: Tournament): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournament.tournamentId)
+                .set(tournament)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addTournamentData: $e")
+            false
+        }
+    }
+
+    suspend fun addTournamentIdToHostingList(userId: String, tournamentId: String): Boolean {
+        Log.i(TAG, "addTournamentIdToHostingList: $userId")
+        return try {
+            firestore
+                .collection(USERS)
+                .document(userId)
+                .update(HOSTING_IDS, FieldValue.arrayUnion(tournamentId))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addTournamentIdToHostingList: $e")
+            false
+        }
     }
 
 }

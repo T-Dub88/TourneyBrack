@@ -5,4 +5,6 @@ import com.dubproductions.bracket.domain.model.User
 interface UserRepository {
     fun fetchUserData(onComplete: (User) -> Unit)
 
+    fun fetchUserId(): String
+
 }

@@ -1,23 +1,24 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
-import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
+import com.dubproductions.bracket.domain.repository.TournamentRepository
+import com.dubproductions.bracket.domain.repository.UserRepository
 import com.dubproductions.bracket.presentation.ui.state.TournamentCreationUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CreationViewModel @Inject constructor(
-    private val tournamentRepository: TournamentRepositoryImpl
+    private val tournamentRepository: TournamentRepository,
+    private val userRepository: UserRepository
 ): ViewModel() {
 
     private val _uiState: MutableStateFlow<TournamentCreationUIState> = MutableStateFlow(
@@ -26,6 +27,7 @@ class CreationViewModel @Inject constructor(
     val uiState: StateFlow<TournamentCreationUIState> = _uiState.asStateFlow()
 
     private fun updateUIState(newUIState: TournamentCreationUIState) {
+        tournamentRepository
         _uiState.update {
             newUIState
         }
@@ -50,46 +52,48 @@ class CreationViewModel @Inject constructor(
         type: String,
         participants: String
     ) {
+        val tournamentId = makeRandomString()
         val tournament = Tournament(
+            hostId = userRepository.fetchUserId(),
+            tournamentId = tournamentId,
             name = name,
             type = type,
-            participants = createParticipantList(participants)
+            participantIds = createParticipantList(tournamentId, participants)
         )
-
-        Log.i("Tournament", "createTournament: $tournament")
 
         val result = tournamentRepository.createTournament(tournament = tournament)
         updateCreationState(result)
     }
 
-    private suspend fun createParticipantList(participants: String): List<Participant> {
-        return viewModelScope.async {
-            var participant = ""
-            val participantList = mutableListOf<Participant>()
+    private fun createParticipantList(tournamentId: String, participants: String): List<String> {
+        // TODO: Participants added before tournament added verification bug
+        var participant = ""
+        val participantIdList = mutableListOf<String>()
 
-            for (i in participants) {
-                participant = when (i) {
-                    ',' -> {
-                        val trimmedParticipant = participant.trim()
-                        if (trimmedParticipant != "") {
-                            val createdParticipant = createParticipant(trimmedParticipant)
-                            participantList.add(createdParticipant)
-                        }
-                        ""
+        for (i in participants) {
+            participant = when (i) {
+                ',' -> {
+                    val trimmedParticipant = participant.trim()
+                    if (trimmedParticipant != "") {
+                        val createdParticipant = createParticipant(trimmedParticipant)
+                        participantIdList.add(createdParticipant.userId)
+                        addParticipantToDatabase(tournamentId, createdParticipant)
                     }
+                    ""
+                }
 
-                    else -> {
-                        participant.plus(i)
-                    }
+                else -> {
+                    participant.plus(i)
                 }
             }
-            val trimmedParticipant = participant.trim()
-            if (trimmedParticipant != "") {
-                val createdParticipant = createParticipant(trimmedParticipant)
-                participantList.add(createdParticipant)
-            }
-            participantList
-        }.await()
+        }
+        val trimmedParticipant = participant.trim()
+        if (trimmedParticipant != "") {
+            val createdParticipant = createParticipant(trimmedParticipant)
+            participantIdList.add(createdParticipant.userId)
+            addParticipantToDatabase(tournamentId, createdParticipant)
+        }
+        return participantIdList
     }
 
     private fun createParticipant(enteredText: String): Participant {
@@ -97,6 +101,12 @@ class CreationViewModel @Inject constructor(
             userId = makeRandomString(),
             username = enteredText
         )
+    }
+
+    private fun addParticipantToDatabase(tournamentId: String, participant: Participant) {
+        viewModelScope.launch {
+            tournamentRepository.addParticipantData(tournamentId, participant)
+        }
     }
 
     private fun makeRandomString(): String {
