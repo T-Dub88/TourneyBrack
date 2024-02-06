@@ -3,7 +3,7 @@ package com.dubproductions.bracket.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Tournament
-import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
+import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditTournamentViewModel @Inject constructor(
-    private val tournamentRepository: TournamentRepositoryImpl
+    private val tournamentRepository: TournamentRepository
 ): ViewModel() {
 
     private val _uiState: MutableStateFlow<EditTournamentUIState> = MutableStateFlow(
@@ -26,6 +26,7 @@ class EditTournamentViewModel @Inject constructor(
     val uiState: StateFlow<EditTournamentUIState> = _uiState.asStateFlow()
 
     private fun updateUIState(newUIState: EditTournamentUIState) {
+        tournamentRepository
         _uiState.update {
             newUIState
         }
@@ -65,45 +66,44 @@ class EditTournamentViewModel @Inject constructor(
         }
     }
 
-    suspend fun generateBracket(tournament: Tournament) {
+//    suspend fun generateBracket(tournament: Tournament) {
+//
+//        viewModelScope.async {
+//            tournament.createNextRound()
+//        }.await()
+//
+//        tournament.rounds?.let { rounds ->
+//            val roundsJob = viewModelScope.async {
+//                tournamentRepository.updateTournamentRounds(
+//                    id = tournament.tournamentId,
+//                    rounds = rounds
+//                )
+//            }
+//
+//            val participantsJob = viewModelScope.async {
+//                tournamentRepository.updateParticipantList(
+//                    id = tournamentId,
+//                    participants = tournament.participants
+//                )
+//            }
+//
+//            awaitAll(roundsJob, participantsJob)
+//
+//        }
+//
+//    }
 
-        tournament.id?.let { tournamentId ->
-            viewModelScope.async {
-                tournament.createNextRound()
-            }.await()
-
-            tournament.rounds?.let { rounds ->
-                val roundsJob = viewModelScope.async {
-                    tournamentRepository.updateTournamentRounds(
-                        id = tournamentId,
-                        rounds = rounds
-                    )
-                }
-
-                val participantsJob = viewModelScope.async {
-                    tournamentRepository.updateParticipantList(
-                        id = tournamentId,
-                        participants = tournament.participants
-                    )
-                }
-
-                awaitAll(roundsJob, participantsJob)
-
-            }
-        }
-    }
-
-    suspend fun deleteTournament(
-        tournamentId: String,
-        userId: String,
-        removeDeletedTournamentFromFlow: (String) -> Unit
-    ) {
-        tournamentRepository.removeTournamentListener(tournamentId)
-        tournamentRepository.removeTournamentFromDatabase(
-            tournamentId = tournamentId,
-            userId = userId
-        )
-        removeDeletedTournamentFromFlow(tournamentId)
-    }
+//    suspend fun deleteTournament(
+//        tournamentId: String,
+//        userId: String,
+//        removeDeletedTournamentFromFlow: (String) -> Unit
+//    ) {
+//        tournamentRepository.removeTournamentListener(tournamentId)
+//        tournamentRepository.removeTournamentFromDatabase(
+//            tournamentId = tournamentId,
+//            userId = userId
+//        )
+//        removeDeletedTournamentFromFlow(tournamentId)
+//    }
 
 }

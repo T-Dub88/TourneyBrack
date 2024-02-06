@@ -2,6 +2,7 @@ package com.dubproductions.bracket.domain.repository
 
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
+import com.dubproductions.bracket.utils.status.TournamentStatus
 
 interface TournamentRepository {
 
@@ -13,6 +14,17 @@ interface TournamentRepository {
 
     suspend fun createTournament(tournament: Tournament): Boolean
 
+    fun listenToParticipant(
+        tournamentId: String,
+        participantId: String,
+        onComplete: (Participant) -> Unit
+    )
+
+    suspend fun updateTournamentStatus(
+        tournamentId: String,
+        status: String
+    )
+
 //    suspend fun createTournament(
 //        tournament: Tournament
 //    ): Boolean
@@ -22,10 +34,7 @@ interface TournamentRepository {
 //        userId: String
 //    ): Boolean
 //
-//    suspend fun updateTournamentStatus(
-//        tournamentId: String,
-//        status: TournamentStatus
-//    ): Boolean
+
 //
 //    suspend fun addParticipant(
 //        tournamentId: String,

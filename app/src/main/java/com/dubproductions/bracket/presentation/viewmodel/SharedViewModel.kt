@@ -2,10 +2,14 @@ package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.domain.repository.UserRepository
+import com.dubproductions.bracket.utils.TournamentHousekeeping
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,8 +44,21 @@ class SharedViewModel @Inject constructor(
     private val _hostingTournamentList = MutableStateFlow(listOf<Tournament>())
     val hostingTournamentList = _hostingTournamentList.asStateFlow()
 
-    var viewingTournamentId: String = ""
-    var viewingParticipantId: String = ""
+    private val _selectedTournamentRounds = MutableStateFlow(listOf<Round>())
+    val selectedTournamentRounds = _selectedTournamentRounds.asStateFlow()
+
+    private val _selectedTournamentParticipants = MutableStateFlow(listOf<Participant>())
+    val selectedTournamentParticipants = _selectedTournamentParticipants.asStateFlow()
+
+    private val _selectedParticipantMatches = MutableStateFlow(listOf<Match>())
+    val selectedParticipantMatches = _selectedParticipantMatches.asStateFlow()
+
+    private val _selectedRoundMatches = MutableStateFlow(listOf<Match>())
+    val selectedRoundMatches = _selectedRoundMatches.asStateFlow()
+
+    var viewingTournamentId = ""
+    var viewingParticipantId = ""
+    var viewingRoundId = ""
 
     init {
         fetchUserData()
@@ -79,6 +96,23 @@ class SharedViewModel @Inject constructor(
         }
     }
 
+    private fun updateSelectedTournamentParticipantsList(participant: Participant) {
+        _selectedTournamentParticipants.update { oldList ->
+            val newList = oldList.toMutableList()
+            val removeData = newList.find { it.userId == participant.userId }
+
+            removeData?.let {
+                newList.remove(it)
+            }
+
+            newList.add(participant)
+
+            TournamentHousekeeping.sortPlayerStandings(
+                newList
+            )
+
+        }
+    }
 
     private fun fetchUserData() {
         viewModelScope.launch {
@@ -114,6 +148,20 @@ class SharedViewModel @Inject constructor(
                     tournamentId = tournamentId,
                     onComplete = { tournament ->
                         updateHostingTournamentList(tournament)
+                    }
+                )
+            }
+        }
+    }
+
+    fun fetchParticipants(participantIds: List<String>) {
+        for (id in participantIds) {
+            viewModelScope.launch {
+                tournamentRepository.listenToParticipant(
+                    tournamentId = viewingTournamentId,
+                    participantId = id,
+                    onComplete = { participant ->
+                        updateSelectedTournamentParticipantsList(participant)
                     }
                 )
             }

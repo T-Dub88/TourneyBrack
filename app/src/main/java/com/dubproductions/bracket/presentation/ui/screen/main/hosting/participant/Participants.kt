@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,11 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
-import com.dubproductions.bracket.utils.Validation
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.presentation.ui.state.ParticipantsUIState
+import com.dubproductions.bracket.utils.Validation
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParticipantsScreen(
     uiState: ParticipantsUIState,
@@ -74,7 +72,7 @@ fun ParticipantsScreen(
             LazyColumn(
                 contentPadding = PaddingValues(8.dp)
             ) {
-                itemsIndexed(participantList) {index, participant ->
+                itemsIndexed(participantList) { index, participant ->
                     ParticipantCard(
                         standing = index + 1,
                         participant = participant,
@@ -253,11 +251,11 @@ fun ParticipantCard(
                 fontSize = 18.sp
             )
             Text(
-                text = stringResource(id = R.string.buchholz, participant.buchholz),
+                text = stringResource(id = R.string.buchholz, participant.opponentsAvgPoints),
                 fontSize = 18.sp
             )
             Text(
-                text = stringResource(id = R.string.sb, participant.sonnebornBerger),
+                text = stringResource(id = R.string.sb, participant.opponentsOpponentsAvgPoints),
                 fontSize = 18.sp
             )
         }
@@ -279,7 +277,7 @@ fun ParticipantCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun ParticipantsScreenPreview() {
     ParticipantsScreen(
@@ -288,8 +286,8 @@ fun ParticipantsScreenPreview() {
             Participant(
                 username = "T_Dub88",
                 points = 1.2,
-                buchholz = 1.2,
-                sonnebornBerger = 1.3,
+                opponentsAvgPoints = 1.2,
+                opponentsOpponentsAvgPoints = 1.3,
                 dropped = false,
                 userId = ""
             )

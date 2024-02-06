@@ -28,8 +28,9 @@ import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.presentation.ui.components.dialogs.ReusableDialog
-import com.dubproductions.bracket.utils.status.TournamentStatus
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
+import com.dubproductions.bracket.utils.TournamentHousekeeping
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -61,7 +62,7 @@ fun EditTournamentScreen(
         EditTourneyText(
             text = stringResource(
                 id = R.string.registration_code,
-                tournament.id.toString().takeLast(4)
+                tournament.tournamentId.takeLast(4)
             )
         )
 
@@ -82,14 +83,14 @@ fun EditTournamentScreen(
         EditTourneyText(
             text = stringResource(
                 id = R.string.num_participants,
-                tournament.participants.size
+                tournament.participantIds.size
             )
         )
 
         EditTourneyText(
             text = stringResource(
                 id = R.string.num_rounds,
-                tournament.setNumberOfRounds()
+                TournamentHousekeeping.setNumberOfRounds(tournament.participantIds)
             )
         )
 
@@ -107,14 +108,14 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp),
             enabled = when (tournament.status) {
-                TournamentStatus.REGISTERING.status,
-                TournamentStatus.CLOSED.status -> true
+                TournamentStatus.REGISTERING.statusString,
+                TournamentStatus.CLOSED.statusString -> true
                 else -> false
             }
         ) {
             EditTourneyText(
                 text = when (tournament.status) {
-                    TournamentStatus.REGISTERING.status -> {
+                    TournamentStatus.REGISTERING.statusString -> {
                         stringResource(id = R.string.close_registration)
                     }
                     else -> stringResource(id = R.string.open_registration)

@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.utils
 
+import com.dubproductions.bracket.domain.model.Participant
 import kotlin.math.ceil
 import kotlin.math.log2
 
@@ -22,14 +23,14 @@ object TournamentHousekeeping {
 //        timeCompleted = Date().time
 //    }
 //
-//    fun sortPlayerStandings(): List<Participant> {
-//        return participants.sortedWith(
-//            compareBy(
-//                { player -> player.dropped },
-//                { player -> -player.points },
-//                { player -> -player.buchholz },
-//                { player -> -player.sonnebornBerger }
-//            )
-//        )
-//    }
+    fun sortPlayerStandings(participants: List<Participant>): List<Participant> {
+        return participants.sortedWith(
+            compareBy(
+                { player -> player.dropped },
+                { player -> -player.points },
+                { player -> -player.opponentsAvgPoints },
+                { player -> -player.opponentsOpponentsAvgPoints }
+            )
+        )
+    }
 }

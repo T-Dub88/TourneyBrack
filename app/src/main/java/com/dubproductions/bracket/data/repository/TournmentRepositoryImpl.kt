@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.data.repository
 
+import android.util.Log
 import com.dubproductions.bracket.data.remote.FirestoreService
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
@@ -57,6 +58,25 @@ class TournamentRepositoryImpl(
         } else {
             false
         }
+    }
+
+    override fun listenToParticipant(
+        tournamentId: String,
+        participantId: String,
+        onComplete: (Participant) -> Unit
+    ) {
+        firestoreService.createParticipantRealtimeListener(
+            tournamentId = tournamentId,
+            participantId = participantId,
+            onComplete = onComplete
+        )
+    }
+
+    override suspend fun updateTournamentStatus(tournamentId: String, status: String) {
+        firestoreService.updateTournamentStatus(
+            id = tournamentId,
+            status = status
+        )
     }
 
 //
@@ -305,18 +325,7 @@ class TournamentRepositoryImpl(
 //        tournamentListenerMap.remove(tournamentId)
 //    }
 //
-//    override suspend fun updateTournamentStatus(id: String, status: String) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(id)
-//                .update("status", status)
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "updateTournamentStatus: $e")
-//        }
-//
-//    }
+
 //
 //    override suspend fun updateTournamentRounds(id: String, rounds: MutableList<FirestoreRoundData>) {
 //        try {

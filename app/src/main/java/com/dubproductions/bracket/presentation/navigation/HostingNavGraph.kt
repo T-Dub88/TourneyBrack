@@ -8,10 +8,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dubproductions.bracket.presentation.ui.screen.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.HostingScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.TournamentCreationScreen
+import com.dubproductions.bracket.presentation.ui.screen.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.presentation.viewmodel.CreationViewModel
+import com.dubproductions.bracket.presentation.viewmodel.EditTournamentViewModel
+import com.dubproductions.bracket.presentation.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.presentation.viewmodel.SharedViewModel
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
@@ -21,9 +26,9 @@ fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
     ) {
         hostingScreen(navController)
         tournamentCreationScreen(navController)
-//        editTournamentScreen(navController)
+        editTournamentScreen(navController)
 //        bracketScreen(navController)
-//        participantsScreen(navController)
+        participantsScreen(navController)
 //        participantMatchesScreen(navController)
     }
 }
@@ -45,6 +50,7 @@ fun NavGraphBuilder.hostingScreen(
             },
             tournamentCardClick = { tournament ->
                 sharedViewModel.viewingTournamentId = tournament.tournamentId
+                sharedViewModel.fetchParticipants(tournament.participantIds)
                 navController.navigate(Screen.EditTournament.route)
             }
         )
@@ -82,40 +88,43 @@ fun NavGraphBuilder.tournamentCreationScreen(navController: NavHostController) {
         )
     }
 }
-//
-//fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
-//    composable(
-//        route = Screen.EditTournament.route
-//    ) {
-//        val userViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
-//        val editTourneyViewModel: EditTournamentViewModel = hiltViewModel()
-//        val coroutineScope = rememberCoroutineScope()
-//
-//        val uiState by editTourneyViewModel.uiState.collectAsStateWithLifecycle()
-//        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
-//
-//        EditTournamentScreen(
-//            tournament = tournament,
-//            uiState = uiState,
-//            changeBracketDialogState = { generate ->
+
+fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
+    composable(
+        route = Screen.EditTournament.route
+    ) {
+        val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
+        val editTourneyViewModel: EditTournamentViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+
+        val uiState by editTourneyViewModel.uiState.collectAsStateWithLifecycle()
+        val tournamentList by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
+        val tournament = tournamentList.find { selectedTournament ->
+            selectedTournament.tournamentId == sharedViewModel.viewingTournamentId
+        }!!
+
+        EditTournamentScreen(
+            tournament = tournament,
+            uiState = uiState,
+            changeBracketDialogState = { generate ->
 //                if (generate) {
 //                    coroutineScope.launch {
 //                        editTourneyViewModel.generateBracket(tournament)
 //                    }
 //                }
 //                editTourneyViewModel.changeBracketGenerationDialogState(false)
-//            },
-//            changeClosedDialogState = { state ->
-//                editTourneyViewModel.changeClosedDialogState(state)
-//            },
-//            changeDeleteDialogState = { delete ->
+            },
+            changeClosedDialogState = { state ->
+                editTourneyViewModel.changeClosedDialogState(state)
+            },
+            changeDeleteDialogState = { delete ->
 //                if (delete) {
 //                    coroutineScope.launch {
 //                        editTourneyViewModel.deleteTournament(
-//                            tournamentId = tournament.id!!,
-//                            userId = userViewModel.user.value.userId!!,
+//                            tournamentId = tournament.tournamentId,
+//                            userId = sharedViewModel.user.value.userId,
 //                            removeDeletedTournamentFromFlow = { id ->
-//                                userViewModel.removeDeletedTournamentFromFlow(id)
+//                                sharedViewModel.removeDeletedTournamentFromFlow(id)
 //                            }
 //                        )
 //                        navController.popBackStack()
@@ -123,48 +132,48 @@ fun NavGraphBuilder.tournamentCreationScreen(navController: NavHostController) {
 //                } else {
 //                    editTourneyViewModel.changeDeleteDialogState(false)
 //                }
-//            },
-//            changeOpenedDialogState = { state ->
-//                editTourneyViewModel.changeOpenedDialogState(state)
-//            },
-//            bracketOnClick = {
-//                if (tournament.rounds.isNullOrEmpty()) {
-//                    editTourneyViewModel.changeBracketGenerationDialogState(true)
-//                } else {
-//                    navController.navigate(Screen.Bracket.route)
-//                }
-//            },
-//            lockOnClick = {
-//                when (tournament.status) {
-//                    TournamentStatus.REGISTERING.status -> {
-//                        editTourneyViewModel.changeClosedDialogState(true)
-//                        editTourneyViewModel.updateTournamentStatus(
-//                            id = tournament.id!!,
-//                            status = TournamentStatus.CLOSED.status
-//                        )
-//                    }
-//                    TournamentStatus.CLOSED.status -> {
-//                        editTourneyViewModel.changeOpenedDialogState(true)
-//                        editTourneyViewModel.updateTournamentStatus(
-//                            id = tournament.id!!,
-//                            status = TournamentStatus.REGISTERING.status
-//                        )
-//                    }
-//                }
-//            },
-//            participantsOnClick = {
-//                navController.navigate(Screen.Participants.route)
-//            },
-//            startOnClick = {
-//                // TODO: if bracket empty, ask for generation
-//                // TODO: make end tournament if started
-//            },
-//            deleteOnClick = {
-//                editTourneyViewModel.changeDeleteDialogState(true)
-//            }
-//        )
-//    }
-//}
+            },
+            changeOpenedDialogState = { state ->
+                editTourneyViewModel.changeOpenedDialogState(state)
+            },
+            bracketOnClick = {
+                if (tournament.roundIds.isEmpty()) {
+                    editTourneyViewModel.changeBracketGenerationDialogState(true)
+                } else {
+                    navController.navigate(Screen.Bracket.route)
+                }
+            },
+            lockOnClick = {
+                when (tournament.status) {
+                    TournamentStatus.REGISTERING.statusString -> {
+                        editTourneyViewModel.changeClosedDialogState(true)
+                        editTourneyViewModel.updateTournamentStatus(
+                            id = tournament.tournamentId,
+                            status = TournamentStatus.CLOSED.statusString
+                        )
+                    }
+                    TournamentStatus.CLOSED.statusString -> {
+                        editTourneyViewModel.changeOpenedDialogState(true)
+                        editTourneyViewModel.updateTournamentStatus(
+                            id = tournament.tournamentId,
+                            status = TournamentStatus.REGISTERING.statusString
+                        )
+                    }
+                }
+            },
+            participantsOnClick = {
+                navController.navigate(Screen.Participants.route)
+            },
+            startOnClick = {
+                // TODO: if bracket empty, ask for generation
+                // TODO: make end tournament if started
+            },
+            deleteOnClick = {
+                editTourneyViewModel.changeDeleteDialogState(true)
+            }
+        )
+    }
+}
 //
 //fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
 //    composable(
@@ -202,44 +211,43 @@ fun NavGraphBuilder.tournamentCreationScreen(navController: NavHostController) {
 //    }
 //}
 //
-//fun NavGraphBuilder.participantsScreen(
-//    navController: NavHostController
-//) {
-//    composable(
-//        route = Screen.Participants.route
-//    ) {
-//        val userViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
-//        val participantsViewModel: ParticipantsViewModel = hiltViewModel()
-//        val coroutineScope = rememberCoroutineScope()
-//
-//        val uiState by participantsViewModel.uiState.collectAsStateWithLifecycle()
-//        val participantList by userViewModel.viewingTournament.collectAsStateWithLifecycle()
-//
-//        ParticipantsScreen(
-//            uiState = uiState,
-//            participantList = participantList.participants,
-//            floatingActionButtonClick = {
-//                participantsViewModel.changeAddPlayerDialogVisibility(true)
-//            },
-//            dropPlayerOnClick = { participant ->
-//                participantsViewModel.changeDropPlayerDialogVisibility(true)
-//                participantsViewModel.changeSelectedParticipant(participant)
-//            },
-//            viewMatchesOnClick = { participant ->
-//                userViewModel.updateViewingParticipant(participant)
-//                userViewModel.viewingParticipantId = participant.userId
-//                navController.navigate(Screen.ParticipantMatches.route)
-//            },
-//            closeCannotAddDialog = {
-//                participantsViewModel.changeCannotAddPlayerDialogVisibility(false)
-//            },
-//            closeDropPlayerDialog = { dropping ->
+fun NavGraphBuilder.participantsScreen(
+    navController: NavHostController
+) {
+    composable(
+        route = Screen.Participants.route
+    ) {
+        val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
+        val participantsViewModel: ParticipantsViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+
+        val uiState by participantsViewModel.uiState.collectAsStateWithLifecycle()
+        val participantList by sharedViewModel.selectedTournamentParticipants.collectAsStateWithLifecycle()
+
+        ParticipantsScreen(
+            uiState = uiState,
+            participantList = participantList,
+            floatingActionButtonClick = {
+                participantsViewModel.changeAddPlayerDialogVisibility(true)
+            },
+            dropPlayerOnClick = { participant ->
+                participantsViewModel.changeDropPlayerDialogVisibility(true)
+                participantsViewModel.changeSelectedParticipant(participant)
+            },
+            viewMatchesOnClick = { participant ->
+                sharedViewModel.viewingParticipantId = participant.userId
+                navController.navigate(Screen.ParticipantMatches.route)
+            },
+            closeCannotAddDialog = {
+                participantsViewModel.changeCannotAddPlayerDialogVisibility(false)
+            },
+            closeDropPlayerDialog = { dropping ->
 //                if (dropping) {
 //                    participantsViewModel.changeUIEnabled(false)
 //                    coroutineScope.launch {
 //                        participantsViewModel.dropExistingPlayer(
-//                            tournamentId = userViewModel.viewingTournament.value.id!!,
-//                            tournamentStatus = userViewModel.viewingTournament.value.status
+//                            tournamentId = sharedViewModel.viewingTournamentId,
+//                            tournamentStatus = sharedViewModel.viewingTournament.value.status
 //                        )
 //                        participantsViewModel.changeDropPlayerDialogVisibility(false)
 //                        participantsViewModel.changeUIEnabled(true)
@@ -247,29 +255,29 @@ fun NavGraphBuilder.tournamentCreationScreen(navController: NavHostController) {
 //                } else {
 //                    participantsViewModel.changeDropPlayerDialogVisibility(false)
 //                }
-//            },
-//            closeAddPlayerDialog = { adding, username ->
-//                if (adding && !username.isNullOrBlank()) {
-//                    participantsViewModel.changeUIEnabled(false)
-//                    coroutineScope.launch {
-//                        participantsViewModel.addNewPlayerToTournament(
-//                            tournamentId = userViewModel.viewingTournament.value.id!!,
-//                            participantUserName = username
-//                        )
-//                        participantsViewModel.changeAddPlayerDialogVisibility(false)
-//                        participantsViewModel.changeAddParticipantText("")
-//                        participantsViewModel.changeUIEnabled(true)
-//                    }
-//                } else {
-//                    participantsViewModel.changeAddPlayerDialogVisibility(false)
-//                }
-//            },
-//            changeAddPlayerTextFieldValue = { username ->
-//                participantsViewModel.changeAddParticipantText(username)
-//            }
-//        )
-//    }
-//}
+            },
+            closeAddPlayerDialog = { adding, username ->
+                if (adding && !username.isNullOrBlank()) {
+                    participantsViewModel.changeUIEnabled(false)
+                    coroutineScope.launch {
+                        participantsViewModel.addNewPlayerToTournament(
+                            tournamentId = sharedViewModel.viewingTournamentId,
+                            participantUserName = username
+                        )
+                        participantsViewModel.changeAddPlayerDialogVisibility(false)
+                        participantsViewModel.changeAddParticipantText("")
+                        participantsViewModel.changeUIEnabled(true)
+                    }
+                } else {
+                    participantsViewModel.changeAddPlayerDialogVisibility(false)
+                }
+            },
+            changeAddPlayerTextFieldValue = { username ->
+                participantsViewModel.changeAddParticipantText(username)
+            }
+        )
+    }
+}
 //
 //fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
 //    composable(

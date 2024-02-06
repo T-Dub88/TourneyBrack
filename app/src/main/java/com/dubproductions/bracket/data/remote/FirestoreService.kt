@@ -218,6 +218,37 @@ class FirestoreService {
         userListener.remove()
     }
 
+    fun createParticipantRealtimeListener(
+        tournamentId: String,
+        participantId: String,
+        onComplete: (Participant) -> Unit
+    ) {
+       if (!participantListeners.containsKey(participantId)) {
+           participantListeners[participantId] = firestore
+               .collection(TOURNAMENTS)
+               .document(tournamentId)
+               .collection(PARTICIPANTS)
+               .document(participantId)
+               .addSnapshotListener { value, error ->
+                   if (error != null) {
+                       Log.e(TAG, "createParticipantRealtimeListener: $error")
+                       return@addSnapshotListener
+                   }
+
+                   if (value != null && value.exists()) {
+                       val participant = value.toObject<Participant>()
+                       participant?.let {
+                           onComplete(it)
+                       }
+                   }
+               }
+       }
+    }
+
+    fun removeParticipantListener(participantId: String) {
+        participantListeners[participantId]?.remove()
+    }
+
     suspend fun addParticipantData(tournamentId: String, participant: Participant) {
 
         try {
@@ -261,6 +292,19 @@ class FirestoreService {
             Log.e(TAG, "addTournamentIdToHostingList: $e")
             false
         }
+    }
+
+    suspend fun updateTournamentStatus(id: String, status: String) {
+        try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(id)
+                .update("status", status)
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "updateTournamentStatus: $e")
+        }
+
     }
 
 }
