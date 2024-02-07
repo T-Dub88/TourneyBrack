@@ -8,10 +8,12 @@ import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.ktx.dataObjects
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import kotlin.math.log
 
 private const val TAG = "FirestoreService"
 private const val USERS = "users"
@@ -172,6 +174,7 @@ class FirestoreService {
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
                 .addSnapshotListener { value, error ->
+                    Log.i(TAG, "createTournamentRealtimeListener: $tournamentListeners")
                     if (error != null) {
                         Log.e(TAG, "createTournamentRealtimeListener: $error")
                         return@addSnapshotListener
@@ -230,6 +233,7 @@ class FirestoreService {
                .collection(PARTICIPANTS)
                .document(participantId)
                .addSnapshotListener { value, error ->
+                   Log.i(TAG, "createParticipantRealtimeListener: $participantListeners")
                    if (error != null) {
                        Log.e(TAG, "createParticipantRealtimeListener: $error")
                        return@addSnapshotListener

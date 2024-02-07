@@ -7,6 +7,13 @@ import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
 private const val TAG = "Repository Implementation"
 
@@ -66,11 +73,34 @@ class TournamentRepositoryImpl(
 
     override fun fetchHostingTournamentData(
         tournamentId: String,
-        onComplete: (Tournament) -> Unit
+        onComplete: (
+            Tournament,
+            participantIds: List<String>,
+            roundIds: List<String>
+        ) -> Unit
     ) {
         firestoreService.createTournamentRealtimeListener(
             tournamentId = tournamentId,
-            onComplete = onComplete
+            onComplete = {
+                val tournament = Tournament(
+                        tournamentId = it.tournamentId,
+                        name = it.name,
+                        type = it.type,
+                        status = it.status,
+                        timeStarted = it.timeStarted,
+                        timeEnded = it.timeEnded,
+                        hostId = it.hostId,
+                        rounds = listOf(),
+                        participants = listOf(),
+                    )
+
+                onComplete(
+                    tournament,
+                    it.participantIds,
+                    it.roundIds
+                )
+
+            }
         )
     }
 

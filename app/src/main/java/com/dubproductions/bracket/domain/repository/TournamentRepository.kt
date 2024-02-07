@@ -9,7 +9,14 @@ interface TournamentRepository {
 
     suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament
 
-    fun fetchHostingTournamentData(tournamentId: String, onComplete: (Tournament) -> Unit)
+    fun fetchHostingTournamentData(
+        tournamentId: String,
+        onComplete: (
+            Tournament,
+            participantIds: List<String>,
+            roundIds: List<String>
+        ) -> Unit
+    )
 
     suspend fun addParticipantData(tournamentId: String, participant: Participant)
 

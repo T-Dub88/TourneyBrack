@@ -30,6 +30,7 @@ import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.presentation.ui.components.dialogs.ReusableDialog
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
 import com.dubproductions.bracket.utils.TournamentHousekeeping
+import com.dubproductions.bracket.utils.TournamentHousekeeping.setNumberOfRounds
 import com.dubproductions.bracket.utils.status.TournamentStatus
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -83,14 +84,14 @@ fun EditTournamentScreen(
         EditTourneyText(
             text = stringResource(
                 id = R.string.num_participants,
-                tournament.participantIds.size
+                tournament.participants.size
             )
         )
 
         EditTourneyText(
             text = stringResource(
                 id = R.string.num_rounds,
-                TournamentHousekeeping.setNumberOfRounds(tournament.participantIds)
+                tournament.setNumberOfRounds()
             )
         )
 

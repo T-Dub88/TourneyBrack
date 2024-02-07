@@ -2,18 +2,14 @@ package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
-import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.domain.repository.UserRepository
-import com.dubproductions.bracket.utils.TournamentHousekeeping
 import com.dubproductions.bracket.utils.TournamentHousekeeping.sortPlayerStandings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -45,18 +41,6 @@ class SharedViewModel @Inject constructor(
     private val _hostingTournamentList = MutableStateFlow(listOf<Tournament>())
     val hostingTournamentList = _hostingTournamentList.asStateFlow()
 
-    private val _selectedTournamentRounds = MutableStateFlow(listOf<Round>())
-    val selectedTournamentRounds = _selectedTournamentRounds.asStateFlow()
-
-    private val _selectedTournamentParticipants = MutableStateFlow(listOf<Participant>())
-    val selectedTournamentParticipants = _selectedTournamentParticipants.asStateFlow()
-
-    private val _selectedParticipantMatches = MutableStateFlow(listOf<Match>())
-    val selectedParticipantMatches = _selectedParticipantMatches.asStateFlow()
-
-    private val _selectedRoundMatches = MutableStateFlow(listOf<Match>())
-    val selectedRoundMatches = _selectedRoundMatches.asStateFlow()
-
     var viewingTournamentId = ""
     var viewingParticipantId = ""
     var viewingRoundId = ""
@@ -83,13 +67,24 @@ class SharedViewModel @Inject constructor(
     private fun updateHostingTournamentList(tournament: Tournament) {
         _hostingTournamentList.update { oldList ->
             val newList = oldList.toMutableList()
-            val removeData = newList.find { it.tournamentId == tournament.tournamentId }
+            val oldData = newList.find { it.tournamentId == tournament.tournamentId }
 
-            removeData?.let {
-                newList.remove(it)
+            if (oldData != null) {
+                val newData = oldData.copy(
+                    tournamentId = tournament.tournamentId,
+                    name = tournament.name,
+                    type = tournament.type,
+                    status = tournament.status,
+                    timeStarted = tournament.timeStarted,
+                    timeEnded = tournament.timeEnded,
+                    hostId = tournament.hostId
+                )
+                newList.remove(oldData)
+                newList.add(newData)
+            } else {
+                newList.add(tournament)
             }
 
-            newList.add(tournament)
             newList.sortBy { it.timeStarted }
 
             newList
@@ -97,20 +92,43 @@ class SharedViewModel @Inject constructor(
         }
     }
 
-    private fun updateSelectedTournamentParticipantsList(participant: Participant) {
-        _selectedTournamentParticipants.update { oldList ->
-            val newList = oldList.toMutableList()
-            val removeData = newList.find { it.userId == participant.userId }
+    private fun updateHostingTournamentParticipantsList(
+        tournamentId: String,
+        participant: Participant
+    ) {
+        _hostingTournamentList.update { oldTournamentList ->
 
-            removeData?.let {
-                newList.remove(it)
+            val oldData = oldTournamentList.find { it.tournamentId == tournamentId }
+            val oldParticipantList = oldData?.participants
+            val oldParticipant = oldParticipantList?.find { it.userId == participant.userId }
+
+            val newParticipantList = oldParticipantList?.toMutableList()
+            val newTournamentList = oldTournamentList.toMutableList()
+
+            if (newParticipantList != null) {
+
+                if (oldParticipant != null) {
+                    newParticipantList.remove(oldParticipant)
+                }
+
+                newParticipantList.add(participant)
+
+                val sortedList = newParticipantList.sortPlayerStandings()
+
+                val newData = oldData.copy(
+                    participants = sortedList
+                )
+
+                newTournamentList.remove(oldData)
+                newTournamentList.add(newData)
+                newTournamentList.sortBy { it.timeStarted }
+
             }
 
-            newList.add(participant)
-
-            newList.sortPlayerStandings()
+            newTournamentList
 
         }
+
     }
 
     private fun fetchUserData() {
@@ -145,22 +163,23 @@ class SharedViewModel @Inject constructor(
             viewModelScope.launch {
                 tournamentRepository.fetchHostingTournamentData(
                     tournamentId = tournamentId,
-                    onComplete = { tournament ->
+                    onComplete = { tournament, participantIds, roundIds ->
                         updateHostingTournamentList(tournament)
+                        fetchParticipants(tournamentId, participantIds)
                     }
                 )
             }
         }
     }
 
-    fun fetchParticipants(participantIds: List<String>) {
+    private fun fetchParticipants(tournamentId: String, participantIds: List<String>) {
         for (id in participantIds) {
             viewModelScope.launch {
                 tournamentRepository.listenToParticipant(
-                    tournamentId = viewingTournamentId,
+                    tournamentId = tournamentId,
                     participantId = id,
                     onComplete = { participant ->
-                        updateSelectedTournamentParticipantsList(participant)
+                        updateHostingTournamentParticipantsList(tournamentId, participant)
                     }
                 )
             }

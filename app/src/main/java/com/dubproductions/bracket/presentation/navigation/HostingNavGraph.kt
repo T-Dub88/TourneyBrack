@@ -50,7 +50,6 @@ fun NavGraphBuilder.hostingScreen(
             },
             tournamentCardClick = { tournament ->
                 sharedViewModel.viewingTournamentId = tournament.tournamentId
-//                sharedViewModel.fetchParticipants(tournament.participantIds)
                 navController.navigate(Screen.EditTournament.route)
             }
         )
@@ -222,11 +221,14 @@ fun NavGraphBuilder.participantsScreen(
         val coroutineScope = rememberCoroutineScope()
 
         val uiState by participantsViewModel.uiState.collectAsStateWithLifecycle()
-//        val participantList by sharedViewModel.selectedTournamentParticipants.collectAsStateWithLifecycle()
+        val tournamentList by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
+        val selectedTournament = tournamentList.find { tourney ->
+            tourney.tournamentId == sharedViewModel.viewingTournamentId
+        }!!
 
         ParticipantsScreen(
             uiState = uiState,
-            participantList = ,
+            participantList = selectedTournament.participants,
             floatingActionButtonClick = {
                 participantsViewModel.changeAddPlayerDialogVisibility(true)
             },
