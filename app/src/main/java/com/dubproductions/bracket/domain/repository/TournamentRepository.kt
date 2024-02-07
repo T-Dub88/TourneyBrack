@@ -1,6 +1,7 @@
 package com.dubproductions.bracket.domain.repository
 
 import com.dubproductions.bracket.data.model.RawTournament
+import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.utils.status.TournamentStatus
@@ -11,10 +12,7 @@ interface TournamentRepository {
 
     fun fetchHostingTournamentData(
         tournamentId: String,
-        onComplete: (
-            Tournament,
-            participantIds: List<String>
-        ) -> Unit
+        onComplete: (Tournament) -> Unit
     )
 
     suspend fun addParticipantData(tournamentId: String, participant: Participant)
@@ -25,6 +23,13 @@ interface TournamentRepository {
         tournamentId: String,
         participantId: String,
         onComplete: (Participant) -> Unit
+    )
+
+    fun listenToMatch(
+        tournamentId: String,
+        roundId: String,
+        matchId: String,
+        onComplete: (Match) -> Unit
     )
 
     suspend fun updateTournamentStatus(

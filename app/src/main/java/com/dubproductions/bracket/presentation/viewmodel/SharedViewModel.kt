@@ -2,6 +2,7 @@ package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
@@ -74,6 +75,8 @@ class SharedViewModel @Inject constructor(
                     tournamentId = tournament.tournamentId,
                     name = tournament.name,
                     type = tournament.type,
+                    roundIds = tournament.roundIds,
+                    participantIds = tournament.participantIds,
                     status = tournament.status,
                     timeStarted = tournament.timeStarted,
                     timeEnded = tournament.timeEnded,
@@ -131,6 +134,52 @@ class SharedViewModel @Inject constructor(
 
     }
 
+    private fun updateHostingTournamentRoundMatches(
+        tournamentId: String,
+        roundId: String,
+        match: Match
+    ) {
+        _hostingTournamentList.update { oldTournamentList ->
+
+            val oldTournament = oldTournamentList.find { it.tournamentId == tournamentId }
+            val oldRoundsList = oldTournament?.rounds
+            val oldRound = oldRoundsList?.find { it.roundId == roundId }
+            val oldMatchList = oldRound?.matches
+            val oldMatch = oldMatchList?.find { it.matchId == match.matchId }
+
+            val newTournamentList = oldTournamentList.toMutableList()
+            val newMatchList = oldMatchList?.toMutableList()
+            val newRoundsList = oldRoundsList?.toMutableList()
+
+            if (newMatchList != null && newRoundsList != null) {
+
+                if (oldMatch != null) {
+                    newMatchList.remove(oldMatch)
+                }
+
+                newMatchList.add(match)
+
+                val newRound = oldRound.copy(
+                    matches = newMatchList
+                )
+                newRoundsList.remove(oldRound)
+                newRoundsList.add(newRound)
+                newRoundsList.sortBy { -it.roundNum }
+
+                val newTournament = oldTournament.copy(
+                    rounds = newRoundsList
+                )
+                newTournamentList.remove(oldTournament)
+                newTournamentList.add(newTournament)
+                newTournamentList.sortBy { it.timeStarted }
+
+            }
+
+            newTournamentList
+
+        }
+    }
+
     private fun fetchUserData() {
         viewModelScope.launch {
             userRepository.fetchUserData(
@@ -163,9 +212,16 @@ class SharedViewModel @Inject constructor(
             viewModelScope.launch {
                 tournamentRepository.fetchHostingTournamentData(
                     tournamentId = tournamentId,
-                    onComplete = { tournament, participantIds ->
+                    onComplete = { tournament ->
                         updateHostingTournamentList(tournament)
-                        fetchParticipants(tournamentId, participantIds)
+                        fetchParticipants(tournamentId, tournament.participantIds)
+                        for (round in tournament.rounds) {
+                            fetchMatches(
+                                tournamentId = tournamentId,
+                                roundId = round.roundId,
+                                matchIds = round.matchIds
+                            )
+                        }
                     }
                 )
             }
@@ -180,6 +236,29 @@ class SharedViewModel @Inject constructor(
                     participantId = id,
                     onComplete = { participant ->
                         updateHostingTournamentParticipantsList(tournamentId, participant)
+                    }
+                )
+            }
+        }
+    }
+
+    private fun fetchMatches(
+        tournamentId: String,
+        roundId: String,
+        matchIds: List<String>
+    ) {
+        for (id in matchIds) {
+            viewModelScope.launch {
+                tournamentRepository.listenToMatch(
+                    tournamentId = tournamentId,
+                    roundId = roundId,
+                    matchId = id,
+                    onComplete = { match ->
+                        updateHostingTournamentRoundMatches(
+                            tournamentId = tournamentId,
+                            match = match,
+                            roundId = roundId
+                        )
                     }
                 )
             }

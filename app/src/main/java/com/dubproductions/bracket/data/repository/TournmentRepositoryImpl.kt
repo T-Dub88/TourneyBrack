@@ -9,11 +9,8 @@ import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
 
 private const val TAG = "Repository Implementation"
 
@@ -33,7 +30,9 @@ class TournamentRepositoryImpl(
             name = rawTournament.name,
             type = rawTournament.type,
             rounds = fetchCompletedTournamentRounds(rawTournament.tournamentId),
+            roundIds = rawTournament.roundIds,
             participants = fetchCompletedTournamentParticipants(rawTournament.tournamentId),
+            participantIds = rawTournament.participantIds,
             status = rawTournament.status,
             timeStarted = rawTournament.timeStarted,
             timeEnded = rawTournament.timeEnded,
@@ -53,12 +52,13 @@ class TournamentRepositoryImpl(
         for (rawRound in rawRounds) {
             val round = Round(
                 roundId = rawRound.roundId,
-                match = fetchCompletedRoundMatches(tournamentId, rawRound.roundId),
+                matches = fetchCompletedRoundMatches(tournamentId, rawRound.roundId),
                 roundNum = rawRound.roundNum,
                 byeParticipantId = rawRound.byeParticipantId
             )
 
             rounds.add(round)
+            rounds.sortBy { -it.roundNum }
         }
 
         return rounds
@@ -71,12 +71,14 @@ class TournamentRepositoryImpl(
         for (rawRound in rawRounds) {
             val round = Round(
                 roundId = rawRound.roundId,
-                match = listOf(),
+                matches = listOf(),
+                matchIds = rawRound.matchIds,
                 roundNum = rawRound.roundNum,
                 byeParticipantId = rawRound.byeParticipantId
             )
 
             rounds.add(round)
+            rounds.sortBy { -it.roundNum }
         }
 
         return rounds
@@ -91,10 +93,7 @@ class TournamentRepositoryImpl(
 
     override fun fetchHostingTournamentData(
         tournamentId: String,
-        onComplete: (
-            Tournament,
-            participantIds: List<String>
-        ) -> Unit
+        onComplete: (Tournament) -> Unit
     ) {
         firestoreService.createTournamentRealtimeListener(
             tournamentId = tournamentId,
@@ -106,6 +105,8 @@ class TournamentRepositoryImpl(
                             name = it.name,
                             type = it.type,
                             status = it.status,
+                            participantIds = it.participantIds,
+                            roundIds = it.roundIds,
                             timeStarted = it.timeStarted,
                             timeEnded = it.timeEnded,
                             hostId = it.hostId,
@@ -113,10 +114,7 @@ class TournamentRepositoryImpl(
                             participants = listOf(),
                         )
                     }
-                    onComplete(
-                        tournament,
-                        it.participantIds
-                    )
+                    onComplete(tournament)
                 }
             }
         )
@@ -147,6 +145,20 @@ class TournamentRepositoryImpl(
         firestoreService.createParticipantRealtimeListener(
             tournamentId = tournamentId,
             participantId = participantId,
+            onComplete = onComplete
+        )
+    }
+
+    override fun listenToMatch(
+        tournamentId: String,
+        roundId: String,
+        matchId: String,
+        onComplete: (Match) -> Unit
+    ) {
+        firestoreService.createMatchRealtimeListener(
+            tournamentId = tournamentId,
+            roundId = roundId,
+            matchId = matchId,
             onComplete = onComplete
         )
     }

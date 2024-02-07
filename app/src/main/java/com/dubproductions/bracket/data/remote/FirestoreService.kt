@@ -28,7 +28,6 @@ class FirestoreService {
     private val firestore = Firebase.firestore
 
     private val tournamentListeners = mutableMapOf<String, ListenerRegistration>()
-    private val roundListeners =  mutableMapOf<String, ListenerRegistration>()
     private val matchListeners = mutableMapOf<String, ListenerRegistration>()
     private val participantListeners = mutableMapOf<String, ListenerRegistration>()
     private lateinit var userListener: ListenerRegistration
@@ -174,7 +173,7 @@ class FirestoreService {
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
                 .addSnapshotListener { value, error ->
-                    Log.i(TAG, "createTournamentRealtimeListener: $tournamentListeners")
+                    Log.i(TAG, "createTournamentRealtimeListener: ${tournamentListeners.size}")
                     if (error != null) {
                         Log.e(TAG, "createTournamentRealtimeListener: $error")
                         return@addSnapshotListener
@@ -251,6 +250,41 @@ class FirestoreService {
 
     fun removeParticipantListener(participantId: String) {
         participantListeners[participantId]?.remove()
+    }
+
+    fun createMatchRealtimeListener(
+        tournamentId: String,
+        roundId: String,
+        matchId: String,
+        onComplete: (Match) -> Unit
+    ) {
+        if (!matchListeners.containsKey(matchId)) {
+            matchListeners[matchId] = firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(ROUNDS)
+                .document(roundId)
+                .collection(MATCHES)
+                .document(matchId)
+                .addSnapshotListener { value, error ->
+                    Log.i(TAG, "createMatchRealtimeListener: ${matchListeners.size}")
+                    if (error != null) {
+                        Log.e(TAG, "createMatchRealtimeListener: $error")
+                        return@addSnapshotListener
+                    }
+
+                    if (value != null && value.exists()) {
+                        val match = value.toObject<Match>()
+                        match?.let {
+                            onComplete(it)
+                        }
+                    }
+                }
+        }
+    }
+
+    fun removeMatchListener(matchId: String) {
+        matchListeners[matchId]?.remove()
     }
 
     suspend fun addParticipantData(tournamentId: String, participant: Participant) {
