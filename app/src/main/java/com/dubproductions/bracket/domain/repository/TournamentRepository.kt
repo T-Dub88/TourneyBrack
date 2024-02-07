@@ -13,8 +13,7 @@ interface TournamentRepository {
         tournamentId: String,
         onComplete: (
             Tournament,
-            participantIds: List<String>,
-            roundIds: List<String>
+            participantIds: List<String>
         ) -> Unit
     )
 

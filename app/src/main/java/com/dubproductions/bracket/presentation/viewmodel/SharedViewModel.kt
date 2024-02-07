@@ -163,7 +163,7 @@ class SharedViewModel @Inject constructor(
             viewModelScope.launch {
                 tournamentRepository.fetchHostingTournamentData(
                     tournamentId = tournamentId,
-                    onComplete = { tournament, participantIds, roundIds ->
+                    onComplete = { tournament, participantIds ->
                         updateHostingTournamentList(tournament)
                         fetchParticipants(tournamentId, participantIds)
                     }

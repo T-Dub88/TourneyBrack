@@ -64,6 +64,24 @@ class TournamentRepositoryImpl(
         return rounds
     }
 
+    private suspend fun fetchHostingTournamentRounds(tournamentId: String): List<Round> {
+        val rounds = mutableListOf<Round>()
+        val rawRounds= firestoreService.fetchRounds(tournamentId)
+
+        for (rawRound in rawRounds) {
+            val round = Round(
+                roundId = rawRound.roundId,
+                match = listOf(),
+                roundNum = rawRound.roundNum,
+                byeParticipantId = rawRound.byeParticipantId
+            )
+
+            rounds.add(round)
+        }
+
+        return rounds
+    }
+
     private suspend fun fetchCompletedRoundMatches(
         tournamentId: String,
         roundId: String
@@ -75,31 +93,31 @@ class TournamentRepositoryImpl(
         tournamentId: String,
         onComplete: (
             Tournament,
-            participantIds: List<String>,
-            roundIds: List<String>
+            participantIds: List<String>
         ) -> Unit
     ) {
         firestoreService.createTournamentRealtimeListener(
             tournamentId = tournamentId,
             onComplete = {
-                val tournament = Tournament(
-                        tournamentId = it.tournamentId,
-                        name = it.name,
-                        type = it.type,
-                        status = it.status,
-                        timeStarted = it.timeStarted,
-                        timeEnded = it.timeEnded,
-                        hostId = it.hostId,
-                        rounds = listOf(),
-                        participants = listOf(),
+                CoroutineScope(Dispatchers.Main).launch {
+                    val tournament = withContext(Dispatchers.IO) {
+                        Tournament(
+                            tournamentId = it.tournamentId,
+                            name = it.name,
+                            type = it.type,
+                            status = it.status,
+                            timeStarted = it.timeStarted,
+                            timeEnded = it.timeEnded,
+                            hostId = it.hostId,
+                            rounds = fetchHostingTournamentRounds(it.tournamentId),
+                            participants = listOf(),
+                        )
+                    }
+                    onComplete(
+                        tournament,
+                        it.participantIds
                     )
-
-                onComplete(
-                    tournament,
-                    it.participantIds,
-                    it.roundIds
-                )
-
+                }
             }
         )
     }
