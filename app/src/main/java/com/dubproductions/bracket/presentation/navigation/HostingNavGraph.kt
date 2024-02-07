@@ -50,7 +50,7 @@ fun NavGraphBuilder.hostingScreen(
             },
             tournamentCardClick = { tournament ->
                 sharedViewModel.viewingTournamentId = tournament.tournamentId
-                sharedViewModel.fetchParticipants(tournament.participantIds)
+//                sharedViewModel.fetchParticipants(tournament.participantIds)
                 navController.navigate(Screen.EditTournament.route)
             }
         )
@@ -137,7 +137,7 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                 editTourneyViewModel.changeOpenedDialogState(state)
             },
             bracketOnClick = {
-                if (tournament.roundIds.isEmpty()) {
+                if (tournament.rounds.isEmpty()) {
                     editTourneyViewModel.changeBracketGenerationDialogState(true)
                 } else {
                     navController.navigate(Screen.Bracket.route)
@@ -222,11 +222,11 @@ fun NavGraphBuilder.participantsScreen(
         val coroutineScope = rememberCoroutineScope()
 
         val uiState by participantsViewModel.uiState.collectAsStateWithLifecycle()
-        val participantList by sharedViewModel.selectedTournamentParticipants.collectAsStateWithLifecycle()
+//        val participantList by sharedViewModel.selectedTournamentParticipants.collectAsStateWithLifecycle()
 
         ParticipantsScreen(
             uiState = uiState,
-            participantList = participantList,
+            participantList = ,
             floatingActionButtonClick = {
                 participantsViewModel.changeAddPlayerDialogVisibility(true)
             },

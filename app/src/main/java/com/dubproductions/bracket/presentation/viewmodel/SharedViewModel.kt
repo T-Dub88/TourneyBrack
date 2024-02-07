@@ -10,6 +10,7 @@ import com.dubproductions.bracket.domain.model.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.domain.repository.UserRepository
 import com.dubproductions.bracket.utils.TournamentHousekeeping
+import com.dubproductions.bracket.utils.TournamentHousekeeping.sortPlayerStandings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -107,9 +108,7 @@ class SharedViewModel @Inject constructor(
 
             newList.add(participant)
 
-            TournamentHousekeeping.sortPlayerStandings(
-                newList
-            )
+            newList.sortPlayerStandings()
 
         }
     }

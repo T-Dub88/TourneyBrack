@@ -1,6 +1,6 @@
 package com.dubproductions.bracket.data.repository
 
-import android.util.Log
+import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.data.remote.FirestoreService
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
@@ -14,8 +14,54 @@ class TournamentRepositoryImpl(
     private val firestoreService: FirestoreService
 ): TournamentRepository {
     override suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament {
-        val tournament = firestoreService.fetchCompletedTournamentData(tournamentId)
-        return tournament ?: Tournament()
+        val rawTournament = firestoreService.fetchCompletedTournamentData(tournamentId)
+        return rawTournament?.let {
+            convertRawTournamentToCompletedTournament(it)
+        } ?: Tournament()
+    }
+
+    private suspend fun convertRawTournamentToCompletedTournament(rawTournament: RawTournament): Tournament {
+        return Tournament(
+            tournamentId = rawTournament.tournamentId,
+            name = rawTournament.name,
+            type = rawTournament.type,
+            rounds = fetchCompletedTournamentRounds(rawTournament.tournamentId),
+            participants = fetchCompletedTournamentParticipants(rawTournament.tournamentId),
+            status = rawTournament.status,
+            timeStarted = rawTournament.timeStarted,
+            timeEnded = rawTournament.timeEnded,
+            hostId = rawTournament.hostId
+        )
+    }
+
+    private suspend fun fetchCompletedTournamentParticipants(tournamentId: String): List<Participant> {
+        return firestoreService.fetchParticipants(tournamentId)
+    }
+
+    private suspend fun fetchCompletedTournamentRounds(tournamentId: String): List<Round> {
+
+        val rounds = mutableListOf<Round>()
+        val rawRounds= firestoreService.fetchRounds(tournamentId)
+
+        for (rawRound in rawRounds) {
+            val round = Round(
+                roundId = rawRound.roundId,
+                match = fetchCompletedRoundMatches(tournamentId, rawRound.roundId),
+                roundNum = rawRound.roundNum,
+                byeParticipantId = rawRound.byeParticipantId
+            )
+
+            rounds.add(round)
+        }
+
+        return rounds
+    }
+
+    private suspend fun fetchCompletedRoundMatches(
+        tournamentId: String,
+        roundId: String
+    ): List<Match> {
+        return firestoreService.fetchMatches(tournamentId, roundId)
     }
 
     override fun fetchHostingTournamentData(
@@ -28,26 +74,11 @@ class TournamentRepositoryImpl(
         )
     }
 
-    private suspend fun fetchTournamentParticipants(tournamentId: String): List<Participant> {
-        return firestoreService.fetchParticipants(tournamentId)
-    }
-
-    private suspend fun fetchTournamentRounds(tournamentId: String): List<Round> {
-        return firestoreService.fetchRounds(tournamentId)
-    }
-
-    private suspend fun fetchRoundMatches(
-        tournamentId: String,
-        roundId: String
-    ): List<Match> {
-        return firestoreService.fetchMatches(tournamentId, roundId)
-    }
-
     override suspend fun addParticipantData(tournamentId: String, participant: Participant) {
         firestoreService.addParticipantData(tournamentId, participant)
     }
 
-    override suspend fun createTournament(tournament: Tournament): Boolean {
+    override suspend fun createTournament(tournament: RawTournament): Boolean {
         val addToHost = firestoreService
             .addTournamentIdToHostingList(
                 userId = tournament.hostId,

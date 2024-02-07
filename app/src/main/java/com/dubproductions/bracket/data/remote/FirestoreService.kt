@@ -1,10 +1,10 @@
 package com.dubproductions.bracket.data.remote
 
 import android.util.Log
+import com.dubproductions.bracket.data.model.RawRound
+import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
-import com.dubproductions.bracket.domain.model.Round
-import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
@@ -64,14 +64,14 @@ class FirestoreService {
         }
     }
 
-    suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament? {
+    suspend fun fetchCompletedTournamentData(tournamentId: String): RawTournament? {
         return try {
             firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
                 .get()
                 .await()
-                .toObject<Tournament>()
+                .toObject<RawTournament>()
         } catch (e: Exception) {
             Log.e(TAG, "fetchCompletedTournamentData: $e")
             null
@@ -107,9 +107,9 @@ class FirestoreService {
 
     suspend fun fetchRounds(
         tournamentId: String
-    ): List<Round> {
+    ): List<RawRound> {
 
-        val roundData = mutableListOf<Round>()
+        val roundData = mutableListOf<RawRound>()
 
         return try {
             val result = firestore
@@ -120,7 +120,7 @@ class FirestoreService {
                 .await()
 
             result.forEach { queryDocumentSnapshot ->
-                val round = queryDocumentSnapshot.toObject<Round>()
+                val round = queryDocumentSnapshot.toObject<RawRound>()
                 roundData.add(round)
             }
 
@@ -165,7 +165,7 @@ class FirestoreService {
 
     fun createTournamentRealtimeListener(
         tournamentId: String,
-        onComplete: (Tournament) -> Unit
+        onComplete: (RawTournament) -> Unit
     ) {
         if (!tournamentListeners.containsKey(tournamentId)) {
             tournamentListeners[tournamentId] = firestore
@@ -178,7 +178,7 @@ class FirestoreService {
                     }
 
                     if (value != null && value.exists()) {
-                        val tournament = value.toObject<Tournament>()
+                        val tournament = value.toObject<RawTournament>()
                         tournament?.let {
                             onComplete(it)
                         }
@@ -265,7 +265,7 @@ class FirestoreService {
 
     }
 
-    suspend fun addTournamentData(tournament: Tournament): Boolean {
+    suspend fun addTournamentData(tournament: RawTournament): Boolean {
         return try {
             firestore
                 .collection(TOURNAMENTS)

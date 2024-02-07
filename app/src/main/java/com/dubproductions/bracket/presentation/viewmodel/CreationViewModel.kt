@@ -2,6 +2,7 @@ package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
@@ -53,7 +54,7 @@ class CreationViewModel @Inject constructor(
         participants: String
     ) {
         val tournamentId = makeRandomString()
-        val tournament = Tournament(
+        val tournament = RawTournament(
             hostId = userRepository.fetchUserId(),
             tournamentId = tournamentId,
             name = name,

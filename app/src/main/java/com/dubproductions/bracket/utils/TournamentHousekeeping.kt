@@ -1,14 +1,15 @@
 package com.dubproductions.bracket.utils
 
 import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Tournament
 import kotlin.math.ceil
 import kotlin.math.log2
 
 object TournamentHousekeeping {
-    fun setNumberOfRounds(participantIds: List<String>): Int {
+    fun Tournament.setNumberOfRounds(): Int {
         // participants <= 2^rounds
-        return if (participantIds.isNotEmpty()) {
-            val participantNth = log2(participantIds.size.toDouble())
+        return if (participants.isNotEmpty()) {
+            val participantNth = log2(participants.size.toDouble())
             ceil(participantNth).toInt()
         } else {
             0
@@ -23,8 +24,8 @@ object TournamentHousekeeping {
 //        timeCompleted = Date().time
 //    }
 //
-    fun sortPlayerStandings(participants: List<Participant>): List<Participant> {
-        return participants.sortedWith(
+    fun List<Participant>.sortPlayerStandings(): List<Participant> {
+        return this.sortedWith(
             compareBy(
                 { player -> player.dropped },
                 { player -> -player.points },

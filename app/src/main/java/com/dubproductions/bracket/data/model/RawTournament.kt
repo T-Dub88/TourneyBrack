@@ -1,14 +1,14 @@
-package com.dubproductions.bracket.domain.model
+package com.dubproductions.bracket.data.model
 
 import com.dubproductions.bracket.utils.status.TournamentStatus
 import com.dubproductions.bracket.utils.type.TournamentType
 
-data class Tournament(
+data class RawTournament(
     val tournamentId: String = "",
     val name: String = "",
     val type: String = TournamentType.SWISS.typeString,
-    val rounds: List<Round> = listOf(),
-    val participants: List<Participant> = listOf(),
+    val roundIds: List<String> = listOf(),
+    val participantIds: List<String> = listOf(),
     val status: String = TournamentStatus.REGISTERING.statusString,
     val timeStarted: Long? = null,
     val timeEnded: Long? = null,

@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.domain.repository
 
+import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.utils.status.TournamentStatus
@@ -12,7 +13,7 @@ interface TournamentRepository {
 
     suspend fun addParticipantData(tournamentId: String, participant: Participant)
 
-    suspend fun createTournament(tournament: Tournament): Boolean
+    suspend fun createTournament(tournament: RawTournament): Boolean
 
     fun listenToParticipant(
         tournamentId: String,
