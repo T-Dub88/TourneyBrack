@@ -8,12 +8,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dubproductions.bracket.presentation.ui.screen.main.hosting.BracketScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.HostingScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.TournamentCreationScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.presentation.viewmodel.CreationViewModel
 import com.dubproductions.bracket.presentation.viewmodel.EditTournamentViewModel
+import com.dubproductions.bracket.presentation.viewmodel.ParticipantMatchesViewModel
 import com.dubproductions.bracket.presentation.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.presentation.viewmodel.SharedViewModel
 import com.dubproductions.bracket.utils.status.TournamentStatus
@@ -27,7 +29,7 @@ fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
         hostingScreen(navController)
         tournamentCreationScreen(navController)
         editTournamentScreen(navController)
-//        bracketScreen(navController)
+        bracketScreen(navController)
         participantsScreen(navController)
 //        participantMatchesScreen(navController)
     }
@@ -163,43 +165,47 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
         )
     }
 }
-//
-//fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
-//    composable(
-//        route = Screen.Bracket.route
-//    ) {
-//        val userViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
-//        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
-//        val coroutineScope = rememberCoroutineScope()
-//
-//        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
-//
-//        BracketScreen(
-//            tournament = tournament,
-//            declareWinner = { winnerId, roundNum, matchId ->
-//                coroutineScope.launch {
-//                    participantMatchesViewModel.declareMatchWinner(
-//                        matchId = matchId,
-//                        round = tournament.rounds?.find { round ->  round.roundNumber == roundNum }!!,
-//                        tournamentId = tournament.id!!,
-//                        winnerId = winnerId
-//                    )
-//                }
-//            },
-//            editMatch = { matchId, roundNum ->
-//                coroutineScope.launch {
-//                    participantMatchesViewModel.editMatch(
-//                        matchId = matchId,
-//                        participantList = tournament.participants,
-//                        round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
-//                        tournamentId = tournament.id!!
-//                    )
-//                }
-//            }
-//        )
-//    }
-//}
-//
+
+fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
+    composable(
+        route = Screen.Bracket.route
+    ) {
+        val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
+        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
+
+        val tournamentsList by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
+
+        val tournament = tournamentsList.find { tourney ->
+            tourney.tournamentId == sharedViewModel.viewingTournamentId
+        }!!
+
+        BracketScreen(
+            tournament = tournament,
+            declareWinner = { winnerId, roundNum, matchId ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.declareMatchWinner(
+                        matchId = matchId,
+                        round = tournament.rounds.find { round ->  round.roundNum == roundNum }!!,
+                        tournamentId = tournament.tournamentId,
+                        winnerId = winnerId
+                    )
+                }
+            },
+            editMatch = { matchId, roundNum ->
+                coroutineScope.launch {
+                    participantMatchesViewModel.editMatch(
+                        matchId = matchId,
+                        participantList = tournament.participants,
+                        round = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
+                        tournamentId = tournament.tournamentId
+                    )
+                }
+            }
+        )
+    }
+}
+
 fun NavGraphBuilder.participantsScreen(
     navController: NavHostController
 ) {

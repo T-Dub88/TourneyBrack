@@ -58,7 +58,7 @@ fun MatchCard(
                 .fillMaxWidth()
         ) {
             Text(
-                text = stringResource(id = R.string.round, match.round),
+                text = stringResource(id = R.string.round, match.roundNum),
                 fontSize = 25.sp,
                 modifier = Modifier
                     .align(Alignment.Center)
@@ -68,7 +68,7 @@ fun MatchCard(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 4.dp),
-                onClick = { if (match.status == MatchStatus.COMPLETE.status) onEditClick() },
+                onClick = { if (match.status == MatchStatus.COMPLETE.statusString) onEditClick() },
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
@@ -120,7 +120,7 @@ fun MatchCard(
                     id = setPlayerMatchResult(
                         tie = match.tie,
                         winnerId = match.winnerId,
-                        playerId = playerOne.userId
+                        playerId = playerTwo?.userId
                     )
                 ),
                 setWinnerClick = setWinnerClick,
@@ -142,7 +142,7 @@ fun MatchCard(
 fun setPlayerMatchResult(
     tie: Boolean?,
     winnerId: String?,
-    playerId: String
+    playerId: String?
 ): Int {
     return if (tie == true) {
         R.string.tie
@@ -161,7 +161,7 @@ fun MatchCardPreview() {
     MatchCard(
         match = Match(),
         winnerClickEnabled = true,
-        getPlayerInfo = { id -> return@MatchCard Participant() },
+        getPlayerInfo = { _ -> return@MatchCard Participant() },
         setWinnerClick = {},
         onEditClick = {}
     )

@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.presentation.ui.screen.main.hosting
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -25,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
-import com.dubproductions.bracket.utils.status.MatchStatus
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
@@ -33,6 +34,7 @@ import com.dubproductions.bracket.presentation.ui.components.MatchCard
 import com.dubproductions.bracket.presentation.ui.components.dialogs.DeclareWinnerDialog
 import com.dubproductions.bracket.presentation.ui.components.dialogs.EditMatchDialog
 import com.dubproductions.bracket.presentation.ui.components.dialogs.ReusableDialog
+import com.dubproductions.bracket.utils.status.MatchStatus
 import com.dubproductions.bracket.utils.status.TournamentStatus
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -42,15 +44,15 @@ fun BracketScreen(
     declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit,
     editMatch: (String, Int) -> Unit
 ) {
-
-    var selectedRoundIndex: Int? by rememberSaveable {
-        mutableStateOf(0)
+    var selectedRoundIndex: Int by rememberSaveable {
+        mutableIntStateOf(0)
     }
+
     val pagerState = rememberPagerState {
-        if (tournament.rounds.isNullOrEmpty()) {
+        if (tournament.roundIds.isEmpty()) {
             1
         } else {
-            tournament.rounds!!.size
+            tournament.roundIds.size
         }
     }
 
@@ -71,7 +73,7 @@ fun BracketScreen(
     }
 
     LaunchedEffect(selectedRoundIndex) {
-        selectedRoundIndex?.let { pagerState.animateScrollToPage(it) }
+        pagerState.animateScrollToPage(selectedRoundIndex)
     }
 
     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
@@ -84,8 +86,8 @@ fun BracketScreen(
         DeclareWinnerDialog(
             selectedWinnerId = selectedWinnerId,
             selectedMatchId = selectedMatchId,
-            participantList = tournament.participants,
-            matchList = tournament.rounds!![selectedRoundIndex!!].matches,
+            participantList = listOf(),
+            matchList = listOf(),
             changeDialogVisibility = {
                 showDeclareWinnerDialog = it
             },
@@ -110,7 +112,7 @@ fun BracketScreen(
                 showMatchEditDialog = false
             },
             editMatch = {
-                editMatch(selectedMatchId, selectedRoundIndex!! + 1)
+                editMatch(selectedMatchId, selectedRoundIndex + 1)
             }
         )
     }
@@ -120,23 +122,21 @@ fun BracketScreen(
             .fillMaxSize()
     ) {
         ScrollableTabRow(
-            selectedTabIndex = selectedRoundIndex ?: 1,
+            selectedTabIndex = selectedRoundIndex,
         ) {
-            if (!tournament.rounds.isNullOrEmpty()) {
-                tournament.rounds!!.forEach { round ->
-                    Tab(
-                        selected = selectedRoundIndex == round.roundNumber - 1,
-                        onClick = {
-                            selectedRoundIndex = round.roundNumber - 1
-                        },
-                        text = {
-                            Text(
-                                text = stringResource(id = R.string.round, round.roundNumber),
-                                fontSize = 16.sp
-                            )
-                        }
-                    )
-                }
+            tournament.rounds.forEach { round ->
+                Tab(
+                    selected = true,
+                    onClick = {
+                        selectedRoundIndex = round.roundNum - 1
+                    },
+                    text = {
+                        Text(
+                            text = stringResource(id = R.string.round, round.roundNum),
+                            fontSize = 16.sp
+                        )
+                    }
+                )
             }
         }
         HorizontalPager(
@@ -147,15 +147,15 @@ fun BracketScreen(
             LazyColumn(
                 contentPadding = PaddingValues(8.dp)
             ) {
-                items(tournament.rounds!![index].matches) { match ->
+                items(tournament.rounds[index].matches) { match ->
                     MatchCard(
                         match = match,
-                        winnerClickEnabled = match.status == MatchStatus.PENDING.status,
+                        winnerClickEnabled = match.status == MatchStatus.PENDING.statusString,
                         getPlayerInfo = { playerId ->
                             tournament.participants.find { it.userId == playerId } ?: Participant()
                         },
                         setWinnerClick = { winnerId ->
-                            if (tournament.status == TournamentStatus.PLAYING.status) {
+                            if (tournament.status == TournamentStatus.PLAYING.statusString) {
                                 selectedWinnerId = winnerId
                                 selectedMatchId = match.matchId
                                 showDeclareWinnerDialog = true
@@ -180,12 +180,14 @@ fun PreviewBracketScreen() {
     BracketScreen(
         tournament = Tournament(
             rounds = mutableListOf(
-                Round(roundNumber = 1),
-                Round(roundNumber = 2),
-                Round(roundNumber = 3),
-                Round(roundNumber = 4),
-                Round(roundNumber = 5),
-                Round(roundNumber = 6)
+                Round(
+                    roundNum = 1
+                ),
+                Round(roundNum = 2),
+                Round(roundNum = 3),
+                Round(roundNum = 4),
+                Round(roundNum = 5),
+                Round(roundNum = 6),
             )
         ),
         declareWinner = { _, _, _ -> },
