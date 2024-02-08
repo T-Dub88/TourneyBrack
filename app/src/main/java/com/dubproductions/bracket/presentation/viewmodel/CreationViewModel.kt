@@ -106,7 +106,7 @@ class CreationViewModel @Inject constructor(
 
     private fun addParticipantToDatabase(tournamentId: String, participant: Participant) {
         viewModelScope.launch {
-            tournamentRepository.addParticipantData(tournamentId, participant)
+            tournamentRepository.addParticipantData(tournamentId, participant, true)
         }
     }
 

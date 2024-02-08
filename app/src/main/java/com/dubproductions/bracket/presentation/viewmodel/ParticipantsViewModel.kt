@@ -2,8 +2,9 @@ package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.dubproductions.bracket.domain.model.Participant
-import com.dubproductions.bracket.data.repository.TournamentRepositoryImpl
+import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.presentation.ui.state.ParticipantsUIState
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ParticipantsViewModel @Inject constructor(
-    private val tournamentRepository: TournamentRepositoryImpl
+    private val tournamentRepository: TournamentRepository
 ): ViewModel() {
 
     private val _uiState: MutableStateFlow<ParticipantsUIState> = MutableStateFlow(
@@ -22,6 +23,7 @@ class ParticipantsViewModel @Inject constructor(
     val uiState: StateFlow<ParticipantsUIState> = _uiState.asStateFlow()
 
     private fun updateUIState(newUIState: ParticipantsUIState) {
+        tournamentRepository
         _uiState.update {
             newUIState
         }
@@ -73,9 +75,10 @@ class ParticipantsViewModel @Inject constructor(
         tournamentId: String,
         participantUserName: String
     ) {
-        tournamentRepository.addParticipant(
+        tournamentRepository.addParticipantData(
             tournamentId = tournamentId,
-            participant = createParticipant(participantUserName)
+            participant = createParticipant(participantUserName),
+            false
         )
     }
 
@@ -85,8 +88,8 @@ class ParticipantsViewModel @Inject constructor(
             username = enteredText,
             dropped = false,
             points = 0.0,
-            buchholz = 0.0,
-            sonnebornBerger = 0.0
+            opponentsAvgPoints = 0.0,
+            opponentsOpponentsAvgPoints = 0.0
         )
     }
 
@@ -99,20 +102,21 @@ class ParticipantsViewModel @Inject constructor(
         tournamentId: String,
         tournamentStatus: String
     ) {
-        val participant = uiState.value.selectedParticipant
-
-        tournamentRepository.removeParticipant(
-            tournamentId = tournamentId,
-            participant = participant
-        )
+        val participantId = uiState.value.selectedParticipant.userId
 
         when (tournamentStatus) {
-            "playing", "complete" -> {
-                participant.dropped = true
-
+            TournamentStatus.PLAYING.statusString -> {
                 tournamentRepository.dropParticipant(
                     tournamentId = tournamentId,
-                    participant = participant
+                    participantId = participantId
+                )
+            }
+            TournamentStatus.REGISTERING.statusString,
+            TournamentStatus.CLOSED.statusString -> {
+                tournamentRepository.deleteParticipant(
+                    tournamentId = tournamentId,
+                    participantId = participantId,
+                    deletedTournament = false
                 )
             }
         }

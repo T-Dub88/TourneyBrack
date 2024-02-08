@@ -101,8 +101,13 @@ class TournamentRepositoryImpl(
         )
     }
 
-    override suspend fun addParticipantData(tournamentId: String, participant: Participant) {
+    override suspend fun addParticipantData(
+        tournamentId: String,
+        participant: Participant,
+        newTournament: Boolean
+    ) {
         firestoreService.addParticipantData(tournamentId, participant)
+        if (!newTournament) firestoreService.addParticipantIdToTournament(tournamentId, participant.userId)
     }
 
     override suspend fun createTournament(tournament: RawTournament): Boolean {

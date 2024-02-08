@@ -307,6 +307,18 @@ class FirestoreService {
 
     }
 
+    suspend fun addParticipantIdToTournament(tournamentId: String, participantId: String) {
+        try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .update("participantIds", FieldValue.arrayUnion(participantId))
+                .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "addParticipantIdToTournament: $e")
+        }
+    }
+
     suspend fun addTournamentData(tournament: RawTournament): Boolean {
         return try {
             firestore

@@ -15,7 +15,11 @@ interface TournamentRepository {
         onComplete: (Tournament) -> Unit
     )
 
-    suspend fun addParticipantData(tournamentId: String, participant: Participant)
+    suspend fun addParticipantData(
+        tournamentId: String,
+        participant: Participant,
+        newTournament: Boolean
+    )
 
     suspend fun createTournament(tournament: RawTournament): Boolean
 
