@@ -1,6 +1,7 @@
 package com.dubproductions.bracket.data.repository
 
 import android.util.Log
+import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.data.remote.FirestoreService
 import com.dubproductions.bracket.domain.model.Match
@@ -191,80 +192,35 @@ class TournamentRepositoryImpl(
         return firestoreService.dropParticipantFromTournament(tournamentId, participantId)
     }
 
+    override suspend fun addNewMatch(
+        match: Match,
+        tournamentId: String,
+        roundId: String
+    ) {
+        firestoreService.addMatchToDatabase(tournamentId, roundId, match)
+        firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, match.playerOneId)
+        match.playerTwoId?.let {
+            firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, it)
+        }
+    }
 
-//
-//    override suspend fun updateTournamentRounds(id: String, rounds: MutableList<FirestoreRoundData>) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(id)
-//                .update("rounds", rounds)
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "updateTournamentRounds: $e")
-//        }
-//    }
-//
-//    override suspend fun updateParticipantList(id: String, participants: List<FirestoreParticipantData>) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(id)
-//                .update("participants", participants)
-//                .await()
-//        } catch (e: Exception){
-//            Log.e(TAG, "updateParticipantList: $e")
-//        }
-//    }
-//
-//    override suspend fun addParticipant(
-//        tournamentId: String,
-//        participant: FirestoreParticipantData
-//    ) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(tournamentId)
-//                .update("participants", FieldValue.arrayUnion(participant))
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "addParticipant: $e")
-//        }
-//    }
-//
-//    override suspend fun removeParticipant(
-//        tournamentId: String,
-//        participant: FirestoreParticipantData
-//    ) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(tournamentId)
-//                .update(
-//                    "participants",
-//                    FieldValue.arrayRemove(participant)
-//                )
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "removeParticipant: $e")
-//        }
-//    }
-//
-//    override suspend fun dropParticipant(
-//        tournamentId: String,
-//        participant: FirestoreParticipantData
-//    ) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(tournamentId)
-//                .update("participants", FieldValue.arrayUnion(participant))
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "dropParticipant: $e")
-//        }
-//    }
-//
+    override suspend fun addNewRound(
+        round: RawRound,
+        tournamentId: String
+    ): Boolean {
+        return firestoreService.addRoundToDatabase(tournamentId, round)
+    }
+
+    override suspend fun addRoundIdToTournament(
+        roundId: String,
+        tournamentId: String
+    ): Boolean {
+        return firestoreService.addRoundIdToTournament(roundId, tournamentId)
+    }
+
+
+
+
 //    override suspend fun updateMatchResult(
 //        tournamentId: String,
 //        updatedRound: FirestoreRoundData

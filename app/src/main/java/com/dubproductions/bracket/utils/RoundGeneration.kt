@@ -1,92 +1,41 @@
 package com.dubproductions.bracket.utils
 
+import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.domain.model.Match
-import com.dubproductions.bracket.domain.model.Participant
-import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
-import com.dubproductions.bracket.utils.ScoreUpdates.updateTiebreakers
 import com.dubproductions.bracket.utils.status.MatchStatus
 
 object RoundGeneration {
 
-//    fun Tournament.createNextRound(): Round {
-//
-//        for (participant in participants) {
-//            participant.updateTiebreakers(
-//                participantList = participants,
-//                matchList = rounds.last().matches
-//            )
-//        }
-//
-//        if (rounds.isEmpty()) {
-//            // First round
-//            val newRounds = mutableListOf<Round>()
-//            val randomizedParticipantList = participants.shuffled()
-//
-//            newRounds.add(
-//                Round(
-//                    matches = generateRoundMatchList(randomizedParticipantList, 1),
-//                    roundNum = 1,
-//                    byeParticipantId = if (randomizedParticipantList.size % 2.0 != 0.0) {
-//                        randomizedParticipantList.last().userId
-//                    } else {
-//                        null
-//                    }
-//                )
-//            )
-//
-//            for (match in rounds.last().matches) {
-//
-//                val playerOneIndex = randomizedParticipantList.indexOfFirst { it.userId == match.playerOneId }
-//                val playerTwoIndex = randomizedParticipantList.indexOfFirst { it.userId == match.playerTwoId }
-//
-////                if (playerOneIndex != -1) {
-////                    // TODO: ADD MATCH ID TO DATABASE PARTICIPANTS
-////                    randomizedParticipantList[playerOneIndex].matchIds.add(match.matchId)
-////                }
-////                if (playerTwoIndex != -1) {
-////                    randomizedParticipantList[playerTwoIndex].matchIds.add(match.matchId)
-////                }
-//            }
-//
-////            participants = randomizedParticipantList
-//
-//        } else {
-//            // after the first round
-//            val newRoundNumber = rounds.last().roundNum + 1
-//
-////            rounds.add(
-////                // TODO: ADD NEW ROUND TO DATABASE
-////                Round(
-////                    matches = generateRoundMatchList(participants, newRoundNumber),
-////                    roundNum = newRoundNumber,
-////                    byeParticipantId = if (participants.size % 2.0 != 0.0) {
-////                        participants.last().userId
-////                    } else {
-////                        null
-////                    }
-////                )
-////            )
-//
-////            for (match in rounds.last().matches) {
-////                val playerOneIndex = participants.indexOfFirst { it.userId == match.playerOneId }
-////                val playerTwoIndex = participants.indexOfFirst { it.userId == match.playerTwoId }
-////
-////                participants[playerOneIndex].matchIds.add(match.matchId)
-////                if (playerTwoIndex != -1) {
-////                    participants[playerTwoIndex].matchIds.add(match.matchId)
-////                }
-////            }
-////
-////            participants = participants
-//        }
-//    }
+    fun Tournament.createNextRound(matchList: List<Match>): RawRound {
 
-    private fun generateRoundMatchList(participantList: List<Participant>, roundNumber: Int): List<Match> {
+        return RawRound(
+            roundId = makeRandomString(),
+            matchIds = matchList.map { it.matchId },
+            roundNum = if (rounds.isEmpty()) {
+                1
+            } else {
+                rounds.last().roundNum + 1
+            },
+            byeParticipantId = matchList.find { it.playerTwoId == null }?.playerOneId
+        )
+
+    }
+
+    fun Tournament.generateRoundMatchList(): List<Match> {
+
+        val roundNumber = roundIds.size + 1
+        val numberOfParticipants = participants.size
+        val matchList = mutableListOf<Match>()
+
+        val sortedParticipants = if (roundNumber == 1) {
+            participants.shuffled()
+        } else {
+            participants
+        }
+
         var i = 0
         var j = 1
-        val numberOfParticipants = participantList.size
-        val matchList = mutableListOf<Match>()
 
         return if (numberOfParticipants % 2.0 == 0.0) {
             // Even number of participants
@@ -94,8 +43,8 @@ object RoundGeneration {
                 matchList.add(
                     Match(
                         matchId = makeRandomString(),
-                        playerOneId = participantList[i].userId,
-                        playerTwoId = participantList[j].userId,
+                        playerOneId = sortedParticipants[i].userId,
+                        playerTwoId = sortedParticipants[j].userId,
                         roundNum = roundNumber
                     )
                 )
@@ -109,8 +58,8 @@ object RoundGeneration {
                 matchList.add(
                     Match(
                         matchId = makeRandomString(),
-                        playerOneId = participantList[i].userId,
-                        playerTwoId = participantList[j].userId,
+                        playerOneId = sortedParticipants[i].userId,
+                        playerTwoId = sortedParticipants[j].userId,
                         roundNum = roundNumber
                     )
                 )
@@ -120,10 +69,10 @@ object RoundGeneration {
             matchList.add(
                 Match(
                     matchId = makeRandomString(),
-                    playerOneId = participantList[i].userId,
+                    playerOneId = sortedParticipants[i].userId,
                     playerTwoId = null,
                     roundNum = roundNumber,
-                    winnerId = participantList[i].userId,
+                    winnerId = sortedParticipants[i].userId,
                     tie = false,
                     status = MatchStatus.COMPLETE.statusString
                 )

@@ -16,14 +16,6 @@ object TournamentHousekeeping {
         }
     }
 
-//    fun timeStampStart() {
-//        timeStarted = Date().time
-//    }
-//
-//    fun timeStampFinish() {
-//        timeCompleted = Date().time
-//    }
-//
     fun List<Participant>.sortPlayerStandings(): List<Participant> {
         return this.sortedWith(
             compareBy(

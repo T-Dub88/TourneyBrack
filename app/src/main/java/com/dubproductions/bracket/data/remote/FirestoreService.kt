@@ -5,6 +5,7 @@ import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
 import com.google.firebase.firestore.FieldValue
@@ -494,6 +495,84 @@ class FirestoreService {
             true
         } catch (e: Exception) {
             Log.e(TAG, "dropParticipantFromTournament: $e")
+            false
+        }
+    }
+
+    suspend fun addRoundToDatabase(
+        tournamentId: String,
+        rawRound: RawRound
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(ROUNDS)
+                .document(rawRound.roundId)
+                .set(rawRound)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addRoundToDatabase: $e")
+            false
+        }
+    }
+
+    suspend fun addMatchToDatabase(
+        tournamentId: String,
+        roundId: String,
+        match: Match
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(ROUNDS)
+                .document(roundId)
+                .collection(MATCHES)
+                .document(match.matchId)
+                .set(match)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addMatchToDatabase: $e")
+            false
+        }
+    }
+
+    suspend fun addMatchIdToParticipant(
+        tournamentId: String,
+        matchId: String,
+        participantId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participantId)
+                .update("matchIds", FieldValue.arrayUnion(matchId))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addMatchIdToParticipant: $e")
+            false
+        }
+    }
+
+    suspend fun addRoundIdToTournament(
+        roundId: String,
+        tournamentId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .update("roundIds", FieldValue.arrayUnion(roundId))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "addRoundIdToTournament: $e")
             false
         }
     }

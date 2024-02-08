@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
+import com.dubproductions.bracket.utils.RoundGeneration.createNextRound
+import com.dubproductions.bracket.utils.RoundGeneration.generateRoundMatchList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.round
 
 @HiltViewModel
 class EditTournamentViewModel @Inject constructor(
@@ -67,6 +70,35 @@ class EditTournamentViewModel @Inject constructor(
         viewModelScope.launch {
             tournamentRepository.updateTournamentStatus(id, status)
         }
+    }
+
+    fun generateBracket(tournament: Tournament) {
+
+        val matchList = tournament.generateRoundMatchList()
+        val round = tournament.createNextRound(matchList)
+
+        viewModelScope.launch {
+
+            launch {
+                tournamentRepository.addNewRound(round, tournament.tournamentId)
+            }
+
+            for (match in matchList) {
+                launch {
+                    tournamentRepository.addNewMatch(
+                        match = match,
+                        tournamentId = tournament.tournamentId,
+                        roundId = round.roundId
+                    )
+                }
+            }
+
+            launch {
+                tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
+            }
+
+        }
+
     }
 
 }

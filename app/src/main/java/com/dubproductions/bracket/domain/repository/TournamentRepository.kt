@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.domain.repository
 
+import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
@@ -67,19 +68,20 @@ interface TournamentRepository {
         participantId: String
     ): Boolean
 
-//
-//    suspend fun addParticipant(
-//        tournamentId: String,
-//        participantId: String,
-//        participant: Participant
-//    ): Boolean
-//
+    suspend fun addNewMatch(
+        match: Match,
+        tournamentId: String,
+        roundId: String
+    )
 
-//
-//    suspend fun updateMatchResult(
-//        matchId: String,
-//        winnerId: String?,
-//        loserId: String?
-//    ): Boolean
+    suspend fun addNewRound(
+        round: RawRound,
+        tournamentId: String
+    ): Boolean
+
+    suspend fun addRoundIdToTournament(
+        roundId: String,
+        tournamentId: String
+    ): Boolean
 
 }

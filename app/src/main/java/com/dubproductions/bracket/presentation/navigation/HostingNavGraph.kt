@@ -106,12 +106,10 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             tournament = tournament,
             uiState = uiState,
             changeBracketDialogState = { generate ->
-//                if (generate) {
-//                    coroutineScope.launch {
-//                        editTourneyViewModel.generateBracket(tournament)
-//                    }
-//                }
-//                editTourneyViewModel.changeBracketGenerationDialogState(false)
+                if (generate) {
+                    editTourneyViewModel.generateBracket(tournament)
+                }
+                editTourneyViewModel.changeBracketGenerationDialogState(false)
             },
             changeClosedDialogState = { state ->
                 editTourneyViewModel.changeClosedDialogState(state)
