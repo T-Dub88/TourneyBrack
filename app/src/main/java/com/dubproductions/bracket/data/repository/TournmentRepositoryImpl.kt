@@ -54,24 +54,6 @@ class TournamentRepositoryImpl(
             val round = Round(
                 roundId = rawRound.roundId,
                 matches = fetchCompletedRoundMatches(tournamentId, rawRound.roundId),
-                roundNum = rawRound.roundNum,
-                byeParticipantId = rawRound.byeParticipantId
-            )
-
-            rounds.add(round)
-            rounds.sortBy { -it.roundNum }
-        }
-
-        return rounds
-    }
-
-    private suspend fun fetchHostingTournamentRounds(tournamentId: String): List<Round> {
-        val rounds = mutableListOf<Round>()
-        val rawRounds= firestoreService.fetchRounds(tournamentId)
-
-        for (rawRound in rawRounds) {
-            val round = Round(
-                roundId = rawRound.roundId,
                 matchIds = rawRound.matchIds,
                 roundNum = rawRound.roundNum,
                 byeParticipantId = rawRound.byeParticipantId
@@ -110,7 +92,7 @@ class TournamentRepositoryImpl(
                             timeStarted = it.timeStarted,
                             timeEnded = it.timeEnded,
                             hostId = it.hostId,
-                            rounds = fetchHostingTournamentRounds(it.tournamentId)
+                            rounds = fetchCompletedTournamentRounds(it.tournamentId)
                         )
                     }
                     onComplete(tournament)
@@ -176,8 +158,12 @@ class TournamentRepositoryImpl(
 
     override suspend fun deleteParticipant(
         tournamentId: String,
-        participantId: String
+        participantId: String,
+        deletedTournament: Boolean
     ): Boolean {
+        if (!deletedTournament) {
+            firestoreService.removeParticipantIdFromTournament(tournamentId, participantId)
+        }
         return firestoreService.removeParticipantFromTournament(tournamentId, participantId)
     }
 
@@ -193,38 +179,13 @@ class TournamentRepositoryImpl(
         return firestoreService.removeMatchFromRound(tournamentId, roundId, matchId)
     }
 
+    override suspend fun dropParticipant(
+        tournamentId: String,
+        participantId: String
+    ): Boolean {
+        return firestoreService.dropParticipantFromTournament(tournamentId, participantId)
+    }
 
-//
-
-//
-//    override fun listenToTournament(
-//        tournamentId: String,
-//        onComplete: (FirestoreTournamentData?) -> Unit
-//    ) {
-//        val listener = firestore
-//            .collection("Tournaments")
-//            .document(tournamentId)
-//            .addSnapshotListener { value, error ->
-//                if (error != null) {
-//                    Log.e(TAG, "listenToTournament: ${error.message}")
-//                    onComplete(null)
-//                    return@addSnapshotListener
-//                }
-//                if (value != null && value.exists()) {
-//                    val tournament = value.toObject<FirestoreTournamentData>()
-//                    onComplete(tournament)
-//                } else {
-//                    onComplete(null)
-//                }
-//            }
-//        tournamentListenerMap[tournamentId] = listener
-//    }
-//
-//    override fun removeTournamentListener(tournamentId: String) {
-//        tournamentListenerMap[tournamentId]?.remove()
-//        tournamentListenerMap.remove(tournamentId)
-//    }
-//
 
 //
 //    override suspend fun updateTournamentRounds(id: String, rounds: MutableList<FirestoreRoundData>) {

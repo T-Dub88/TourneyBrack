@@ -78,6 +78,7 @@ class SharedViewModel @Inject constructor(
                     name = tournament.name,
                     type = tournament.type,
                     roundIds = tournament.roundIds,
+                    rounds = tournament.rounds,
                     participantIds = tournament.participantIds,
                     status = tournament.status,
                     timeStarted = tournament.timeStarted,
@@ -292,7 +293,11 @@ class SharedViewModel @Inject constructor(
 
             for (participantId in tournament.participantIds) {
                 launch {
-                    tournamentRepository.deleteParticipant(tournament.tournamentId, participantId)
+                    tournamentRepository.deleteParticipant(
+                        tournament.tournamentId,
+                        participantId,
+                        true
+                    )
                 }
             }
 

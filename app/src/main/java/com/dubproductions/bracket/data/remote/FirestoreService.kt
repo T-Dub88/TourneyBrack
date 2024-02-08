@@ -416,6 +416,21 @@ class FirestoreService {
         }
     }
 
+    suspend fun removeParticipantIdFromTournament(
+        tournamentId: String,
+        participantId: String
+    ) {
+        try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .update("participantIds", FieldValue.arrayRemove(participantId))
+                .await()
+        } catch (e: Exception){
+            Log.e(TAG, "removeParticipantIdFromTournament: $e")
+        }
+    }
+
     suspend fun removeRoundFromTournament(
         tournamentId: String,
         roundId: String
@@ -448,6 +463,25 @@ class FirestoreService {
             true
         } catch (e: Exception) {
             Log.e(TAG, "removeTournamentFromUser: $e")
+            false
+        }
+    }
+
+    suspend fun dropParticipantFromTournament(
+        tournamentId: String,
+        participantId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participantId)
+                .update("dropped", true)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "dropParticipantFromTournament: $e")
             false
         }
     }

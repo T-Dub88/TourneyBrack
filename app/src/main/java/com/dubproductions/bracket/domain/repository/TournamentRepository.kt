@@ -43,7 +43,8 @@ interface TournamentRepository {
 
     suspend fun deleteParticipant(
         tournamentId: String,
-        participantId: String
+        participantId: String,
+        deletedTournament: Boolean
     ): Boolean
 
     suspend fun deleteRound(
@@ -57,6 +58,10 @@ interface TournamentRepository {
         matchId: String
     ): Boolean
 
+    suspend fun dropParticipant(
+        tournamentId: String,
+        participantId: String
+    ): Boolean
 
 //
 //    suspend fun addParticipant(
@@ -65,15 +70,7 @@ interface TournamentRepository {
 //        participant: Participant
 //    ): Boolean
 //
-//    suspend fun removeParticipant(
-//        tournamentId: String,
-//        participantId: String
-//    ): Boolean
-//
-//    suspend fun dropParticipant(
-//        tournamentId: String,
-//        participantId: String
-//    ): Boolean
+
 //
 //    suspend fun updateMatchResult(
 //        matchId: String,

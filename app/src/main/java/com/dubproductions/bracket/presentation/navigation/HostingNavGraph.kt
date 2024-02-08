@@ -236,19 +236,19 @@ fun NavGraphBuilder.participantsScreen(
                 participantsViewModel.changeCannotAddPlayerDialogVisibility(false)
             },
             closeDropPlayerDialog = { dropping ->
-//                if (dropping) {
-//                    participantsViewModel.changeUIEnabled(false)
-//                    coroutineScope.launch {
-//                        participantsViewModel.dropExistingPlayer(
-//                            tournamentId = sharedViewModel.viewingTournamentId,
-//                            tournamentStatus = sharedViewModel.viewingTournament.value.status
-//                        )
-//                        participantsViewModel.changeDropPlayerDialogVisibility(false)
-//                        participantsViewModel.changeUIEnabled(true)
-//                    }
-//                } else {
-//                    participantsViewModel.changeDropPlayerDialogVisibility(false)
-//                }
+                if (dropping) {
+                    participantsViewModel.changeUIEnabled(false)
+                    coroutineScope.launch {
+                        participantsViewModel.dropExistingPlayer(
+                            tournamentId = sharedViewModel.viewingTournamentId,
+                            tournamentStatus = selectedTournament.status
+                        )
+                        participantsViewModel.changeDropPlayerDialogVisibility(false)
+                        participantsViewModel.changeUIEnabled(true)
+                    }
+                } else {
+                    participantsViewModel.changeDropPlayerDialogVisibility(false)
+                }
             },
             closeAddPlayerDialog = { adding, username ->
                 if (adding && !username.isNullOrBlank()) {
