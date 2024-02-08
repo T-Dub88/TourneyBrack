@@ -6,8 +6,11 @@ import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,45 +68,5 @@ class EditTournamentViewModel @Inject constructor(
             tournamentRepository.updateTournamentStatus(id, status)
         }
     }
-
-//    suspend fun generateBracket(tournament: Tournament) {
-//
-//        viewModelScope.async {
-//            tournament.createNextRound()
-//        }.await()
-//
-//        tournament.rounds?.let { rounds ->
-//            val roundsJob = viewModelScope.async {
-//                tournamentRepository.updateTournamentRounds(
-//                    id = tournament.tournamentId,
-//                    rounds = rounds
-//                )
-//            }
-//
-//            val participantsJob = viewModelScope.async {
-//                tournamentRepository.updateParticipantList(
-//                    id = tournamentId,
-//                    participants = tournament.participants
-//                )
-//            }
-//
-//            awaitAll(roundsJob, participantsJob)
-//
-//        }
-//
-//    }
-
-//    suspend fun deleteTournament(
-//        tournamentId: String,
-//        userId: String,
-//        removeDeletedTournamentFromFlow: (String) -> Unit
-//    ) {
-//        tournamentRepository.removeTournamentListener(tournamentId)
-//        tournamentRepository.removeTournamentFromDatabase(
-//            tournamentId = tournamentId,
-//            userId = userId
-//        )
-//        removeDeletedTournamentFromFlow(tournamentId)
-//    }
 
 }

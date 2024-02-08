@@ -5,15 +5,16 @@ import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.ktx.dataObjects
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlin.math.log
 
 private const val TAG = "FirestoreService"
 private const val USERS = "users"
@@ -192,6 +193,7 @@ class FirestoreService {
 
     fun removeTournamentListener(tournamentId: String) {
         tournamentListeners[tournamentId]?.remove()
+        tournamentListeners.remove(tournamentId)
     }
 
     fun createUserRealtimeListener(
@@ -232,7 +234,7 @@ class FirestoreService {
                .collection(PARTICIPANTS)
                .document(participantId)
                .addSnapshotListener { value, error ->
-                   Log.i(TAG, "createParticipantRealtimeListener: $participantListeners")
+                   Log.i(TAG, "createParticipantRealtimeListener: ${participantListeners.size}")
                    if (error != null) {
                        Log.e(TAG, "createParticipantRealtimeListener: $error")
                        return@addSnapshotListener
@@ -250,6 +252,7 @@ class FirestoreService {
 
     fun removeParticipantListener(participantId: String) {
         participantListeners[participantId]?.remove()
+        participantListeners.remove(participantId)
     }
 
     fun createMatchRealtimeListener(
@@ -285,6 +288,7 @@ class FirestoreService {
 
     fun removeMatchListener(matchId: String) {
         matchListeners[matchId]?.remove()
+        matchListeners.remove(matchId)
     }
 
     suspend fun addParticipantData(tournamentId: String, participant: Participant) {
@@ -343,6 +347,109 @@ class FirestoreService {
             Log.e(TAG, "updateTournamentStatus: $e")
         }
 
+    }
+
+    suspend fun removeTournamentFromDatabase(
+        tournament: Tournament,
+    ): Boolean {
+        return try {
+            removeTournamentFromUser(
+                userId = tournament.hostId,
+                tournamentId = tournament.tournamentId
+            )
+
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournament.tournamentId)
+                .delete()
+                .await()
+
+            true
+
+        } catch (e: Exception) {
+            Log.e(TAG, "removeTournamentFromDatabase: $e")
+            false
+        }
+    }
+
+    suspend fun removeMatchFromRound(
+        tournamentId: String,
+        roundId: String,
+        matchId: String
+    ) : Boolean {
+        return try {
+            removeMatchListener(matchId)
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(ROUNDS)
+                .document(roundId)
+                .collection(MATCHES)
+                .document(matchId)
+                .delete()
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeMatchFromRound: $e")
+            false
+        }
+    }
+
+    suspend fun removeParticipantFromTournament(
+        tournamentId: String,
+        participantId: String
+    ): Boolean {
+        return try {
+            removeParticipantListener(participantId)
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participantId)
+                .delete()
+                .await()
+            Log.i(TAG, "removed: $participantId")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeParticipantFromTournament: $e")
+            false
+        }
+    }
+
+    suspend fun removeRoundFromTournament(
+        tournamentId: String,
+        roundId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(ROUNDS)
+                .document(roundId)
+                .delete()
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeRoundFromTournament: $e")
+            false
+        }
+    }
+
+    suspend fun removeTournamentFromUser(
+        userId: String,
+        tournamentId: String
+    ): Boolean {
+        return try {
+            firestore
+                .collection(USERS)
+                .document(userId)
+                .update(HOSTING_IDS, FieldValue.arrayRemove(tournamentId))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeTournamentFromUser: $e")
+            false
+        }
     }
 
 }

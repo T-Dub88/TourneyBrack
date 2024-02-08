@@ -10,6 +10,8 @@ import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.domain.repository.UserRepository
 import com.dubproductions.bracket.utils.TournamentHousekeeping.sortPlayerStandings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -263,6 +265,53 @@ class SharedViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun removeDeletedTournamentFromFlow(tournamentId: String) {
+        _hostingTournamentList.update { oldList ->
+            val newList = oldList.toMutableList()
+            newList.remove(newList.find { it.tournamentId == tournamentId })
+            newList
+        }
+    }
+
+    fun deleteTournament(
+        tournament: Tournament
+    ) {
+
+        viewModelScope.launch {
+            launch {
+                tournamentRepository.deleteTournament(tournament = tournament)
+            }
+
+            for (roundId in tournament.roundIds) {
+                launch {
+                    tournamentRepository.deleteRound(tournament.tournamentId, roundId)
+                }
+            }
+
+            for (participantId in tournament.participantIds) {
+                launch {
+                    tournamentRepository.deleteParticipant(tournament.tournamentId, participantId)
+                }
+            }
+
+            for (round in tournament.rounds) {
+                for (matchId in round.matchIds) {
+                    launch {
+                        tournamentRepository.deleteMatch(
+                            tournamentId = tournament.tournamentId,
+                            roundId = round.roundId,
+                            matchId = matchId
+                        )
+                    }
+                }
+            }
+
+        }
+
+        removeDeletedTournamentFromFlow(tournament.tournamentId)
+
     }
 
 }

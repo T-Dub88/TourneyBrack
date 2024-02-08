@@ -117,20 +117,12 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                 editTourneyViewModel.changeClosedDialogState(state)
             },
             changeDeleteDialogState = { delete ->
-//                if (delete) {
-//                    coroutineScope.launch {
-//                        editTourneyViewModel.deleteTournament(
-//                            tournamentId = tournament.tournamentId,
-//                            userId = sharedViewModel.user.value.userId,
-//                            removeDeletedTournamentFromFlow = { id ->
-//                                sharedViewModel.removeDeletedTournamentFromFlow(id)
-//                            }
-//                        )
-//                        navController.popBackStack()
-//                    }
-//                } else {
-//                    editTourneyViewModel.changeDeleteDialogState(false)
-//                }
+                if (delete) {
+                    sharedViewModel.deleteTournament(tournament = tournament)
+                    navController.popBackStack()
+                } else {
+                    editTourneyViewModel.changeDeleteDialogState(false)
+                }
             },
             changeOpenedDialogState = { state ->
                 editTourneyViewModel.changeOpenedDialogState(state)
@@ -164,8 +156,8 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                 navController.navigate(Screen.Participants.route)
             },
             startOnClick = {
-                // TODO: if bracket empty, ask for generation
-                // TODO: make end tournament if started
+//                 TODO: if bracket empty, ask for generation
+//                 TODO: make end tournament if started
             },
             deleteOnClick = {
                 editTourneyViewModel.changeDeleteDialogState(true)

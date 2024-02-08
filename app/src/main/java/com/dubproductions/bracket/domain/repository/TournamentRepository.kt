@@ -37,15 +37,26 @@ interface TournamentRepository {
         status: String
     )
 
-//    suspend fun createTournament(
-//        tournament: Tournament
-//    ): Boolean
-//
-//    suspend fun deleteTournament(
-//        tournamentId: String,
-//        userId: String
-//    ): Boolean
-//
+    suspend fun deleteTournament(
+        tournament: Tournament
+    ): Boolean
+
+    suspend fun deleteParticipant(
+        tournamentId: String,
+        participantId: String
+    ): Boolean
+
+    suspend fun deleteRound(
+        tournamentId: String,
+        roundId: String
+    ): Boolean
+
+    suspend fun deleteMatch(
+        tournamentId: String,
+        roundId: String,
+        matchId: String
+    ): Boolean
+
 
 //
 //    suspend fun addParticipant(

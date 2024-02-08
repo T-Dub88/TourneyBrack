@@ -5,7 +5,7 @@ import com.dubproductions.bracket.utils.status.MatchStatus
 data class Match(
     val matchId: String = "",
     val playerOneId: String = "",
-    val playerTwoId: String = "",
+    val playerTwoId: String? = null,
     val winnerId: String? = null,
     val tie: Boolean? = null,
     val roundNum: Int = 1,
