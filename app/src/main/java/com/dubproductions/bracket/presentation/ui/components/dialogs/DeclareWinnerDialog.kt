@@ -19,7 +19,7 @@ fun DeclareWinnerDialog(
     participantList: List<Participant>,
     matchList: List<Match>,
     changeDialogVisibility: (Boolean) -> Unit,
-    declareWinner: (winnerId: String?, roundNumber: Int, matchId: String) -> Unit
+    declareWinner: (winnerId: String?, roundNumber: Int, match: Match) -> Unit
 ) {
     AlertDialog(
         title = { Text(text = stringResource(id = R.string.report_results)) },
@@ -44,8 +44,8 @@ fun DeclareWinnerDialog(
                     selectedMatch?.let { match ->
                         declareWinner(
                             selectedWinnerId,
-                            match.round,
-                            match.matchId
+                            match.roundNum,
+                            match
                         )
                     }
 

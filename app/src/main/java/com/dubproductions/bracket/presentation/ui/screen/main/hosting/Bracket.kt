@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dubproductions.bracket.R
+import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
@@ -41,7 +42,7 @@ import com.dubproductions.bracket.utils.status.TournamentStatus
 @Composable
 fun BracketScreen(
     tournament: Tournament,
-    declareWinner: (winnerId: String?, roundNum: Int, matchId: String) -> Unit,
+    declareWinner: (winnerId: String?, roundNum: Int, match: Match) -> Unit,
     editMatch: (String, Int) -> Unit
 ) {
     var selectedRoundIndex: Int by rememberSaveable {
@@ -86,8 +87,8 @@ fun BracketScreen(
         DeclareWinnerDialog(
             selectedWinnerId = selectedWinnerId,
             selectedMatchId = selectedMatchId,
-            participantList = listOf(),
-            matchList = listOf(),
+            participantList = tournament.participants,
+            matchList = tournament.rounds[selectedRoundIndex].matches,
             changeDialogVisibility = {
                 showDeclareWinnerDialog = it
             },

@@ -577,4 +577,26 @@ class FirestoreService {
         }
     }
 
+    suspend fun updateMatchResults(
+        tournamentId: String,
+        roundId: String,
+        match: Match
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(ROUNDS)
+                .document(roundId)
+                .collection(MATCHES)
+                .document(match.matchId)
+                .set(match)
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "updateMatchResults: $e")
+            false
+        }
+    }
+
 }

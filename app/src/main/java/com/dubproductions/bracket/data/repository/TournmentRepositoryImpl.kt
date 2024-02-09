@@ -218,37 +218,12 @@ class TournamentRepositoryImpl(
         return firestoreService.addRoundIdToTournament(roundId, tournamentId)
     }
 
-
-
-
-//    override suspend fun updateMatchResult(
-//        tournamentId: String,
-//        updatedRound: FirestoreRoundData
-//    ) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(tournamentId)
-//                .update("rounds", FieldValue.arrayUnion(updatedRound))
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "updateMatchResult: $e")
-//        }
-//    }
-//
-//    suspend fun removeOldRoundData(
-//        tournamentId: String,
-//        oldRound: FirestoreRoundData
-//    ) {
-//        try {
-//            firestore
-//                .collection("Tournaments")
-//                .document(tournamentId)
-//                .update("rounds", FieldValue.arrayRemove(oldRound))
-//                .await()
-//        } catch (e: Exception) {
-//            Log.e(TAG, "removeOldRoundData: $e")
-//        }
-//    }
+    override suspend fun addMatchResults(
+        tournamentId: String,
+        roundId: String,
+        match: Match
+    ): Boolean {
+        return firestoreService.updateMatchResults(tournamentId, roundId, match)
+    }
 
 }

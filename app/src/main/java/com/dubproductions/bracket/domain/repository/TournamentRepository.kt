@@ -84,4 +84,10 @@ interface TournamentRepository {
         tournamentId: String
     ): Boolean
 
+    suspend fun addMatchResults(
+        tournamentId: String,
+        roundId: String,
+        match: Match
+    ): Boolean
+
 }

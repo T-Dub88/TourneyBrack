@@ -8,10 +8,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.BracketScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.EditTournamentScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.HostingScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.TournamentCreationScreen
+import com.dubproductions.bracket.presentation.ui.screen.main.hosting.participant.ParticipantMatchesScreen
 import com.dubproductions.bracket.presentation.ui.screen.main.hosting.participant.ParticipantsScreen
 import com.dubproductions.bracket.presentation.viewmodel.CreationViewModel
 import com.dubproductions.bracket.presentation.viewmodel.EditTournamentViewModel
@@ -31,7 +34,7 @@ fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
         editTournamentScreen(navController)
         bracketScreen(navController)
         participantsScreen(navController)
-//        participantMatchesScreen(navController)
+        participantMatchesScreen(navController)
     }
 }
 
@@ -182,15 +185,13 @@ fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
 
         BracketScreen(
             tournament = tournament,
-            declareWinner = { winnerId, roundNum, matchId ->
-                coroutineScope.launch {
-                    participantMatchesViewModel.declareMatchWinner(
-                        matchId = matchId,
-                        round = tournament.rounds.find { round ->  round.roundNum == roundNum }!!,
-                        tournamentId = tournament.tournamentId,
-                        winnerId = winnerId
-                    )
-                }
+            declareWinner = { winnerId, roundNum, match ->
+                participantMatchesViewModel.declareMatchWinner(
+                    match = match,
+                    roundId = tournament.rounds.find { round ->  round.roundNum == roundNum }!!.roundId,
+                    tournamentId = tournament.tournamentId,
+                    winnerId = winnerId
+                )
             },
             editMatch = { matchId, roundNum ->
                 coroutineScope.launch {
@@ -276,63 +277,61 @@ fun NavGraphBuilder.participantsScreen(
         )
     }
 }
-//
-//fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
-//    composable(
-//        route = Screen.ParticipantMatches.route
-//    ) {
-//        val userViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
-//        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
-//        val coroutineScope = rememberCoroutineScope()
-//
-//        val tournament by userViewModel.viewingTournament.collectAsStateWithLifecycle()
-//        val viewingParticipant by userViewModel.viewingParticipant.collectAsStateWithLifecycle()
-//
-//        ParticipantMatchesScreen(
-//            participantList = tournament.participants,
-//            matchList = createMatchList(
-//                tournament = tournament,
-//                userId = viewingParticipant.userId
-//            ),
-//            tournamentStatus = tournament.status,
-//            declareWinner = { winnerId, roundNum, matchId ->
-//                coroutineScope.launch {
-//                    participantMatchesViewModel.declareMatchWinner(
-//                        winnerId = winnerId,
-//                        tournamentId = tournament.id!!,
-//                        round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
-//                        matchId = matchId
-//                    )
-//                }
-//            },
-//            editMatch = { matchId, roundNum ->
+
+fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
+    composable(
+        route = Screen.ParticipantMatches.route
+    ) {
+        val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
+        val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
+
+        val tournaments by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
+
+        val tournament = tournaments.find { tourney -> tourney.tournamentId == sharedViewModel.viewingTournamentId }!!
+
+        ParticipantMatchesScreen(
+            participantList = tournament.participants,
+            matchList = createMatchList(
+                tournament = tournament,
+                userId = sharedViewModel.viewingParticipantId
+            ),
+            tournamentStatus = tournament.status,
+            declareWinner = { winnerId, roundNum, match ->
+                participantMatchesViewModel.declareMatchWinner(
+                    winnerId = winnerId,
+                    tournamentId = tournament.tournamentId,
+                    roundId = tournament.rounds.find { round -> round.roundNum == roundNum }!!.roundId,
+                    match = match
+                )
+            },
+            editMatch = { matchId, roundNum ->
 //                coroutineScope.launch {
 //                    participantMatchesViewModel.editMatch(
 //                        matchId = matchId,
 //                        participantList = tournament.participants,
-//                        round = tournament.rounds?.find { round -> round.roundNumber == roundNum }!!,
+//                        round = tournament.rounds.find { round -> round.roundNumber == roundNum }!!,
 //                        tournamentId = tournament.id!!
 //                    )
 //                }
-//            }
-//        )
-//    }
-//}
-//
-//private fun createMatchList(
-//    tournament: FirestoreTournamentData,
-//    userId: String
-//): List<FirestoreMatchData> {
-//    val matchList: MutableList<FirestoreMatchData> = mutableListOf()
-//    tournament.rounds?.let { roundsList ->
-//        for (round in roundsList) {
-//            val match = round.matches.find {
-//                it.playerOneId == userId || it.playerTwoId == userId
-//            }
-//            match?.let {
-//                matchList.add(it)
-//            }
-//        }
-//    }
-//    return matchList
-//}
+            }
+        )
+    }
+}
+
+private fun createMatchList(
+    tournament: Tournament,
+    userId: String
+): List<Match> {
+    val matchList: MutableList<Match> = mutableListOf()
+
+    for (round in tournament.rounds) {
+        val match = round.matches.find {
+            it.playerOneId == userId || it.playerTwoId == userId
+        }
+        match?.let {
+            matchList.add(it)
+        }
+    }
+
+    return matchList
+}
