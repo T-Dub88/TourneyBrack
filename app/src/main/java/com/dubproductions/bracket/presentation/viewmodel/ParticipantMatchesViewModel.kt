@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
+import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.utils.status.MatchStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,13 +37,55 @@ class ParticipantMatchesViewModel @Inject constructor(
 
     }
 
-    suspend fun editMatch(
+    fun editMatch(
         matchId: String,
-        round: Round,
-        tournamentId: String,
+        selectedRound: Round,
+        tournament: Tournament,
         participantList: List<Participant>
     ) {
+        val selectedMatch = selectedRound.matches.find { it.matchId == matchId } ?: return
 
+        viewModelScope.launch {
+
+            tournamentRepository.addMatchResults(
+                tournamentId = tournament.tournamentId,
+                roundId = selectedRound.roundId,
+                match = selectedMatch.copy(
+                    winnerId = null,
+                    tie = null,
+                    status = MatchStatus.PENDING.statusString
+                )
+            )
+
+            if (selectedRound != tournament.rounds.last()) {
+                for (i in selectedRound.roundNum..tournament.rounds.lastIndex) {
+                    val roundId = tournament.rounds[i].roundId
+                    launch {
+                        for (match in tournament.rounds[i].matches) {
+                            launch {
+                                tournamentRepository.deleteMatch(
+                                    tournamentId = tournament.tournamentId,
+                                    roundId = roundId,
+                                    matchId = match.matchId
+                                )
+                            }
+                        }
+
+                        tournamentRepository.deleteRound(
+                            tournamentId = tournament.tournamentId,
+                            roundId = roundId
+                        )
+
+                        tournamentRepository.removeRoundId(
+                            tournamentId = tournament.tournamentId,
+                            roundId = roundId
+                        )
+                    }
+
+                }
+            }
+
+        }
     }
 
 }

@@ -1,6 +1,5 @@
 package com.dubproductions.bracket.presentation.ui.screen.main.hosting
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -113,6 +112,7 @@ fun BracketScreen(
                 showMatchEditDialog = false
             },
             editMatch = {
+                showMatchEditDialog = false
                 editMatch(selectedMatchId, selectedRoundIndex + 1)
             }
         )

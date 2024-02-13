@@ -461,6 +461,23 @@ class FirestoreService {
         }
     }
 
+    suspend fun removeRoundIdFromTournament(
+        tournamentId: String,
+        roundId: String,
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .update("roundIds", FieldValue.arrayRemove(roundId))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeRoundIdFromTournament: $e")
+            false
+        }
+    }
+
     suspend fun removeTournamentFromUser(
         userId: String,
         tournamentId: String

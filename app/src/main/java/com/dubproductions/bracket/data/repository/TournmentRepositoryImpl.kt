@@ -174,6 +174,10 @@ class TournamentRepositoryImpl(
         return firestoreService.removeRoundFromTournament(tournamentId, roundId)
     }
 
+    override suspend fun removeRoundId(tournamentId: String, roundId: String): Boolean {
+        return firestoreService.removeRoundIdFromTournament(tournamentId, roundId)
+    }
+
     override suspend fun deleteMatch(
         tournamentId: String,
         roundId: String,

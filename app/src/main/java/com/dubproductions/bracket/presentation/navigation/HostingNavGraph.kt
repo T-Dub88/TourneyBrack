@@ -183,7 +183,6 @@ fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
     ) {
         val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
         val participantMatchesViewModel: ParticipantMatchesViewModel = hiltViewModel()
-        val coroutineScope = rememberCoroutineScope()
 
         val tournamentsList by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
 
@@ -202,14 +201,12 @@ fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
                 )
             },
             editMatch = { matchId, roundNum ->
-                coroutineScope.launch {
-                    participantMatchesViewModel.editMatch(
-                        matchId = matchId,
-                        participantList = tournament.participants,
-                        round = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
-                        tournamentId = tournament.tournamentId
-                    )
-                }
+                participantMatchesViewModel.editMatch(
+                    matchId = matchId,
+                    participantList = tournament.participants,
+                    selectedRound = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
+                    tournament = tournament
+                )
             }
         )
     }
@@ -319,14 +316,12 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
                 )
             },
             editMatch = { matchId, roundNum ->
-//                coroutineScope.launch {
-//                    participantMatchesViewModel.editMatch(
-//                        matchId = matchId,
-//                        participantList = tournament.participants,
-//                        round = tournament.rounds.find { round -> round.roundNumber == roundNum }!!,
-//                        tournamentId = tournament.id!!
-//                    )
-//                }
+                participantMatchesViewModel.editMatch(
+                    matchId = matchId,
+                    participantList = tournament.participants,
+                    selectedRound = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
+                    tournament = tournament
+                )
             }
         )
     }

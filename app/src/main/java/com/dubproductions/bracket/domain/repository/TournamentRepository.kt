@@ -56,6 +56,11 @@ interface TournamentRepository {
         roundId: String
     ): Boolean
 
+    suspend fun removeRoundId(
+        tournamentId: String,
+        roundId: String
+    ): Boolean
+
     suspend fun deleteMatch(
         tournamentId: String,
         roundId: String,
