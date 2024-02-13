@@ -99,7 +99,6 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
     ) {
         val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
         val editTourneyViewModel: EditTournamentViewModel = hiltViewModel()
-        val coroutineScope = rememberCoroutineScope()
 
         val uiState by editTourneyViewModel.uiState.collectAsStateWithLifecycle()
         val tournamentList by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
@@ -112,6 +111,7 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             uiState = uiState,
             changeBracketDialogState = { generate ->
                 if (generate) {
+                    editTourneyViewModel.startTournament(tournament.tournamentId)
                     editTourneyViewModel.generateBracket(tournament)
                 }
                 editTourneyViewModel.changeBracketGenerationDialogState(false)
@@ -159,8 +159,16 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                 navController.navigate(Screen.Participants.route)
             },
             startOnClick = {
-//                 TODO: if bracket empty, ask for generation
-//                 TODO: make end tournament if started
+                when (tournament.status) {
+                    TournamentStatus.CLOSED.statusString,
+                    TournamentStatus.REGISTERING.statusString -> {
+                        editTourneyViewModel.changeBracketGenerationDialogState(true)
+                    }
+
+                    TournamentStatus.PLAYING.statusString -> {
+                        // Todo: End tournament button
+                    }
+                }
             },
             deleteOnClick = {
                 editTourneyViewModel.changeDeleteDialogState(true)

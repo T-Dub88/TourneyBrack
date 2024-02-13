@@ -5,16 +5,14 @@ import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
-import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 private const val TAG = "FirestoreService"
@@ -595,6 +593,26 @@ class FirestoreService {
             true
         } catch (e: Exception) {
             Log.e(TAG, "updateMatchResults: $e")
+            false
+        }
+    }
+
+    suspend fun timeStampStart(
+        tournamentId: String,
+        timeStamp: Long
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .update(
+                    "timeStarted", timeStamp,
+                    "status", TournamentStatus.PLAYING.statusString
+                )
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "timeStampStart: $e")
             false
         }
     }

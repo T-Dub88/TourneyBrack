@@ -1,6 +1,5 @@
 package com.dubproductions.bracket.data.repository
 
-import android.util.Log
 import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.data.remote.FirestoreService
@@ -13,8 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-private const val TAG = "Repository Implementation"
 
 class TournamentRepositoryImpl(
     private val firestoreService: FirestoreService
@@ -224,6 +221,13 @@ class TournamentRepositoryImpl(
         match: Match
     ): Boolean {
         return firestoreService.updateMatchResults(tournamentId, roundId, match)
+    }
+
+    override suspend fun startTournament(
+        tournamentId: String,
+        timestamp: Long
+    ): Boolean {
+        return firestoreService.timeStampStart(tournamentId, timestamp)
     }
 
 }

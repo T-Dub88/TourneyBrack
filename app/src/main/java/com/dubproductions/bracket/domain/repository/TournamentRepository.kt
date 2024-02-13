@@ -5,7 +5,6 @@ import com.dubproductions.bracket.data.model.RawTournament
 import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
-import com.dubproductions.bracket.utils.status.TournamentStatus
 
 interface TournamentRepository {
 
@@ -88,6 +87,11 @@ interface TournamentRepository {
         tournamentId: String,
         roundId: String,
         match: Match
+    ): Boolean
+
+    suspend fun startTournament(
+        tournamentId: String,
+        timestamp: Long
     ): Boolean
 
 }

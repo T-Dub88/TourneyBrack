@@ -8,18 +8,13 @@ import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
 import com.dubproductions.bracket.utils.RoundGeneration.createNextRound
 import com.dubproductions.bracket.utils.RoundGeneration.generateRoundMatchList
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
-import kotlin.math.round
 
 @HiltViewModel
 class EditTournamentViewModel @Inject constructor(
@@ -97,6 +92,15 @@ class EditTournamentViewModel @Inject constructor(
                 tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
             }
 
+        }
+
+    }
+
+    fun startTournament(tournamentId: String) {
+        val timestamp = Date().time
+
+        viewModelScope.launch {
+            tournamentRepository.startTournament(tournamentId, timestamp)
         }
 
     }
