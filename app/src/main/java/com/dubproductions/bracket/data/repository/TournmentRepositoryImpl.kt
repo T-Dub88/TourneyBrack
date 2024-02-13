@@ -1,387 +1,237 @@
 package com.dubproductions.bracket.data.repository
 
-import android.util.Log
-import com.dubproductions.bracket.data.Match
-import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.data.Round
-import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.User
+import com.dubproductions.bracket.data.model.RawRound
+import com.dubproductions.bracket.data.model.RawTournament
+import com.dubproductions.bracket.data.remote.FirestoreService
+import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
+import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-private const val TAG = "Firebase Manager"
-
-class TournamentRepositoryImpl: TournamentRepository {
-
-    private val auth: FirebaseAuth = Firebase.auth
-    private val firestore: FirebaseFirestore = Firebase.firestore
-
-    val tournamentListenerMap: MutableMap<String, ListenerRegistration> = mutableMapOf()
-
-    override suspend fun registerUser(
-        email: String,
-        password: String,
-        username: String,
-        firstName: String,
-        lastName: String,
-    ): Boolean {
-         return try {
-             val taskResult = auth
-                .createUserWithEmailAndPassword(email, password)
-                .await()
-
-             val creationResult = taskResult
-                 .user?.uid?.let { userId ->
-                     createUserData(
-                         userData = User(
-                             username = username,
-                             userId = userId,
-                             email = email,
-                             firstName = firstName,
-                             lastName = lastName
-                         )
-                     )
-                 }
-
-             if (creationResult == true) {
-                 true
-             } else {
-                 deleteUserSignup()
-                 false
-             }
-
-        } catch (e: Exception) {
-             Log.e(TAG, "registerUser: $e")
-             false
-        }
+class TournamentRepositoryImpl(
+    private val firestoreService: FirestoreService
+): TournamentRepository {
+    override suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament {
+        val rawTournament = firestoreService.fetchCompletedTournamentData(tournamentId)
+        return rawTournament?.let {
+            convertRawTournamentToCompletedTournament(it)
+        } ?: Tournament()
     }
 
-    override suspend fun createUserData(
-        userData: User
-    ): Boolean {
-        return try {
-            firestore
-                .collection("Users")
-                .document(userData.userId!!)
-                .set(userData)
-                .await()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "createUserData: $e")
-            false
+    private suspend fun convertRawTournamentToCompletedTournament(rawTournament: RawTournament): Tournament {
+        return Tournament(
+            tournamentId = rawTournament.tournamentId,
+            name = rawTournament.name,
+            type = rawTournament.type,
+            rounds = fetchCompletedTournamentRounds(rawTournament.tournamentId),
+            roundIds = rawTournament.roundIds,
+            participants = fetchCompletedTournamentParticipants(rawTournament.tournamentId),
+            participantIds = rawTournament.participantIds,
+            status = rawTournament.status,
+            timeStarted = rawTournament.timeStarted,
+            timeEnded = rawTournament.timeEnded,
+            hostId = rawTournament.hostId
+        )
+    }
+
+    private suspend fun fetchCompletedTournamentParticipants(tournamentId: String): List<Participant> {
+        return firestoreService.fetchParticipants(tournamentId)
+    }
+
+    private suspend fun fetchCompletedTournamentRounds(tournamentId: String): List<Round> {
+
+        val rounds = mutableListOf<Round>()
+        val rawRounds= firestoreService.fetchRounds(tournamentId)
+
+        for (rawRound in rawRounds) {
+            val round = Round(
+                roundId = rawRound.roundId,
+                matches = fetchCompletedRoundMatches(tournamentId, rawRound.roundId),
+                matchIds = rawRound.matchIds,
+                roundNum = rawRound.roundNum,
+                byeParticipantId = rawRound.byeParticipantId
+            )
+
+            rounds.add(round)
+            rounds.sortBy { -it.roundNum }
         }
 
+        return rounds
     }
 
-    override fun deleteUserSignup() {
-        auth.currentUser?.delete()
+    private suspend fun fetchCompletedRoundMatches(
+        tournamentId: String,
+        roundId: String
+    ): List<Match> {
+        return firestoreService.fetchMatches(tournamentId, roundId)
     }
 
-    override suspend fun signInUser(
-        email: String,
-        password: String
-    ): Boolean {
-        return try {
-            auth
-                .signInWithEmailAndPassword(email, password)
-                .await()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "signInUser: $e")
-            false
-        }
-
-    }
-
-    override suspend fun resetPassword(email: String): Boolean {
-        return try {
-            auth
-                .sendPasswordResetEmail(email)
-                .await()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "resetPassword: $e")
-            false
-        }
-    }
-
-    override fun checkLoginStatus(): Boolean {
-        return auth.currentUser != null
-    }
-
-    override fun fetchUserData(
-        onComplete: (User?) -> Unit
+    override fun fetchHostingTournamentData(
+        tournamentId: String,
+        onComplete: (Tournament) -> Unit
     ) {
-        auth.currentUser?.uid?.let { userId ->
-            firestore
-                .collection("Users")
-                .document(userId)
-                .addSnapshotListener { value, error ->
-                    if (error != null) {
-                        Log.e(TAG, "fetchUserData: ${error.message}")
-                        onComplete(null)
-                        return@addSnapshotListener
+        firestoreService.createTournamentRealtimeListener(
+            tournamentId = tournamentId,
+            onComplete = {
+                CoroutineScope(Dispatchers.Main).launch {
+                    val tournament = withContext(Dispatchers.IO) {
+                        Tournament(
+                            tournamentId = it.tournamentId,
+                            name = it.name,
+                            type = it.type,
+                            status = it.status,
+                            participantIds = it.participantIds,
+                            roundIds = it.roundIds,
+                            timeStarted = it.timeStarted,
+                            timeEnded = it.timeEnded,
+                            hostId = it.hostId,
+                            rounds = fetchCompletedTournamentRounds(it.tournamentId)
+                        )
                     }
-                    if (value != null && value.exists()) {
-                        val user = value.toObject<User>()
-                        onComplete(user)
-                    } else {
-                        onComplete(null)
-                    }
-                }
-        }
-    }
-
-    override suspend fun fetchTournamentData(tournamentId: String): Tournament? {
-        return try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .get()
-                .await()
-                .toObject<Tournament>()
-        } catch (e: Exception) {
-            Log.e(TAG, "fetchTournamentData: $e")
-            null
-        }
-    }
-
-    override suspend fun createTournament(tournament: Tournament): Boolean {
-        val createdTournamentRef = firestore.collection("Tournaments").document()
-        tournament.id = createdTournamentRef.id
-        tournament.hostId = auth.currentUser?.uid
-
-        return try {
-            firestore
-                .collection("Tournaments")
-                .document(tournament.id!!)
-                .set(tournament)
-                .await()
-            if (!tournament.id.isNullOrEmpty() && !tournament.hostId.isNullOrEmpty()) {
-                addTournamentIdToHost(
-                    tournamentId = tournament.id!!,
-                    userId = tournament.hostId!!
-                )
-            } else {
-                false
-            }
-
-        } catch (e: Exception) {
-            Log.e(TAG, "createTournament: $e")
-            false
-        }
-    }
-
-    override suspend fun addTournamentIdToHost(
-        tournamentId: String,
-        userId: String
-    ): Boolean {
-        return try {
-            firestore
-                .collection("Users")
-                .document(userId)
-                .update(
-                    "hostTournaments",
-                    FieldValue.arrayUnion(tournamentId)
-                )
-                .await()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "addTournamentIdToHost: $e")
-            removeTournamentFromDatabase(tournamentId, null)
-            false
-        }
-    }
-
-    override suspend fun removeTournamentFromDatabase(
-        tournamentId: String,
-        userId: String?
-    ): Boolean {
-        return try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .delete()
-                .await()
-            userId?.let {
-                removeTournamentFromUser(
-                    userId = it,
-                    tournamentId = tournamentId
-                )
-            }
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "removeTournamentFromDatabase: $e")
-            false
-        }
-    }
-
-    override suspend fun removeTournamentFromUser(
-        userId: String,
-        tournamentId: String
-    ): Boolean {
-        return try {
-            firestore
-                .collection("Users")
-                .document(userId)
-                .update("hostTournaments", FieldValue.arrayRemove(tournamentId))
-                .await()
-            true
-        } catch (e: Exception) {
-            Log.e(TAG, "removeTournamentFromUser: $e")
-            false
-        }
-    }
-
-    override fun listenToTournament(
-        tournamentId: String,
-        onComplete: (Tournament?) -> Unit
-    ) {
-        val listener = firestore
-            .collection("Tournaments")
-            .document(tournamentId)
-            .addSnapshotListener { value, error ->
-                if (error != null) {
-                    Log.e(TAG, "listenToTournament: ${error.message}")
-                    onComplete(null)
-                    return@addSnapshotListener
-                }
-                if (value != null && value.exists()) {
-                    val tournament = value.toObject<Tournament>()
                     onComplete(tournament)
-                } else {
-                    onComplete(null)
                 }
             }
-        tournamentListenerMap[tournamentId] = listener
+        )
     }
 
-    override fun removeTournamentListener(tournamentId: String) {
-        tournamentListenerMap[tournamentId]?.remove()
-        tournamentListenerMap.remove(tournamentId)
-    }
-
-    override suspend fun updateTournamentStatus(id: String, status: String) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(id)
-                .update("status", status)
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "updateTournamentStatus: $e")
-        }
-
-    }
-
-    override suspend fun updateTournamentRounds(id: String, rounds: MutableList<Round>) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(id)
-                .update("rounds", rounds)
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "updateTournamentRounds: $e")
-        }
-    }
-
-    override suspend fun updateParticipantList(id: String, participants: List<Participant>) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(id)
-                .update("participants", participants)
-                .await()
-        } catch (e: Exception){
-            Log.e(TAG, "updateParticipantList: $e")
-        }
-    }
-
-    override suspend fun addParticipant(
+    override suspend fun addParticipantData(
         tournamentId: String,
-        participant: Participant
+        participant: Participant,
+        newTournament: Boolean
     ) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .update("participants", FieldValue.arrayUnion(participant))
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "addParticipant: $e")
+        firestoreService.addParticipantData(tournamentId, participant)
+        if (!newTournament) firestoreService.addParticipantIdToTournament(tournamentId, participant.userId)
+    }
+
+    override suspend fun createTournament(tournament: RawTournament): Boolean {
+        val addToHost = firestoreService
+            .addTournamentIdToHostingList(
+                userId = tournament.hostId,
+                tournamentId = tournament.tournamentId
+            )
+        return if (addToHost) {
+            firestoreService.addTournamentData(tournament)
+        } else {
+            false
         }
     }
 
-    override suspend fun removeParticipant(
+    override fun listenToParticipant(
         tournamentId: String,
-        participant: Participant
+        participantId: String,
+        onComplete: (Participant) -> Unit
     ) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .update(
-                    "participants",
-                    FieldValue.arrayRemove(participant)
-                )
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "removeParticipant: $e")
+        firestoreService.createParticipantRealtimeListener(
+            tournamentId = tournamentId,
+            participantId = participantId,
+            onComplete = onComplete
+        )
+    }
+
+    override fun listenToMatch(
+        tournamentId: String,
+        roundId: String,
+        matchId: String,
+        onComplete: (Match) -> Unit
+    ) {
+        firestoreService.createMatchRealtimeListener(
+            tournamentId = tournamentId,
+            roundId = roundId,
+            matchId = matchId,
+            onComplete = onComplete
+        )
+    }
+
+    override suspend fun updateTournamentStatus(tournamentId: String, status: String) {
+        firestoreService.updateTournamentStatus(
+            id = tournamentId,
+            status = status
+        )
+    }
+
+    override suspend fun deleteTournament(tournament: Tournament): Boolean {
+        firestoreService.removeTournamentListener(tournament.tournamentId)
+        return firestoreService.removeTournamentFromDatabase(tournament)
+    }
+
+    override suspend fun deleteParticipant(
+        tournamentId: String,
+        participantId: String,
+        deletedTournament: Boolean
+    ): Boolean {
+        if (!deletedTournament) {
+            firestoreService.removeParticipantIdFromTournament(tournamentId, participantId)
         }
+        return firestoreService.removeParticipantFromTournament(tournamentId, participantId)
+    }
+
+    override suspend fun deleteRound(tournamentId: String, roundId: String): Boolean {
+        return firestoreService.removeRoundFromTournament(tournamentId, roundId)
+    }
+
+    override suspend fun removeRoundId(tournamentId: String, roundId: String): Boolean {
+        return firestoreService.removeRoundIdFromTournament(tournamentId, roundId)
+    }
+
+    override suspend fun deleteMatch(
+        tournamentId: String,
+        roundId: String,
+        matchId: String
+    ): Boolean {
+        return firestoreService.removeMatchFromRound(tournamentId, roundId, matchId)
     }
 
     override suspend fun dropParticipant(
         tournamentId: String,
-        participant: Participant
+        participantId: String
+    ): Boolean {
+        return firestoreService.dropParticipantFromTournament(tournamentId, participantId)
+    }
+
+    override suspend fun addNewMatch(
+        match: Match,
+        tournamentId: String,
+        roundId: String
     ) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .update("participants", FieldValue.arrayUnion(participant))
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "dropParticipant: $e")
+        firestoreService.addMatchToDatabase(tournamentId, roundId, match)
+        firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, match.playerOneId)
+        match.playerTwoId?.let {
+            firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, it)
         }
     }
 
-    override suspend fun updateMatchResult(
-        tournamentId: String,
-        updatedRound: Round
-    ) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .update("rounds", FieldValue.arrayUnion(updatedRound))
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "updateMatchResult: $e")
-        }
+    override suspend fun addNewRound(
+        round: RawRound,
+        tournamentId: String
+    ): Boolean {
+        return firestoreService.addRoundToDatabase(tournamentId, round)
     }
 
-    suspend fun removeOldRoundData(
+    override suspend fun addRoundIdToTournament(
+        roundId: String,
+        tournamentId: String
+    ): Boolean {
+        return firestoreService.addRoundIdToTournament(roundId, tournamentId)
+    }
+
+    override suspend fun addMatchResults(
         tournamentId: String,
-        oldRound: Round
-    ) {
-        try {
-            firestore
-                .collection("Tournaments")
-                .document(tournamentId)
-                .update("rounds", FieldValue.arrayRemove(oldRound))
-                .await()
-        } catch (e: Exception) {
-            Log.e(TAG, "removeOldRoundData: $e")
-        }
+        roundId: String,
+        match: Match
+    ): Boolean {
+        return firestoreService.updateMatchResults(tournamentId, roundId, match)
+    }
+
+    override suspend fun startTournament(
+        tournamentId: String,
+        timestamp: Long
+    ): Boolean {
+        return firestoreService.timeStampStart(tournamentId, timestamp)
     }
 
 }

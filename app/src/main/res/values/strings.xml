@@ -77,7 +77,7 @@
     <string name="registration_opened">Registration Opened!</string>
     <string name="registration_opened_message">Players are now able to register for your tournament using the registration code.</string>
     <string name="bracket_gen_title">Bracket Not Generated</string>
-    <string name="bracket_gen_body">Would you like to generate a bracket?</string>
+    <string name="bracket_gen_body">Would you like to start tournament and generate a bracket?</string>
     <string name="generate">Generate</string>
     <string name="delete_message">Are you sure? This action cannot be undone.</string>
     <string name="delete">Delete</string>
@@ -101,11 +101,13 @@
     <string name="view_matches">View Matches</string>
 
     <!--Composables-->
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="pending">Pending</string>
     <string name="update_tournament">Tap card to update tournament</string>
     <string name="cancel">Cancel</string>
     <string name="not_started">Not Started</string>
+    <string name="edit_match">Edit Match</string>
+    <string name="edit_match_body">Editing this match will delete future round data that has already been generated.</string>
 
     <!--Declare Winner Dialog-->
     <string name="report_results">Report Results</string>

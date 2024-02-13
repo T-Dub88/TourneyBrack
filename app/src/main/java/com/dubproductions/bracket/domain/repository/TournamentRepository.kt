@@ -1,107 +1,102 @@
 package com.dubproductions.bracket.domain.repository
 
-import com.dubproductions.bracket.data.Participant
-import com.dubproductions.bracket.data.Round
-import com.dubproductions.bracket.data.Tournament
-import com.dubproductions.bracket.data.User
+import com.dubproductions.bracket.data.model.RawRound
+import com.dubproductions.bracket.data.model.RawTournament
+import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Tournament
 
 interface TournamentRepository {
-    // Onboarding methods
-    suspend fun registerUser(
-        email: String,
-        password: String,
-        username: String,
-        firstName: String,
-        lastName: String,
-    ): Boolean
 
-    suspend fun createUserData(
-        userData: User,
-    ): Boolean
+    suspend fun fetchCompletedTournamentData(tournamentId: String): Tournament
 
-    fun deleteUserSignup()
-
-    suspend fun signInUser(
-        email: String,
-        password: String
-    ): Boolean
-
-    suspend fun resetPassword(
-        email: String
-    ): Boolean
-
-    fun checkLoginStatus(): Boolean
-
-    // Update app data methods
-    fun fetchUserData(
-        onComplete: (User?) -> Unit
+    fun fetchHostingTournamentData(
+        tournamentId: String,
+        onComplete: (Tournament) -> Unit
     )
 
-    suspend fun fetchTournamentData(
-        tournamentId: String
-    ): Tournament?
-
-    fun listenToTournament(
+    suspend fun addParticipantData(
         tournamentId: String,
-        onComplete: (Tournament?) -> Unit
+        participant: Participant,
+        newTournament: Boolean
     )
 
-    suspend fun createTournament(
-        tournament: Tournament
-    ): Boolean
+    suspend fun createTournament(tournament: RawTournament): Boolean
 
-    suspend fun addTournamentIdToHost(
+    fun listenToParticipant(
         tournamentId: String,
-        userId: String
-    ): Boolean
+        participantId: String,
+        onComplete: (Participant) -> Unit
+    )
 
-    suspend fun removeTournamentFromDatabase(
+    fun listenToMatch(
         tournamentId: String,
-        userId: String?
-    ): Boolean
-
-    suspend fun removeTournamentFromUser(
-        userId: String,
-        tournamentId: String
-    ): Boolean
-
-    fun removeTournamentListener(
-        tournamentId: String
+        roundId: String,
+        matchId: String,
+        onComplete: (Match) -> Unit
     )
 
     suspend fun updateTournamentStatus(
-        id: String,
+        tournamentId: String,
         status: String
     )
 
-    suspend fun updateTournamentRounds(
-        id: String,
-        rounds: MutableList<Round>
-    )
+    suspend fun deleteTournament(
+        tournament: Tournament
+    ): Boolean
 
-    suspend fun updateParticipantList(
-        id: String,
-        participants: List<Participant>
-    )
-
-    suspend fun addParticipant(
+    suspend fun deleteParticipant(
         tournamentId: String,
-        participant: Participant
-    )
+        participantId: String,
+        deletedTournament: Boolean
+    ): Boolean
 
-    suspend fun removeParticipant(
+    suspend fun deleteRound(
         tournamentId: String,
-        participant: Participant
-    )
+        roundId: String
+    ): Boolean
+
+    suspend fun removeRoundId(
+        tournamentId: String,
+        roundId: String
+    ): Boolean
+
+    suspend fun deleteMatch(
+        tournamentId: String,
+        roundId: String,
+        matchId: String
+    ): Boolean
 
     suspend fun dropParticipant(
         tournamentId: String,
-        participant: Participant
+        participantId: String
+    ): Boolean
+
+    suspend fun addNewMatch(
+        match: Match,
+        tournamentId: String,
+        roundId: String
     )
 
-    suspend fun updateMatchResult(
+    suspend fun addNewRound(
+        round: RawRound,
+        tournamentId: String
+    ): Boolean
+
+    suspend fun addRoundIdToTournament(
+        roundId: String,
+        tournamentId: String
+    ): Boolean
+
+    suspend fun addMatchResults(
         tournamentId: String,
-        updatedRound: Round,
-    )
+        roundId: String,
+        match: Match
+    ): Boolean
+
+    suspend fun startTournament(
+        tournamentId: String,
+        timestamp: Long
+    ): Boolean
 
 }
