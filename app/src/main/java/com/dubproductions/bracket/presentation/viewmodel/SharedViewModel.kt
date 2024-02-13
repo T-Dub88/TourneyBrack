@@ -47,7 +47,6 @@ class SharedViewModel @Inject constructor(
 
     var viewingTournamentId = ""
     var viewingParticipantId = ""
-    var viewingRoundId = ""
 
     init {
         fetchUserData()
@@ -182,6 +181,37 @@ class SharedViewModel @Inject constructor(
             newTournamentList
 
         }
+    }
+
+    fun removePlayerFromTournamentFlow(
+        participant: Participant
+    ) {
+        _hostingTournamentList.update { oldList ->
+
+            val newList = oldList.toMutableList()
+            val tournament = newList.find { it.tournamentId == viewingTournamentId }
+            val newParticipantIdList = tournament?.participantIds?.toMutableList()
+            val newParticipants = tournament?.participants?.toMutableList()
+
+            if (!newParticipants.isNullOrEmpty() && !newParticipantIdList.isNullOrEmpty()) {
+                newParticipants.remove(participant)
+                newParticipantIdList.remove(participant.userId)
+
+                val newTournament = tournament.copy(
+                    participantIds = newParticipantIdList,
+                    participants = newParticipants
+                )
+
+                newList.remove(tournament)
+                newList.add(newTournament)
+                newList.sortBy { it.timeStarted }
+
+            }
+
+            newList
+
+        }
+
     }
 
     private fun fetchUserData() {

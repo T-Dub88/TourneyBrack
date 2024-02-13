@@ -1,9 +1,12 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.presentation.ui.state.ParticipantsUIState
+import com.dubproductions.bracket.utils.status.MatchStatus
 import com.dubproductions.bracket.utils.status.TournamentStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,22 +102,43 @@ class ParticipantsViewModel @Inject constructor(
     }
 
     suspend fun dropExistingPlayer(
-        tournamentId: String,
-        tournamentStatus: String
+        tournament: Tournament
     ) {
         val participantId = uiState.value.selectedParticipant.userId
 
-        when (tournamentStatus) {
+        when (tournament.status) {
             TournamentStatus.PLAYING.statusString -> {
                 tournamentRepository.dropParticipant(
-                    tournamentId = tournamentId,
+                    tournamentId = tournament.tournamentId,
                     participantId = participantId
                 )
+
+                val round = tournament.rounds.last()
+                val match = round.matches.find {
+                    it.playerOneId == participantId || it.playerTwoId == participantId
+                } ?: return
+
+                val completedMatch = match.copy(
+                    winnerId = if (match.playerOneId == participantId) {
+                        match.playerTwoId
+                    } else {
+                        match.playerOneId
+                    },
+                    tie = false,
+                    status = MatchStatus.COMPLETE.statusString
+                )
+
+                tournamentRepository.addMatchResults(
+                    tournamentId = tournament.tournamentId,
+                    roundId = round.roundId,
+                    match = completedMatch
+                )
+
             }
             TournamentStatus.REGISTERING.statusString,
             TournamentStatus.CLOSED.statusString -> {
                 tournamentRepository.deleteParticipant(
-                    tournamentId = tournamentId,
+                    tournamentId = tournament.tournamentId,
                     participantId = participantId,
                     deletedTournament = false
                 )

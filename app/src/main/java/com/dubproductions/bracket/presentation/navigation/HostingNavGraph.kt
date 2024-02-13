@@ -242,12 +242,18 @@ fun NavGraphBuilder.participantsScreen(
             },
             closeDropPlayerDialog = { dropping ->
                 if (dropping) {
+                    val status = selectedTournament.status
                     participantsViewModel.changeUIEnabled(false)
                     coroutineScope.launch {
-                        participantsViewModel.dropExistingPlayer(
-                            tournamentId = sharedViewModel.viewingTournamentId,
-                            tournamentStatus = selectedTournament.status
-                        )
+                        participantsViewModel.dropExistingPlayer(selectedTournament)
+                        when (status) {
+                            TournamentStatus.REGISTERING.statusString,
+                            TournamentStatus.CLOSED.statusString -> {
+                                val participant = participantsViewModel.uiState.value.selectedParticipant
+                                sharedViewModel.removePlayerFromTournamentFlow(participant)
+                            }
+                        }
+
                         participantsViewModel.changeDropPlayerDialogVisibility(false)
                         participantsViewModel.changeUIEnabled(true)
                     }
