@@ -251,11 +251,11 @@ fun ParticipantCard(
                 fontSize = 18.sp
             )
             Text(
-                text = stringResource(id = R.string.buchholz, participant.opponentsAvgPoints),
+                text = stringResource(id = R.string.opponents_average_points, participant.opponentsAvgPoints),
                 fontSize = 18.sp
             )
             Text(
-                text = stringResource(id = R.string.sb, participant.opponentsOpponentsAvgPoints),
+                text = stringResource(id = R.string.opponents_opponents_average_points, participant.opponentsOpponentsAvgPoints),
                 fontSize = 18.sp
             )
         }

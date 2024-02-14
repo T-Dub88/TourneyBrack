@@ -95,8 +95,8 @@
     <string name="dropped">Dropped</string>
     <string name="place">Place: %1$d</string>
     <string name="points">Points: %1$.1f</string>
-    <string name="buchholz">Buchholz: %1$.1f</string>
-    <string name="sb">SB: %1$.1f</string>
+    <string name="opponents_average_points">OAP: %1$.1f</string>
+    <string name="opponents_opponents_average_points">OOAP: %1$.1f</string>
     <string name="drop_player">Drop Player</string>
     <string name="view_matches">View Matches</string>
 
