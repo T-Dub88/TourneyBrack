@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,7 +31,6 @@ import com.dubproductions.bracket.R
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.presentation.ui.components.dialogs.ReusableDialog
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
-import com.dubproductions.bracket.utils.TournamentHousekeeping
 import com.dubproductions.bracket.utils.TournamentHousekeeping.setNumberOfRounds
 import com.dubproductions.bracket.utils.status.TournamentStatus
 import java.text.SimpleDateFormat
@@ -53,54 +54,64 @@ fun EditTournamentScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.tournament_name_2,
-                tournament.name
+        Card(
+            elevation = CardDefaults.cardElevation(4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 8.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
             )
-        )
+        ) {
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.tournament_name_2,
+                    tournament.name
+                )
+            )
 
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.registration_code,
-                tournament.tournamentId.takeLast(4)
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.registration_code,
+                    tournament.tournamentId.takeLast(4)
+                )
             )
-        )
 
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.format,
-                tournament.type
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.format,
+                    tournament.type
+                )
             )
-        )
 
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.status,
-                tournament.status.replaceFirstChar { it.uppercase() }
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.status,
+                    tournament.status.replaceFirstChar { it.uppercase() }
+                )
             )
-        )
 
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.num_participants,
-                tournament.participants.size
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.num_participants,
+                    tournament.participants.size
+                )
             )
-        )
 
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.num_rounds,
-                tournament.setNumberOfRounds()
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.num_rounds,
+                    tournament.setNumberOfRounds()
+                )
             )
-        )
 
-        EditTourneyText(
-            text = stringResource(
-                id = R.string.start_date_time,
-                formatDateTime(tournament.timeStarted, LocalContext.current)
+            EditTourneyText(
+                text = stringResource(
+                    id = R.string.start_date_time,
+                    formatDateTime(tournament.timeStarted, LocalContext.current)
+                )
             )
-        )
+        }
 
         Button(
             onClick = lockOnClick,
@@ -114,7 +125,7 @@ fun EditTournamentScreen(
                 else -> false
             }
         ) {
-            EditTourneyText(
+            Text(
                 text = when (tournament.status) {
                     TournamentStatus.REGISTERING.statusString -> {
                         stringResource(id = R.string.close_registration)
@@ -125,13 +136,25 @@ fun EditTournamentScreen(
         }
 
         Button(
+            onClick = startOnClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.start_tournament)
+            )
+        }
+
+        Button(
             onClick = participantsOnClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp)
         ) {
-            EditTourneyText(text = stringResource(id = R.string.view_edit_participants))
+            Text(text = stringResource(id = R.string.view_edit_participants))
         }
 
         Button(
@@ -141,17 +164,7 @@ fun EditTournamentScreen(
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp)
         ) {
-            EditTourneyText(text = stringResource(id = R.string.view_edit_bracket))
-        }
-
-        Button(
-            onClick = startOnClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                .padding(vertical = 4.dp)
-        ) {
-            EditTourneyText(text = stringResource(id = R.string.start_tournament))
+            Text(text = stringResource(id = R.string.view_edit_bracket))
         }
 
         Button(
@@ -165,7 +178,7 @@ fun EditTournamentScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         ) {
-            EditTourneyText(text = stringResource(id = R.string.delete_tournament))
+            Text(text = stringResource(id = R.string.delete_tournament))
         }
 
         when {
