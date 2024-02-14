@@ -3,7 +3,6 @@ package com.dubproductions.bracket.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Match
-import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository

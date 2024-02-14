@@ -203,7 +203,6 @@ fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
             editMatch = { matchId, roundNum ->
                 participantMatchesViewModel.editMatch(
                     matchId = matchId,
-                    participantList = tournament.participants,
                     selectedRound = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
                     tournament = tournament
                 )
@@ -318,7 +317,6 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
             editMatch = { matchId, roundNum ->
                 participantMatchesViewModel.editMatch(
                     matchId = matchId,
-                    participantList = tournament.participants,
                     selectedRound = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
                     tournament = tournament
                 )

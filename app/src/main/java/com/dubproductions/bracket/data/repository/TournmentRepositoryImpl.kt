@@ -213,9 +213,19 @@ class TournamentRepositoryImpl(
         roundId: String
     ) {
         firestoreService.addMatchToDatabase(tournamentId, roundId, match)
-        firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, match.playerOneId)
+        firestoreService.addMatchIdToParticipant(
+            tournamentId = tournamentId,
+            matchId = match.matchId,
+            participantId = match.playerOneId,
+            opponentId = match.playerTwoId
+        )
         match.playerTwoId?.let {
-            firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, it)
+            firestoreService.addMatchIdToParticipant(
+                tournamentId = tournamentId,
+                matchId = match.matchId,
+                participantId = it,
+                opponentId = match.playerOneId
+            )
         }
     }
 
