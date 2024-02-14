@@ -41,7 +41,6 @@ class ParticipantMatchesViewModel @Inject constructor(
         matchId: String,
         selectedRound: Round,
         tournament: Tournament,
-        participantList: List<Participant>
     ) {
         val selectedMatch = selectedRound.matches.find { it.matchId == matchId } ?: return
 
