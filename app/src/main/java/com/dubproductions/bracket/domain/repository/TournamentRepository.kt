@@ -99,4 +99,11 @@ interface TournamentRepository {
         timestamp: Long
     ): Boolean
 
+    suspend fun removeMatchIdAndOpponentIdFromParticipant(
+        tournamentId: String,
+        participantId: String,
+        matchId: String,
+        opponentId: String?
+    ): Boolean
+
 }

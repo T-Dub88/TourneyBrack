@@ -406,6 +406,30 @@ class FirestoreService {
         }
     }
 
+    suspend fun removeOpponentIdAndMatchIdFromParticipant(
+        tournamentId: String,
+        participantId: String,
+        matchId: String,
+        opponentId: String?
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participantId)
+                .update(
+                    "matchIds", FieldValue.arrayRemove(matchId),
+                    "opponentIds", FieldValue.arrayRemove(opponentId ?: "bye")
+                )
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "removeOpponentIdAndMatchIdFromParticipant: $e")
+            false
+        }
+    }
+
     suspend fun removeParticipantFromTournament(
         tournamentId: String,
         participantId: String
@@ -558,7 +582,8 @@ class FirestoreService {
     suspend fun addMatchIdToParticipant(
         tournamentId: String,
         matchId: String,
-        participantId: String
+        participantId: String,
+        opponentId: String?
     ): Boolean {
         return try {
             firestore
@@ -566,7 +591,10 @@ class FirestoreService {
                 .document(tournamentId)
                 .collection(PARTICIPANTS)
                 .document(participantId)
-                .update("matchIds", FieldValue.arrayUnion(matchId))
+                .update(
+                    "matchIds", FieldValue.arrayUnion(matchId),
+                    "opponentIds", FieldValue.arrayUnion(opponentId ?: "bye")
+                )
                 .await()
             true
         } catch (e: Exception) {

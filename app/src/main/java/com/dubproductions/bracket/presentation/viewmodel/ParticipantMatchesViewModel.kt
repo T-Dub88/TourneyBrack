@@ -69,6 +69,26 @@ class ParticipantMatchesViewModel @Inject constructor(
                                     matchId = match.matchId
                                 )
                             }
+                            launch {
+                                tournamentRepository.removeMatchIdAndOpponentIdFromParticipant(
+                                    tournamentId = tournament.tournamentId,
+                                    participantId = match.playerOneId,
+                                    matchId = matchId,
+                                    opponentId = match.playerTwoId
+                                )
+                            }
+
+                            match.playerTwoId?.let {
+                                launch {
+                                    tournamentRepository.removeMatchIdAndOpponentIdFromParticipant(
+                                        tournamentId = tournament.tournamentId,
+                                        participantId = it,
+                                        matchId = matchId,
+                                        opponentId = match.playerOneId
+                                    )
+                                }
+                            }
+
                         }
 
                         tournamentRepository.deleteRound(
@@ -76,15 +96,15 @@ class ParticipantMatchesViewModel @Inject constructor(
                             roundId = roundId
                         )
 
-                        tournamentRepository.removeRoundId(
-                            tournamentId = tournament.tournamentId,
-                            roundId = roundId
-                        )
+                        launch {
+                            tournamentRepository.removeRoundId(
+                                tournamentId = tournament.tournamentId,
+                                roundId = roundId
+                            )
+                        }
                     }
-
                 }
             }
-
         }
     }
 

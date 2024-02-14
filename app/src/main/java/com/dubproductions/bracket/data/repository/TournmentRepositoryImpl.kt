@@ -186,6 +186,20 @@ class TournamentRepositoryImpl(
         return firestoreService.removeMatchFromRound(tournamentId, roundId, matchId)
     }
 
+    override suspend fun removeMatchIdAndOpponentIdFromParticipant(
+        tournamentId: String,
+        participantId: String,
+        matchId: String,
+        opponentId: String?
+    ): Boolean {
+        return firestoreService.removeOpponentIdAndMatchIdFromParticipant(
+            tournamentId,
+            participantId,
+            matchId,
+            opponentId
+        )
+    }
+
     override suspend fun dropParticipant(
         tournamentId: String,
         participantId: String
