@@ -106,4 +106,17 @@ interface TournamentRepository {
         opponentId: String?
     ): Boolean
 
+    suspend fun updateParticipantPoints(
+        tournamentId: String,
+        participantId: String,
+        earnedPoints: Double
+    ): Boolean
+
+    suspend fun updateTiebreakers(
+        tournamentId: String,
+        participantId: String,
+        firstTiebreaker: Double,
+        secondTiebreaker: Double
+    ): Boolean
+
 }

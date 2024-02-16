@@ -1,6 +1,5 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Match
@@ -9,8 +8,13 @@ import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.model.User
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.domain.repository.UserRepository
+import com.dubproductions.bracket.utils.RoundGeneration.createNextRound
+import com.dubproductions.bracket.utils.RoundGeneration.generateRoundMatchList
+import com.dubproductions.bracket.utils.ScoreUpdates.updateFirstTieBreaker
+import com.dubproductions.bracket.utils.ScoreUpdates.updateSecondTieBreaker
 import com.dubproductions.bracket.utils.TournamentHousekeeping.sortPlayerStandings
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -167,7 +171,7 @@ class SharedViewModel @Inject constructor(
                 )
                 newRoundsList.remove(oldRound)
                 newRoundsList.add(newRound)
-                newRoundsList.sortBy { -it.roundNum }
+                newRoundsList.sortBy { it.roundNum }
 
                 val newTournament = oldTournament.copy(
                     rounds = newRoundsList
@@ -347,6 +351,131 @@ class SharedViewModel @Inject constructor(
         }
 
         removeDeletedTournamentFromFlow(tournament.tournamentId)
+
+    }
+
+    fun generateBracket(tournamentId: String) {
+
+        viewModelScope.launch {
+
+            var tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+
+            if (tournament.rounds.isNotEmpty()) {
+
+                addMatchPoints(
+                    tournamentId = tournament.tournamentId,
+                    matches = tournament.rounds.last().matches
+                ).awaitAll()
+
+                tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+
+                addTiebreakerPoints(
+                    tournamentId = tournament.tournamentId,
+                    participants = tournament.participants
+                ).awaitAll()
+
+                tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+
+            }
+
+            val matchList = tournament.generateRoundMatchList()
+            val round = tournament.createNextRound(matchList)
+
+            launch {
+                tournamentRepository.addNewRound(round, tournament.tournamentId)
+            }
+
+            for (match in matchList) {
+                launch {
+                    tournamentRepository.addNewMatch(
+                        match = match,
+                        tournamentId = tournament.tournamentId,
+                        roundId = round.roundId
+                    )
+                }
+            }
+
+            launch {
+                tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
+            }
+
+        }
+
+    }
+
+    private fun addTiebreakerPoints(
+        tournamentId: String,
+        participants: List<Participant>
+    ): List<Deferred<Boolean>> {
+
+        val tiebreakerJobs = mutableListOf<Deferred<Boolean>>()
+
+        // Update first tiebreak and second at same time then wait
+        for (participant in participants) {
+            val tiebreakerJob = viewModelScope.async {
+                val firstTiebreaker = participant.updateFirstTieBreaker(participants)
+                val secondTiebreaker = participant.updateSecondTieBreaker(participants)
+
+                tournamentRepository.updateTiebreakers(
+                    tournamentId = tournamentId,
+                    participantId = participant.userId,
+                    firstTiebreaker = firstTiebreaker,
+                    secondTiebreaker = secondTiebreaker
+                )
+
+            }
+
+            tiebreakerJobs.add(tiebreakerJob)
+
+        }
+
+        return tiebreakerJobs
+
+    }
+
+    private fun addMatchPoints(
+        tournamentId: String,
+        matches: List<Match>
+    ): List<Deferred<Boolean>> {
+
+        val pointsJobs = mutableListOf<Deferred<Boolean>>()
+
+        for (match in matches) {
+
+            match.winnerId?.let { winnerId ->
+                val addWinningPlayerPointsJob = viewModelScope.async {
+                    tournamentRepository.updateParticipantPoints(
+                        tournamentId = tournamentId,
+                        participantId = winnerId,
+                        earnedPoints = 1.0
+                    )
+                }
+                pointsJobs.add(addWinningPlayerPointsJob)
+            }
+
+            if (match.tie == true && !match.playerTwoId.isNullOrEmpty()) {
+                val addPlayerOneTieJob = viewModelScope.async {
+                    tournamentRepository.updateParticipantPoints(
+                        tournamentId = tournamentId,
+                        participantId = match.playerOneId,
+                        earnedPoints = 1.0
+                    )
+                }
+                pointsJobs.add(addPlayerOneTieJob)
+
+                val addPlayerTwoTieJob = viewModelScope.async {
+                    tournamentRepository.updateParticipantPoints(
+                        tournamentId = tournamentId,
+                        participantId = match.playerTwoId,
+                        earnedPoints = 1.0
+                    )
+                }
+                pointsJobs.add(addPlayerTwoTieJob)
+            }
+
+        }
+
+        return pointsJobs
 
     }
 

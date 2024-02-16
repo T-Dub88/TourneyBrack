@@ -111,8 +111,10 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             uiState = uiState,
             changeBracketDialogState = { generate ->
                 if (generate) {
-                    editTourneyViewModel.startTournament(tournament.tournamentId)
-                    editTourneyViewModel.generateBracket(tournament)
+                    if (tournament.timeStarted == null) {
+                        editTourneyViewModel.startTournament(tournament.tournamentId)
+                    }
+                    sharedViewModel.generateBracket(tournament.tournamentId)
                 }
                 editTourneyViewModel.changeBracketGenerationDialogState(false)
             },
@@ -166,7 +168,8 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                     }
 
                     TournamentStatus.PLAYING.statusString -> {
-                        // Todo: End tournament button
+                        // TODO: SHOW A NEW ROUND DIALOG
+                        sharedViewModel.generateBracket(tournament.tournamentId)
                     }
                 }
             },

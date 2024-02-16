@@ -22,6 +22,16 @@ private const val PARTICIPANTS = "participants"
 private const val ROUNDS = "rounds"
 private const val MATCHES = "matches"
 private const val HOSTING_IDS = "hostingTournamentIds"
+private const val POINTS = "points"
+private const val TIME_STARTED = "timeStarted"
+private const val OA = "opponentsAveragePoints"
+private const val OOA = "opponentsOpponentsAveragePoints"
+private const val STATUS = "status"
+private const val OPP_IDS = "opponentIds"
+private const val MATCH_IDS = "matchIds"
+private const val ROUND_IDS = "roundIds"
+private const val DROPPED = "dropped"
+private const val PARTICIPANT_IDS = "participantIds"
 
 class FirestoreService {
 
@@ -249,7 +259,7 @@ class FirestoreService {
        }
     }
 
-    fun removeParticipantListener(participantId: String) {
+    private fun removeParticipantListener(participantId: String) {
         participantListeners[participantId]?.remove()
         participantListeners.remove(participantId)
     }
@@ -285,7 +295,7 @@ class FirestoreService {
         }
     }
 
-    fun removeMatchListener(matchId: String) {
+    private fun removeMatchListener(matchId: String) {
         matchListeners[matchId]?.remove()
         matchListeners.remove(matchId)
     }
@@ -311,7 +321,7 @@ class FirestoreService {
             firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
-                .update("participantIds", FieldValue.arrayUnion(participantId))
+                .update(PARTICIPANT_IDS, FieldValue.arrayUnion(participantId))
                 .await()
         } catch (e: Exception) {
             Log.e(TAG, "addParticipantIdToTournament: $e")
@@ -352,7 +362,7 @@ class FirestoreService {
             firestore
                 .collection(TOURNAMENTS)
                 .document(id)
-                .update("status", status)
+                .update(STATUS, status)
                 .await()
         } catch (e: Exception) {
             Log.e(TAG, "updateTournamentStatus: $e")
@@ -419,8 +429,8 @@ class FirestoreService {
                 .collection(PARTICIPANTS)
                 .document(participantId)
                 .update(
-                    "matchIds", FieldValue.arrayRemove(matchId),
-                    "opponentIds", FieldValue.arrayRemove(opponentId ?: "bye")
+                    MATCH_IDS, FieldValue.arrayRemove(matchId),
+                    OPP_IDS, FieldValue.arrayRemove(opponentId ?: "bye")
                 )
                 .await()
             true
@@ -459,7 +469,7 @@ class FirestoreService {
             firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
-                .update("participantIds", FieldValue.arrayRemove(participantId))
+                .update(PARTICIPANT_IDS, FieldValue.arrayRemove(participantId))
                 .await()
         } catch (e: Exception){
             Log.e(TAG, "removeParticipantIdFromTournament: $e")
@@ -493,7 +503,7 @@ class FirestoreService {
             firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
-                .update("roundIds", FieldValue.arrayRemove(roundId))
+                .update(ROUND_IDS, FieldValue.arrayRemove(roundId))
                 .await()
             true
         } catch (e: Exception) {
@@ -502,7 +512,7 @@ class FirestoreService {
         }
     }
 
-    suspend fun removeTournamentFromUser(
+    private suspend fun removeTournamentFromUser(
         userId: String,
         tournamentId: String
     ): Boolean {
@@ -529,7 +539,7 @@ class FirestoreService {
                 .document(tournamentId)
                 .collection(PARTICIPANTS)
                 .document(participantId)
-                .update("dropped", true)
+                .update(DROPPED, true)
                 .await()
             true
         } catch (e: Exception) {
@@ -592,8 +602,8 @@ class FirestoreService {
                 .collection(PARTICIPANTS)
                 .document(participantId)
                 .update(
-                    "matchIds", FieldValue.arrayUnion(matchId),
-                    "opponentIds", FieldValue.arrayUnion(opponentId ?: "bye")
+                    MATCH_IDS, FieldValue.arrayUnion(matchId),
+                    OPP_IDS, FieldValue.arrayUnion(opponentId ?: "bye")
                 )
                 .await()
             true
@@ -611,7 +621,7 @@ class FirestoreService {
             firestore
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
-                .update("roundIds", FieldValue.arrayUnion(roundId))
+                .update(ROUND_IDS, FieldValue.arrayUnion(roundId))
                 .await()
             true
         } catch (e: Exception) {
@@ -651,13 +661,57 @@ class FirestoreService {
                 .collection(TOURNAMENTS)
                 .document(tournamentId)
                 .update(
-                    "timeStarted", timeStamp,
-                    "status", TournamentStatus.PLAYING.statusString
+                    TIME_STARTED, timeStamp,
+                    STATUS, TournamentStatus.PLAYING.statusString
                 )
                 .await()
             true
         } catch (e: Exception) {
             Log.e(TAG, "timeStampStart: $e")
+            false
+        }
+    }
+
+    suspend fun updateParticipantPoints(
+        tournamentId: String,
+        participantId: String,
+        earnedPoints: Double
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participantId)
+                .update(POINTS, FieldValue.increment(earnedPoints))
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "updateParticipantPoints: $e")
+            false
+        }
+    }
+
+    suspend fun updateParticipantTiebreakers(
+        tournamentId: String,
+        participantId: String,
+        firstTiebreaker: Double,
+        secondTiebreaker: Double
+    ): Boolean {
+        return try {
+            firestore
+                .collection(TOURNAMENTS)
+                .document(tournamentId)
+                .collection(PARTICIPANTS)
+                .document(participantId)
+                .update(
+                    OA, firstTiebreaker,
+                    OOA, secondTiebreaker
+                )
+                .await()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "updateParticipantTieBreakers: $e")
             false
         }
     }

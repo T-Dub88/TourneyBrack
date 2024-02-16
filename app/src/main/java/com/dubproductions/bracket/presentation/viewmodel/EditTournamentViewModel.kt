@@ -2,11 +2,8 @@ package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
 import com.dubproductions.bracket.presentation.ui.state.EditTournamentUIState
-import com.dubproductions.bracket.utils.RoundGeneration.createNextRound
-import com.dubproductions.bracket.utils.RoundGeneration.generateRoundMatchList
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,35 +62,6 @@ class EditTournamentViewModel @Inject constructor(
         viewModelScope.launch {
             tournamentRepository.updateTournamentStatus(id, status)
         }
-    }
-
-    fun generateBracket(tournament: Tournament) {
-
-        val matchList = tournament.generateRoundMatchList()
-        val round = tournament.createNextRound(matchList)
-
-        viewModelScope.launch {
-
-            launch {
-                tournamentRepository.addNewRound(round, tournament.tournamentId)
-            }
-
-            for (match in matchList) {
-                launch {
-                    tournamentRepository.addNewMatch(
-                        match = match,
-                        tournamentId = tournament.tournamentId,
-                        roundId = round.roundId
-                    )
-                }
-            }
-
-            launch {
-                tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
-            }
-
-        }
-
     }
 
     fun startTournament(tournamentId: String) {

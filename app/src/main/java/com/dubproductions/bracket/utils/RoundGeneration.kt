@@ -24,7 +24,7 @@ object RoundGeneration {
 
     fun Tournament.generateRoundMatchList(): List<Match> {
 
-        val roundNumber = roundIds.size + 1
+        val roundNumber = rounds.size + 1
         val numberOfParticipants = participants.size
         val matchList = mutableListOf<Match>()
 

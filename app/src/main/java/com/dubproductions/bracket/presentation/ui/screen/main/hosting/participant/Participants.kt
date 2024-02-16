@@ -251,11 +251,11 @@ fun ParticipantCard(
                 fontSize = 18.sp
             )
             Text(
-                text = stringResource(id = R.string.opponents_average_points, participant.opponentsAvgPoints),
+                text = stringResource(id = R.string.opponents_average_points, participant.opponentsAveragePoints),
                 fontSize = 18.sp
             )
             Text(
-                text = stringResource(id = R.string.opponents_opponents_average_points, participant.opponentsOpponentsAvgPoints),
+                text = stringResource(id = R.string.opponents_opponents_average_points, participant.opponentsOpponentsAveragePoints),
                 fontSize = 18.sp
             )
         }
@@ -286,8 +286,8 @@ fun ParticipantsScreenPreview() {
             Participant(
                 username = "T_Dub88",
                 points = 1.2,
-                opponentsAvgPoints = 1.2,
-                opponentsOpponentsAvgPoints = 1.3,
+                opponentsAveragePoints = 1.2,
+                opponentsOpponentsAveragePoints = 1.3,
                 dropped = false,
                 userId = ""
             )

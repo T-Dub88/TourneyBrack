@@ -45,10 +45,12 @@ fun BracketScreen(
     editMatch: (String, Int) -> Unit
 ) {
     var selectedRoundIndex: Int by rememberSaveable {
-        mutableIntStateOf(0)
+        mutableIntStateOf(tournament.rounds.size - 1)
     }
 
-    val pagerState = rememberPagerState {
+    val pagerState = rememberPagerState(
+        initialPage = tournament.rounds.size - 1
+    ) {
         if (tournament.roundIds.isEmpty()) {
             1
         } else {
@@ -123,7 +125,7 @@ fun BracketScreen(
             .fillMaxSize()
     ) {
         ScrollableTabRow(
-            selectedTabIndex = selectedRoundIndex,
+            selectedTabIndex = pagerState.currentPage,
         ) {
             tournament.rounds.forEach { round ->
                 Tab(

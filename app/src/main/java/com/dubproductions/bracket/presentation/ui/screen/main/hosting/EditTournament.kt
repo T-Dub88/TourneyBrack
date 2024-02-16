@@ -143,7 +143,19 @@ fun EditTournamentScreen(
                 .padding(vertical = 4.dp)
         ) {
             Text(
-                text = stringResource(id = R.string.start_tournament)
+                text = when (tournament.status) {
+                    TournamentStatus.REGISTERING.statusString,
+                    TournamentStatus.CLOSED.statusString -> {
+                        stringResource(id = R.string.start_tournament)
+                    }
+                    TournamentStatus.PLAYING.statusString -> {
+                        stringResource(id = R.string.next_round)
+                    }
+                    else -> {
+                        stringResource(id = R.string.complete_tournament)
+                    }
+
+                }
             )
         }
 

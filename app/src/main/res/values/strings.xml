@@ -81,6 +81,8 @@
     <string name="generate">Generate</string>
     <string name="delete_message">Are you sure? This action cannot be undone.</string>
     <string name="delete">Delete</string>
+    <string name="next_round">Next Round</string>
+    <string name="complete_tournament">Complete Tournament</string>
 
     <!--Participants Screen-->
     <string name="cannot_add_title">Cannot Add New Player</string>

@@ -58,7 +58,7 @@ class TournamentRepositoryImpl(
             )
 
             rounds.add(round)
-            rounds.sortBy { -it.roundNum }
+            rounds.sortBy { it.roundNum }
         }
 
         return rounds
@@ -256,6 +256,32 @@ class TournamentRepositoryImpl(
         timestamp: Long
     ): Boolean {
         return firestoreService.timeStampStart(tournamentId, timestamp)
+    }
+
+    override suspend fun updateParticipantPoints(
+        tournamentId: String,
+        participantId: String,
+        earnedPoints: Double
+    ): Boolean {
+        return firestoreService.updateParticipantPoints(
+            tournamentId,
+            participantId,
+            earnedPoints
+        )
+    }
+
+    override suspend fun updateTiebreakers(
+        tournamentId: String,
+        participantId: String,
+        firstTiebreaker: Double,
+        secondTiebreaker: Double
+    ): Boolean {
+        return firestoreService.updateParticipantTiebreakers(
+            tournamentId,
+            participantId,
+            firstTiebreaker,
+            secondTiebreaker
+        )
     }
 
 }
