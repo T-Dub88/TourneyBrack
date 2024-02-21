@@ -378,7 +378,7 @@ class SharedViewModel @Inject constructor(
 
             }
 
-            val matchList = tournament.generateRoundMatchList()
+            val matchList = generateRoundMatchList(tournament.rounds, tournament.participants)
             val round = tournament.createNextRound(matchList)
 
             launch {

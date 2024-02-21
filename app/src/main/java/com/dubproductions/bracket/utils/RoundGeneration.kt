@@ -1,9 +1,13 @@
 package com.dubproductions.bracket.utils
 
+import android.util.Log
 import com.dubproductions.bracket.data.model.RawRound
 import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Participant
+import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.utils.status.MatchStatus
+import kotlin.math.abs
 
 object RoundGeneration {
 
@@ -22,63 +26,107 @@ object RoundGeneration {
 
     }
 
-    fun Tournament.generateRoundMatchList(): List<Match> {
+    fun generateRoundMatchList(
+        rounds: List<Round>,
+        participants: List<Participant>
+    ): List<Match> {
 
-        val roundNumber = rounds.size + 1
-        val numberOfParticipants = participants.size
+        val roundNum = rounds.size + 1
         val matchList = mutableListOf<Match>()
+        var byeMatch: Match? = null
 
-        val sortedParticipants = if (roundNumber == 1) {
-            participants.shuffled()
+        // Get the list of unpaired participants to manipulate
+        val unpairedParticipants = if (roundNum == 1) {
+            participants.shuffled().toMutableList()
         } else {
-            participants
+            participants.toMutableList()
         }
 
-        var i = 0
-        var j = 1
+        val viableMatches = mutableMapOf<String, MutableList<Participant>>()
 
-        return if (numberOfParticipants % 2.0 == 0.0) {
-            // Even number of participants
-            while (j < numberOfParticipants) {
-                matchList.add(
-                    Match(
-                        matchId = makeRandomString(),
-                        playerOneId = sortedParticipants[i].userId,
-                        playerTwoId = sortedParticipants[j].userId,
-                        roundNum = roundNumber
-                    )
-                )
-                i += 2
-                j += 2
+        // Dropped participants will not be paired
+        unpairedParticipants.removeAll { it.dropped }
+
+        // Participants that will try to pair
+        val numOriginalParticipants = unpairedParticipants.size
+
+        // Create the bye match to make participants even
+        if (numOriginalParticipants % 2 != 0) {
+
+            val byeParticipant = unpairedParticipants.findLast {
+                "bye" !in it.opponentIds
             }
-            matchList
-        } else {
-            // Odd number of participants
-            while (j < numberOfParticipants - 1) {
-                matchList.add(
-                    Match(
-                        matchId = makeRandomString(),
-                        playerOneId = sortedParticipants[i].userId,
-                        playerTwoId = sortedParticipants[j].userId,
-                        roundNum = roundNumber
-                    )
-                )
-                i += 2
-                j += 2
-            }
-            matchList.add(
-                Match(
+
+            byeParticipant?.let {
+                byeMatch = Match(
                     matchId = makeRandomString(),
-                    playerOneId = sortedParticipants[i].userId,
+                    playerOneId = byeParticipant.userId,
                     playerTwoId = null,
-                    roundNum = roundNumber,
-                    winnerId = sortedParticipants[i].userId,
+                    winnerId = byeParticipant.userId,
                     tie = false,
+                    roundNum = roundNum,
                     status = MatchStatus.COMPLETE.statusString
                 )
-            )
-            matchList
+
+                unpairedParticipants.remove(byeParticipant)
+            }
+
         }
+
+        // Creates a map containing a list of viable opponents for each participant
+        for (participant in unpairedParticipants) {
+
+            viableMatches[participant.userId] = unpairedParticipants.filter {
+                it.userId != participant.userId && it.userId !in participant.opponentIds
+            }.sortedWith(
+                compareBy(
+                    { abs(it.points - participant.points) },
+                    { abs(it.opponentsAveragePoints - participant.opponentsAveragePoints) },
+                    { abs(it.opponentsOpponentsAveragePoints - participant.opponentsOpponentsAveragePoints) }
+                )
+            ).toMutableList()
+
+            Log.i("Viable Matches", viableMatches[participant.userId].toString())
+
+        }
+
+        // Sort list so that adjacent participants haven't played
+        while (viableMatches.isNotEmpty()) {
+
+            val playerOneId = viableMatches.minByOrNull {
+                it.value.size
+            }?.key ?: break
+
+            val playerTwoId = viableMatches[playerOneId]?.first()?.userId!!
+
+            val match = Match(
+                matchId = makeRandomString(),
+                playerOneId = playerOneId,
+                playerTwoId = playerTwoId,
+                roundNum = roundNum,
+                status = MatchStatus.PENDING.statusString
+            )
+
+            viableMatches.remove(playerOneId)
+            viableMatches.remove(playerTwoId)
+
+            for (viableOpponents in viableMatches.values) {
+                viableOpponents.removeAll {
+                    it.userId == playerOneId || it.userId == playerTwoId
+                }
+            }
+
+            matchList.add(match)
+
+        }
+
+        // Add bye match to the end of the list if it exists
+        byeMatch?.let {
+            matchList.add(it)
+        }
+
+        return matchList
+
     }
 
     private fun makeRandomString(): String {
