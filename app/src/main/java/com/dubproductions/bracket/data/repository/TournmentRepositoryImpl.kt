@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 class TournamentRepositoryImpl(
     private val firestoreService: FirestoreService
@@ -282,6 +283,40 @@ class TournamentRepositoryImpl(
             firstTiebreaker,
             secondTiebreaker
         )
+    }
+
+    override suspend fun completeTournament(tournament: Tournament) {
+        // Remove all associated real time listeners for this tournament
+        firestoreService.removeTournamentListener(tournament.tournamentId)
+
+        for (participant in tournament.participants) {
+            firestoreService.removeParticipantListener(participant.userId)
+        }
+
+        for (round in tournament.rounds) {
+            for (match in round.matches) {
+                firestoreService.removeMatchListener(match.matchId)
+            }
+        }
+
+        // Update status in tournament
+        firestoreService.timeStampEnd(
+            tournament.tournamentId,
+            Date().time
+        )
+
+        // Remove tournament id from user hosting list
+        firestoreService.removeTournamentFromUser(
+            tournament.hostId,
+            tournament.tournamentId
+        )
+
+        // Add id to completed list
+        firestoreService.addTournamentIdToCompletedList(
+            tournament.hostId,
+            tournament.tournamentId
+        )
+
     }
 
 }

@@ -12,7 +12,9 @@ import com.dubproductions.bracket.utils.RoundGeneration.createNextRound
 import com.dubproductions.bracket.utils.RoundGeneration.generateRoundMatchList
 import com.dubproductions.bracket.utils.ScoreUpdates.updateFirstTieBreaker
 import com.dubproductions.bracket.utils.ScoreUpdates.updateSecondTieBreaker
+import com.dubproductions.bracket.utils.TournamentHousekeeping.setNumberOfRounds
 import com.dubproductions.bracket.utils.TournamentHousekeeping.sortPlayerStandings
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -362,17 +364,7 @@ class SharedViewModel @Inject constructor(
 
             if (tournament.rounds.isNotEmpty()) {
 
-                addMatchPoints(
-                    tournamentId = tournament.tournamentId,
-                    matches = tournament.rounds.last().matches
-                ).awaitAll()
-
-                tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
-
-                addTiebreakerPoints(
-                    tournamentId = tournament.tournamentId,
-                    participants = tournament.participants
-                ).awaitAll()
+                updateScores(tournamentId)
 
                 tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
 
@@ -399,7 +391,31 @@ class SharedViewModel @Inject constructor(
                 tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
             }
 
+            if (tournament.rounds.size >= tournament.setNumberOfRounds() - 1) {
+                launch {
+                    tournamentRepository.updateTournamentStatus(tournamentId, TournamentStatus.COMPLETE_ROUNDS.statusString)
+                }
+            }
+
         }
+
+    }
+
+    suspend fun updateScores(tournamentId: String) {
+
+        var tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+
+        addMatchPoints(
+            tournamentId = tournament.tournamentId,
+            matches = tournament.rounds.last().matches
+        ).awaitAll()
+
+        tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+
+        addTiebreakerPoints(
+            tournamentId = tournament.tournamentId,
+            participants = tournament.participants
+        ).awaitAll()
 
     }
 
@@ -458,7 +474,7 @@ class SharedViewModel @Inject constructor(
                     tournamentRepository.updateParticipantPoints(
                         tournamentId = tournamentId,
                         participantId = match.playerOneId,
-                        earnedPoints = 1.0
+                        earnedPoints = 0.5
                     )
                 }
                 pointsJobs.add(addPlayerOneTieJob)
@@ -467,7 +483,7 @@ class SharedViewModel @Inject constructor(
                     tournamentRepository.updateParticipantPoints(
                         tournamentId = tournamentId,
                         participantId = match.playerTwoId,
-                        earnedPoints = 1.0
+                        earnedPoints = 0.5
                     )
                 }
                 pointsJobs.add(addPlayerTwoTieJob)
@@ -477,6 +493,13 @@ class SharedViewModel @Inject constructor(
 
         return pointsJobs
 
+    }
+
+    fun completeTournament(tournament: Tournament) {
+        viewModelScope.launch {
+            tournamentRepository.completeTournament(tournament)
+            removeDeletedTournamentFromFlow(tournament.tournamentId)
+        }
     }
 
 }

@@ -119,4 +119,8 @@ interface TournamentRepository {
         secondTiebreaker: Double
     ): Boolean
 
+    suspend fun completeTournament(
+        tournament: Tournament
+    )
+
 }

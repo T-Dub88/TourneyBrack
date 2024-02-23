@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.dubproductions.bracket.R
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.utils.TournamentHousekeeping.setNumberOfRounds
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -53,6 +54,7 @@ fun TournamentSummaryCard(
                     modifier = Modifier
                         .padding(all = 4.dp)
                 )
+
                 Text(
                     text = stringResource(
                         id = R.string.rounds,
@@ -61,10 +63,23 @@ fun TournamentSummaryCard(
                     modifier = Modifier
                         .padding(all = 4.dp)
                 )
+
                 Text(
                     text = stringResource(
                         id = R.string.status,
-                        tournament.status.replaceFirstChar { it.uppercase() }
+                        when (tournament.status) {
+                            TournamentStatus.PLAYING.statusString,
+                            TournamentStatus.COMPLETE_ROUNDS.statusString-> {
+                                stringResource(id = R.string.playing_round, tournament.rounds.size)
+                            }
+                            TournamentStatus.COMPLETE_TOURNAMENT.statusString -> {
+                                stringResource(id = R.string.awaiting_confirmation)
+                            }
+                            TournamentStatus.FINALIZED.statusString -> {
+                                stringResource(id = R.string.complete)
+                            }
+                            else -> { tournament.status.replaceFirstChar { it.uppercase() } }
+                        }
                     ),
                     modifier = Modifier
                         .padding(all = 4.dp)

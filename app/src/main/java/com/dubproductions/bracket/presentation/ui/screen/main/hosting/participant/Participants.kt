@@ -56,6 +56,7 @@ fun ParticipantsScreen(
 
     Scaffold(
         floatingActionButton = {
+            if (participantList.isNotEmpty() && participantList[0].matchIds.isNotEmpty()) return@Scaffold
             FloatingActionButton(
                 onClick = floatingActionButtonClick
             ) {

@@ -158,17 +158,24 @@ fun BracketScreen(
                             tournament.participants.find { it.userId == playerId } ?: Participant()
                         },
                         setWinnerClick = { winnerId ->
-                            if (tournament.status == TournamentStatus.PLAYING.statusString) {
-                                selectedWinnerId = winnerId
-                                selectedMatchId = match.matchId
-                                showDeclareWinnerDialog = true
-                            } else {
-                                showNeedPlayingDialog = true
+                            when (tournament.status) {
+                                TournamentStatus.PLAYING.statusString,
+                                TournamentStatus.COMPLETE_ROUNDS.statusString -> {
+                                    selectedWinnerId = winnerId
+                                    selectedMatchId = match.matchId
+                                    showDeclareWinnerDialog = true
+                                }
+                                else -> {
+                                    showNeedPlayingDialog = true
+                                }
                             }
+
                         },
                         onEditClick = {
-                            selectedMatchId = match.matchId
-                            showMatchEditDialog = true
+                            if (tournament.status != TournamentStatus.FINALIZED.statusString) {
+                                selectedMatchId = match.matchId
+                                showMatchEditDialog = true
+                            }
                         }
                     )
                 }

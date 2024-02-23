@@ -18,9 +18,7 @@ class EditTournamentViewModel @Inject constructor(
     private val tournamentRepository: TournamentRepository
 ): ViewModel() {
 
-    private val _uiState: MutableStateFlow<EditTournamentUIState> = MutableStateFlow(
-        EditTournamentUIState()
-    )
+    private val _uiState= MutableStateFlow(EditTournamentUIState())
     val uiState: StateFlow<EditTournamentUIState> = _uiState.asStateFlow()
 
     private fun updateUIState(newUIState: EditTournamentUIState) {
@@ -54,6 +52,27 @@ class EditTournamentViewModel @Inject constructor(
     fun changeDeleteDialogState(display: Boolean) {
         val newUIState = uiState.value.copy(
             displayDeleteTournamentDialog = display
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeNewRoundDialogState(display: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayCreateNewRoundDialog = display
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeCompleteRoundsDialogState(display: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayCompleteRoundsDialog = display
+        )
+        updateUIState(newUIState)
+    }
+
+    fun changeCompleteTournamentDialogState(display: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayCompleteTournamentDialog = display
         )
         updateUIState(newUIState)
     }

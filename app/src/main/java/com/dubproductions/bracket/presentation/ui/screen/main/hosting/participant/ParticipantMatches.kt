@@ -98,17 +98,23 @@ fun ParticipantMatchesScreen(
                         participantList.find { it.userId == playerId } ?: Participant()
                     },
                     setWinnerClick = { winnerId ->
-                        if (tournamentStatus == TournamentStatus.PLAYING.statusString) {
-                            selectedWinnerId = winnerId
-                            selectedMatchId = match.matchId
-                            showDeclareDialog = true
-                        } else {
-                            showNeedPlayingDialog = true
+                        when (tournamentStatus) {
+                            TournamentStatus.PLAYING.statusString,
+                            TournamentStatus.COMPLETE_ROUNDS.statusString -> {
+                                selectedWinnerId = winnerId
+                                selectedMatchId = match.matchId
+                                showDeclareDialog = true
+                            }
+                            else -> {
+                                showNeedPlayingDialog = true
+                            }
                         }
                     },
                     onEditClick = {
-                        selectedMatchId = match.matchId
-                        showMatchEditDialog = true
+                        if (tournamentStatus != TournamentStatus.FINALIZED.statusString) {
+                            selectedMatchId = match.matchId
+                            showMatchEditDialog = true
+                        }
                     }
                 )
             }
