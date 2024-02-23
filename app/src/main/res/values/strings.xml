@@ -81,6 +81,17 @@
     <string name="generate">Generate</string>
     <string name="delete_message">Are you sure? This action cannot be undone.</string>
     <string name="delete">Delete</string>
+    <string name="next_round">Next Round</string>
+    <string name="complete_tournament">Complete Tournament</string>
+    <string name="finalize_rounds">Complete Final Round</string>
+    <string name="complete">Complete</string>
+    <string name="awaiting_confirmation">Awaiting Confirmation</string>
+    <string name="playing_round">Playing Round %1$d</string>
+    <string name="complete_rounds">Complete Rounds</string>
+    <string name="complete_rounds_body">Upload results for the final round? Afterward, you will be prompted to complete the tournament and finalize the results.</string>
+    <string name="complete_tournament_body">Finalize tournament results? This action cannot be undone. Tournament will be moved to the Completed Tournaments section on the home screen. Select "Wait" to review standings before finalizing.</string>
+    <string name="generate_round">Generate Round %1$d</string>
+    <string name="generate_round_body">Do you want to complete Round %1$d and advance to Round %2$d?</string>
 
     <!--Participants Screen-->
     <string name="cannot_add_title">Cannot Add New Player</string>
@@ -95,8 +106,8 @@
     <string name="dropped">Dropped</string>
     <string name="place">Place: %1$d</string>
     <string name="points">Points: %1$.1f</string>
-    <string name="buchholz">Buchholz: %1$.1f</string>
-    <string name="sb">SB: %1$.1f</string>
+    <string name="opponents_average_points">OAP: %1$.1f</string>
+    <string name="opponents_opponents_average_points">OOAP: %1$.1f</string>
     <string name="drop_player">Drop Player</string>
     <string name="view_matches">View Matches</string>
 
@@ -108,6 +119,7 @@
     <string name="not_started">Not Started</string>
     <string name="edit_match">Edit Match</string>
     <string name="edit_match_body">Editing this match will delete future round data that has already been generated.</string>
+    <string name="wait">Wait</string>
 
     <!--Declare Winner Dialog-->
     <string name="report_results">Report Results</string>

@@ -99,4 +99,28 @@ interface TournamentRepository {
         timestamp: Long
     ): Boolean
 
+    suspend fun removeMatchIdAndOpponentIdFromParticipant(
+        tournamentId: String,
+        participantId: String,
+        matchId: String,
+        opponentId: String?
+    ): Boolean
+
+    suspend fun updateParticipantPoints(
+        tournamentId: String,
+        participantId: String,
+        earnedPoints: Double
+    ): Boolean
+
+    suspend fun updateTiebreakers(
+        tournamentId: String,
+        participantId: String,
+        firstTiebreaker: Double,
+        secondTiebreaker: Double
+    ): Boolean
+
+    suspend fun completeTournament(
+        tournament: Tournament
+    )
+
 }

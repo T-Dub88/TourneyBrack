@@ -45,10 +45,12 @@ fun BracketScreen(
     editMatch: (String, Int) -> Unit
 ) {
     var selectedRoundIndex: Int by rememberSaveable {
-        mutableIntStateOf(0)
+        mutableIntStateOf(tournament.rounds.size - 1)
     }
 
-    val pagerState = rememberPagerState {
+    val pagerState = rememberPagerState(
+        initialPage = tournament.rounds.size - 1
+    ) {
         if (tournament.roundIds.isEmpty()) {
             1
         } else {
@@ -123,7 +125,7 @@ fun BracketScreen(
             .fillMaxSize()
     ) {
         ScrollableTabRow(
-            selectedTabIndex = selectedRoundIndex,
+            selectedTabIndex = pagerState.currentPage,
         ) {
             tournament.rounds.forEach { round ->
                 Tab(
@@ -156,17 +158,24 @@ fun BracketScreen(
                             tournament.participants.find { it.userId == playerId } ?: Participant()
                         },
                         setWinnerClick = { winnerId ->
-                            if (tournament.status == TournamentStatus.PLAYING.statusString) {
-                                selectedWinnerId = winnerId
-                                selectedMatchId = match.matchId
-                                showDeclareWinnerDialog = true
-                            } else {
-                                showNeedPlayingDialog = true
+                            when (tournament.status) {
+                                TournamentStatus.PLAYING.statusString,
+                                TournamentStatus.COMPLETE_ROUNDS.statusString -> {
+                                    selectedWinnerId = winnerId
+                                    selectedMatchId = match.matchId
+                                    showDeclareWinnerDialog = true
+                                }
+                                else -> {
+                                    showNeedPlayingDialog = true
+                                }
                             }
+
                         },
                         onEditClick = {
-                            selectedMatchId = match.matchId
-                            showMatchEditDialog = true
+                            if (tournament.status != TournamentStatus.FINALIZED.statusString) {
+                                selectedMatchId = match.matchId
+                                showMatchEditDialog = true
+                            }
                         }
                     )
                 }

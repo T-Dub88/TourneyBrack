@@ -1,7 +1,6 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
@@ -91,8 +90,8 @@ class ParticipantsViewModel @Inject constructor(
             username = enteredText,
             dropped = false,
             points = 0.0,
-            opponentsAvgPoints = 0.0,
-            opponentsOpponentsAvgPoints = 0.0
+            opponentsAveragePoints = 0.0,
+            opponentsOpponentsAveragePoints = 0.0
         )
     }
 

@@ -21,8 +21,8 @@ object TournamentHousekeeping {
             compareBy(
                 { player -> player.dropped },
                 { player -> -player.points },
-                { player -> -player.opponentsAvgPoints },
-                { player -> -player.opponentsOpponentsAvgPoints }
+                { player -> -player.opponentsAveragePoints },
+                { player -> -player.opponentsOpponentsAveragePoints }
             )
         )
     }

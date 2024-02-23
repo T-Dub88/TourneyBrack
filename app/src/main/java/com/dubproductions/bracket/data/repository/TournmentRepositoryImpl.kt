@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 class TournamentRepositoryImpl(
     private val firestoreService: FirestoreService
@@ -58,7 +59,7 @@ class TournamentRepositoryImpl(
             )
 
             rounds.add(round)
-            rounds.sortBy { -it.roundNum }
+            rounds.sortBy { it.roundNum }
         }
 
         return rounds
@@ -186,6 +187,20 @@ class TournamentRepositoryImpl(
         return firestoreService.removeMatchFromRound(tournamentId, roundId, matchId)
     }
 
+    override suspend fun removeMatchIdAndOpponentIdFromParticipant(
+        tournamentId: String,
+        participantId: String,
+        matchId: String,
+        opponentId: String?
+    ): Boolean {
+        return firestoreService.removeOpponentIdAndMatchIdFromParticipant(
+            tournamentId,
+            participantId,
+            matchId,
+            opponentId
+        )
+    }
+
     override suspend fun dropParticipant(
         tournamentId: String,
         participantId: String
@@ -199,9 +214,19 @@ class TournamentRepositoryImpl(
         roundId: String
     ) {
         firestoreService.addMatchToDatabase(tournamentId, roundId, match)
-        firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, match.playerOneId)
+        firestoreService.addMatchIdToParticipant(
+            tournamentId = tournamentId,
+            matchId = match.matchId,
+            participantId = match.playerOneId,
+            opponentId = match.playerTwoId
+        )
         match.playerTwoId?.let {
-            firestoreService.addMatchIdToParticipant(tournamentId, match.matchId, it)
+            firestoreService.addMatchIdToParticipant(
+                tournamentId = tournamentId,
+                matchId = match.matchId,
+                participantId = it,
+                opponentId = match.playerOneId
+            )
         }
     }
 
@@ -232,6 +257,66 @@ class TournamentRepositoryImpl(
         timestamp: Long
     ): Boolean {
         return firestoreService.timeStampStart(tournamentId, timestamp)
+    }
+
+    override suspend fun updateParticipantPoints(
+        tournamentId: String,
+        participantId: String,
+        earnedPoints: Double
+    ): Boolean {
+        return firestoreService.updateParticipantPoints(
+            tournamentId,
+            participantId,
+            earnedPoints
+        )
+    }
+
+    override suspend fun updateTiebreakers(
+        tournamentId: String,
+        participantId: String,
+        firstTiebreaker: Double,
+        secondTiebreaker: Double
+    ): Boolean {
+        return firestoreService.updateParticipantTiebreakers(
+            tournamentId,
+            participantId,
+            firstTiebreaker,
+            secondTiebreaker
+        )
+    }
+
+    override suspend fun completeTournament(tournament: Tournament) {
+        // Remove all associated real time listeners for this tournament
+        firestoreService.removeTournamentListener(tournament.tournamentId)
+
+        for (participant in tournament.participants) {
+            firestoreService.removeParticipantListener(participant.userId)
+        }
+
+        for (round in tournament.rounds) {
+            for (match in round.matches) {
+                firestoreService.removeMatchListener(match.matchId)
+            }
+        }
+
+        // Update status in tournament
+        firestoreService.timeStampEnd(
+            tournament.tournamentId,
+            Date().time
+        )
+
+        // Remove tournament id from user hosting list
+        firestoreService.removeTournamentFromUser(
+            tournament.hostId,
+            tournament.tournamentId
+        )
+
+        // Add id to completed list
+        firestoreService.addTournamentIdToCompletedList(
+            tournament.hostId,
+            tournament.tournamentId
+        )
+
     }
 
 }

@@ -21,6 +21,7 @@ import com.dubproductions.bracket.presentation.viewmodel.EditTournamentViewModel
 import com.dubproductions.bracket.presentation.viewmodel.ParticipantMatchesViewModel
 import com.dubproductions.bracket.presentation.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.presentation.viewmodel.SharedViewModel
+import com.dubproductions.bracket.utils.status.MatchStatus
 import com.dubproductions.bracket.utils.status.TournamentStatus
 import kotlinx.coroutines.launch
 
@@ -99,6 +100,7 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
     ) {
         val sharedViewModel: SharedViewModel = it.sharedViewModel(navController = navController)
         val editTourneyViewModel: EditTournamentViewModel = hiltViewModel()
+        val coroutineScope = rememberCoroutineScope()
 
         val uiState by editTourneyViewModel.uiState.collectAsStateWithLifecycle()
         val tournamentList by sharedViewModel.hostingTournamentList.collectAsStateWithLifecycle()
@@ -111,8 +113,10 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             uiState = uiState,
             changeBracketDialogState = { generate ->
                 if (generate) {
-                    editTourneyViewModel.startTournament(tournament.tournamentId)
-                    editTourneyViewModel.generateBracket(tournament)
+                    if (tournament.timeStarted == null) {
+                        editTourneyViewModel.startTournament(tournament.tournamentId)
+                    }
+                    sharedViewModel.generateBracket(tournament.tournamentId)
                 }
                 editTourneyViewModel.changeBracketGenerationDialogState(false)
             },
@@ -129,6 +133,33 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             },
             changeOpenedDialogState = { state ->
                 editTourneyViewModel.changeOpenedDialogState(state)
+            },
+            changeNextRoundDialogState = { generate ->
+                if (generate) sharedViewModel.generateBracket(tournament.tournamentId)
+                editTourneyViewModel.changeNewRoundDialogState(false)
+            },
+            changeCompleteRoundsDialogState = { complete ->
+                editTourneyViewModel.changeCompleteRoundsDialogState(false)
+                if (complete) {
+                    coroutineScope.launch {
+                        editTourneyViewModel.updateTournamentStatus(
+                            tournament.tournamentId,
+                            TournamentStatus.COMPLETE_TOURNAMENT.statusString
+                        )
+                        sharedViewModel.updateScores(tournament.tournamentId)
+                    }
+                    editTourneyViewModel.changeCompleteTournamentDialogState(true)
+                }
+
+            },
+            changeCompleteTournamentDialogState = { complete ->
+                if (complete) {
+                    sharedViewModel.completeTournament(tournament)
+                    navController.popBackStack()
+                } else {
+                    editTourneyViewModel.changeCompleteTournamentDialogState(false)
+                }
+
             },
             bracketOnClick = {
                 if (tournament.rounds.isEmpty()) {
@@ -166,7 +197,18 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                     }
 
                     TournamentStatus.PLAYING.statusString -> {
-                        // Todo: End tournament button
+                        if (checkForIncompleteMatches(tournament)) return@EditTournamentScreen
+                        editTourneyViewModel.changeNewRoundDialogState(true)
+                    }
+
+                    TournamentStatus.COMPLETE_ROUNDS.statusString -> {
+
+                        if (checkForIncompleteMatches(tournament)) return@EditTournamentScreen
+                        editTourneyViewModel.changeCompleteRoundsDialogState(true)
+
+                    }
+                    TournamentStatus.COMPLETE_TOURNAMENT.statusString -> {
+                        editTourneyViewModel.changeCompleteTournamentDialogState(true)
                     }
                 }
             },
@@ -175,6 +217,14 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun checkForIncompleteMatches(tournament: Tournament): Boolean {
+    val incompleteMatch = tournament.rounds.last().matches.find {
+            match -> match.status == MatchStatus.PENDING.statusString
+    }
+
+    return incompleteMatch != null
 }
 
 fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
@@ -203,7 +253,6 @@ fun NavGraphBuilder.bracketScreen(navController: NavHostController) {
             editMatch = { matchId, roundNum ->
                 participantMatchesViewModel.editMatch(
                     matchId = matchId,
-                    participantList = tournament.participants,
                     selectedRound = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
                     tournament = tournament
                 )
@@ -318,7 +367,6 @@ fun NavGraphBuilder.participantMatchesScreen(navController: NavHostController) {
             editMatch = { matchId, roundNum ->
                 participantMatchesViewModel.editMatch(
                     matchId = matchId,
-                    participantList = tournament.participants,
                     selectedRound = tournament.rounds.find { round -> round.roundNum == roundNum }!!,
                     tournament = tournament
                 )

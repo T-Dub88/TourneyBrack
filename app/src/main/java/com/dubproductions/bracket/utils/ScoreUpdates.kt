@@ -1,40 +1,47 @@
 package com.dubproductions.bracket.utils
 
-import com.dubproductions.bracket.domain.model.Match
 import com.dubproductions.bracket.domain.model.Participant
 
 object ScoreUpdates {
-    fun Participant.updateTiebreakers(
-        participantList: List<Participant>,
-        matchList: List<Match>
-    ) {
-        var firstTiebreaker = 0.0
-        var secondTiebreaker = 0.0
 
-        for (match in matchList) {
+    fun Participant.updateFirstTieBreaker(
+        participants: List<Participant>
+    ): Double {
+        var opponentsTotalPoints = 0.0
 
-            val opponentId = if (match.playerOneId != userId) {
-                match.playerOneId
-            } else {
-                match.playerTwoId
+        for (opponentId in opponentIds) {
+            val opponent = participants.find { it.userId == opponentId }
+            opponent?.let {
+                opponentsTotalPoints += it.points
             }
 
-            val opponent = participantList.find { opponentId == it.userId }
+        }
 
-            opponent?.points?.let { opponentsPoints ->
+        return opponentsTotalPoints / opponentIds.size
 
-                firstTiebreaker += opponentsPoints
+    }
 
-                secondTiebreaker += if (match.winnerId == userId) {
-                    opponentsPoints
-                } else if (match.tie == true) {
-                    (opponentsPoints * 0.5)
-                } else {
-                    0.0
+    fun Participant.updateSecondTieBreaker(
+        participants: List<Participant>
+    ): Double {
+
+        var opponentsOpponentsTotalPoints = 0.0
+        val divisor = opponentIds.size * opponentIds.size
+
+        for (opponentId in opponentIds) {
+            val opponent = participants.find { it.userId == opponentId }
+            opponent?.let { opponentExists ->
+                for (opponentsOpponentId in opponentExists.opponentIds) {
+                    val opponentsOpponent = participants.find { it.userId == opponentsOpponentId }
+                    opponentsOpponent?.let {
+                        opponentsOpponentsTotalPoints += it.points
+                    }
                 }
-
             }
         }
+
+        return opponentsOpponentsTotalPoints / divisor
+
     }
 
 }
