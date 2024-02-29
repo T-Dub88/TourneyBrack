@@ -82,6 +82,7 @@ fun ParticipantMatchesScreen(
                     showMatchEditDialog = false
                 },
                 editMatch = {
+                    showMatchEditDialog = false
                     editMatch(selectedMatchId, matchList.find { it.matchId == selectedMatchId }!!.roundNum)
                 }
             )
