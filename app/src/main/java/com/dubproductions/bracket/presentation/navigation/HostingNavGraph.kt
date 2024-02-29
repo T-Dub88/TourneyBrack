@@ -134,6 +134,9 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             changeOpenedDialogState = { state ->
                 editTourneyViewModel.changeOpenedDialogState(state)
             },
+            changeIncompleteMatchDialogState = { state ->
+                editTourneyViewModel.changeMatchesIncompleteDialogState(state)
+            },
             changeNextRoundDialogState = { generate ->
                 if (generate) sharedViewModel.generateBracket(tournament.tournamentId)
                 editTourneyViewModel.changeNewRoundDialogState(false)
@@ -197,15 +200,19 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                     }
 
                     TournamentStatus.PLAYING.statusString -> {
-                        if (checkForIncompleteMatches(tournament)) return@EditTournamentScreen
-                        editTourneyViewModel.changeNewRoundDialogState(true)
+                        if (checkForIncompleteMatches(tournament)) {
+                            editTourneyViewModel.changeMatchesIncompleteDialogState(true)
+                        } else {
+                            editTourneyViewModel.changeNewRoundDialogState(true)
+                        }
                     }
 
                     TournamentStatus.COMPLETE_ROUNDS.statusString -> {
-
-                        if (checkForIncompleteMatches(tournament)) return@EditTournamentScreen
-                        editTourneyViewModel.changeCompleteRoundsDialogState(true)
-
+                        if (checkForIncompleteMatches(tournament)) {
+                            editTourneyViewModel.changeMatchesIncompleteDialogState(true)
+                        } else {
+                            editTourneyViewModel.changeCompleteRoundsDialogState(true)
+                        }
                     }
                     TournamentStatus.COMPLETE_TOURNAMENT.statusString -> {
                         editTourneyViewModel.changeCompleteTournamentDialogState(true)

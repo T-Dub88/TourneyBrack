@@ -77,6 +77,13 @@ class EditTournamentViewModel @Inject constructor(
         updateUIState(newUIState)
     }
 
+    fun changeMatchesIncompleteDialogState(display: Boolean) {
+        val newUIState = uiState.value.copy(
+            displayMatchesIncompleteDialog = display
+        )
+        updateUIState(newUIState)
+    }
+
     fun updateTournamentStatus(id: String, status: String) {
         viewModelScope.launch {
             tournamentRepository.updateTournamentStatus(id, status)

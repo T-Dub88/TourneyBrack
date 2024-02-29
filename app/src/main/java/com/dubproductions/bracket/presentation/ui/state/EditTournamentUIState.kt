@@ -7,5 +7,6 @@ data class EditTournamentUIState(
     var displayDeleteTournamentDialog: Boolean = false,
     var displayCreateNewRoundDialog: Boolean = false,
     var displayCompleteRoundsDialog: Boolean = false,
-    var displayCompleteTournamentDialog: Boolean = false
+    var displayCompleteTournamentDialog: Boolean = false,
+    var displayMatchesIncompleteDialog: Boolean = false
 )

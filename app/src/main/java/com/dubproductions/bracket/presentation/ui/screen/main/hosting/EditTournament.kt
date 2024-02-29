@@ -50,7 +50,8 @@ fun EditTournamentScreen(
     changeDeleteDialogState: (Boolean) -> Unit,
     changeNextRoundDialogState: (Boolean) -> Unit,
     changeCompleteRoundsDialogState: (Boolean) -> Unit,
-    changeCompleteTournamentDialogState: (Boolean) -> Unit
+    changeCompleteTournamentDialogState: (Boolean) -> Unit,
+    changeIncompleteMatchDialogState: (Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -229,6 +230,15 @@ fun EditTournamentScreen(
                 )
             }
 
+            uiState.displayMatchesIncompleteDialog -> {
+                ReusableDialog(
+                    titleText = "Incomplete Matches",
+                    contentText = "Complete all matches this round to advance.",
+                    icon = Icons.Default.Warning,
+                    dismissDialog = { changeIncompleteMatchDialogState(false) }
+                )
+            }
+
             uiState.displayBracketGenerationDialog -> {
                 BracketGenerationDialog(
                     title = stringResource(id = R.string.bracket_gen_title),
@@ -331,7 +341,8 @@ fun EditTournamentScreenPreview() {
         changeDeleteDialogState = {},
         changeNextRoundDialogState = {},
         changeCompleteRoundsDialogState = {},
-        changeCompleteTournamentDialogState = {}
+        changeCompleteTournamentDialogState = {},
+        changeIncompleteMatchDialogState = {}
     )
 }
 
