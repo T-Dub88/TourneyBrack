@@ -436,6 +436,7 @@ class FirestoreService {
     suspend fun removeOpponentIdAndMatchIdFromParticipant(
         tournamentId: String,
         participantId: String,
+        participantPointDeduction: Double,
         matchId: String,
         opponentId: String?
     ): Boolean {
@@ -447,7 +448,8 @@ class FirestoreService {
                 .document(participantId)
                 .update(
                     MATCH_IDS, FieldValue.arrayRemove(matchId),
-                    OPP_IDS, FieldValue.arrayRemove(opponentId ?: "bye")
+                    OPP_IDS, FieldValue.arrayRemove(opponentId ?: "bye"),
+                    POINTS, FieldValue.increment(participantPointDeduction)
                 )
                 .await()
             true
