@@ -190,12 +190,14 @@ class TournamentRepositoryImpl(
     override suspend fun removeMatchIdAndOpponentIdFromParticipant(
         tournamentId: String,
         participantId: String,
+        participantPointDeduction: Double,
         matchId: String,
         opponentId: String?
     ): Boolean {
         return firestoreService.removeOpponentIdAndMatchIdFromParticipant(
             tournamentId,
             participantId,
+            participantPointDeduction,
             matchId,
             opponentId
         )

@@ -102,6 +102,7 @@ interface TournamentRepository {
     suspend fun removeMatchIdAndOpponentIdFromParticipant(
         tournamentId: String,
         participantId: String,
+        participantPointDeduction: Double,
         matchId: String,
         opponentId: String?
     ): Boolean

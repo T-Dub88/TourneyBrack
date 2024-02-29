@@ -3,10 +3,13 @@ package com.dubproductions.bracket.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Match
+import com.dubproductions.bracket.domain.model.Participant
 import com.dubproductions.bracket.domain.model.Round
 import com.dubproductions.bracket.domain.model.Tournament
 import com.dubproductions.bracket.domain.repository.TournamentRepository
+import com.dubproductions.bracket.utils.TournamentHousekeeping.setNumberOfRounds
 import com.dubproductions.bracket.utils.status.MatchStatus
+import com.dubproductions.bracket.utils.status.TournamentStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -36,6 +39,23 @@ class ParticipantMatchesViewModel @Inject constructor(
 
     }
 
+    private fun pointDeductionCalculation(
+        tournament: Tournament,
+        round: Round,
+        match: Match,
+        participantId: String
+    ): Double {
+        return if (round == tournament.rounds.last()) {
+            0.0
+        } else if (match.winnerId == participantId) {
+            -1.0
+        } else if (match.tie == true) {
+            -0.5
+        } else {
+            0.0
+        }
+    }
+
     fun editMatch(
         matchId: String,
         selectedRound: Round,
@@ -55,23 +75,34 @@ class ParticipantMatchesViewModel @Inject constructor(
                 )
             )
 
-            if (selectedRound != tournament.rounds.last()) {
-                for (i in selectedRound.roundNum..tournament.rounds.lastIndex) {
-                    val roundId = tournament.rounds[i].roundId
-                    launch {
-                        for (match in tournament.rounds[i].matches) {
+            if (selectedRound.roundNum < tournament.setNumberOfRounds() && tournament.status != TournamentStatus.PLAYING.statusString) {
+                tournamentRepository.updateTournamentStatus(
+                    tournamentId = tournament.tournamentId,
+                    status = TournamentStatus.PLAYING.statusString
+                )
+            }
+
+
+            for (round in tournament.rounds) {
+                launch {
+                    if (round.roundNum > selectedRound.roundNum) {
+
+                        for (match in round.matches) {
+
                             launch {
                                 tournamentRepository.deleteMatch(
                                     tournamentId = tournament.tournamentId,
-                                    roundId = roundId,
+                                    roundId = round.roundId,
                                     matchId = match.matchId
                                 )
                             }
+
                             launch {
                                 tournamentRepository.removeMatchIdAndOpponentIdFromParticipant(
                                     tournamentId = tournament.tournamentId,
                                     participantId = match.playerOneId,
-                                    matchId = matchId,
+                                    participantPointDeduction = pointDeductionCalculation(tournament, round, match, match.playerOneId),
+                                    matchId = match.matchId,
                                     opponentId = match.playerTwoId
                                 )
                             }
@@ -81,7 +112,8 @@ class ParticipantMatchesViewModel @Inject constructor(
                                     tournamentRepository.removeMatchIdAndOpponentIdFromParticipant(
                                         tournamentId = tournament.tournamentId,
                                         participantId = it,
-                                        matchId = matchId,
+                                        participantPointDeduction = pointDeductionCalculation(tournament, round, match, it),
+                                        matchId = match.matchId,
                                         opponentId = match.playerOneId
                                     )
                                 }
@@ -91,14 +123,34 @@ class ParticipantMatchesViewModel @Inject constructor(
 
                         tournamentRepository.deleteRound(
                             tournamentId = tournament.tournamentId,
-                            roundId = roundId
+                            roundId = round.roundId
                         )
 
                         launch {
                             tournamentRepository.removeRoundId(
                                 tournamentId = tournament.tournamentId,
-                                roundId = roundId
+                                roundId = round.roundId
                             )
+                        }
+                    } else {
+                        for (match in round.matches) {
+                            launch {
+                                tournamentRepository.updateParticipantPoints(
+                                    earnedPoints = pointDeductionCalculation(tournament, round, match, match.playerOneId),
+                                    participantId = match.playerOneId,
+                                    tournamentId = tournament.tournamentId
+                                )
+                            }
+
+                            match.playerTwoId?.let {
+                                launch {
+                                    tournamentRepository.updateParticipantPoints(
+                                        earnedPoints = pointDeductionCalculation(tournament, round, match, it),
+                                        participantId = it,
+                                        tournamentId = tournament.tournamentId
+                                    )
+                                }
+                            }
                         }
                     }
                 }
