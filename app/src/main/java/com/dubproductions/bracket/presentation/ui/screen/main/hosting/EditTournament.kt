@@ -135,10 +135,14 @@ fun EditTournamentScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 4.dp),
-            enabled = when (tournament.status) {
-                TournamentStatus.REGISTERING.statusString,
-                TournamentStatus.CLOSED.statusString -> true
-                else -> false
+            enabled = if (uiState.uiEnabled) {
+                when (tournament.status) {
+                    TournamentStatus.REGISTERING.statusString,
+                    TournamentStatus.CLOSED.statusString -> true
+                    else -> false
+                }
+            } else {
+                false
             }
         ) {
             Text(
@@ -156,7 +160,8 @@ fun EditTournamentScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .padding(vertical = 4.dp)
+                .padding(vertical = 4.dp),
+            enabled = uiState.uiEnabled
         ) {
             Text(
                 text = when (tournament.status) {
@@ -182,7 +187,8 @@ fun EditTournamentScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .padding(vertical = 4.dp)
+                .padding(vertical = 4.dp),
+            enabled = uiState.uiEnabled
         ) {
             Text(text = stringResource(id = R.string.view_edit_participants))
         }
@@ -192,7 +198,8 @@ fun EditTournamentScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .padding(vertical = 4.dp)
+                .padding(vertical = 4.dp),
+            enabled = uiState.uiEnabled
         ) {
             Text(text = stringResource(id = R.string.view_edit_bracket))
         }
@@ -206,7 +213,8 @@ fun EditTournamentScreen(
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            ),
+            enabled = uiState.uiEnabled
         ) {
             Text(text = stringResource(id = R.string.delete_tournament))
         }
@@ -329,7 +337,9 @@ fun EditTourneyText(text: String) {
 fun EditTournamentScreenPreview() {
     EditTournamentScreen(
         tournament = Tournament(),
-        uiState = EditTournamentUIState(),
+        uiState = EditTournamentUIState(
+            uiEnabled = false
+        ),
         lockOnClick = {  },
         participantsOnClick = {  },
         bracketOnClick = {  },

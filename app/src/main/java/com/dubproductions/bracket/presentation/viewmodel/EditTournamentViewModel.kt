@@ -84,6 +84,13 @@ class EditTournamentViewModel @Inject constructor(
         updateUIState(newUIState)
     }
 
+    fun enableDisableUIState(enable: Boolean) {
+        val newUIState = uiState.value.copy(
+            uiEnabled = enable
+        )
+        updateUIState(newUIState)
+    }
+
     fun updateTournamentStatus(id: String, status: String) {
         viewModelScope.launch {
             tournamentRepository.updateTournamentStatus(id, status)

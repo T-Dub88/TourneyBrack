@@ -1,5 +1,6 @@
 package com.dubproductions.bracket.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dubproductions.bracket.domain.model.Match
@@ -358,46 +359,49 @@ class SharedViewModel @Inject constructor(
 
     }
 
-    fun generateBracket(tournamentId: String) {
+    suspend fun generateBracket(tournamentId: String) {
 
-        viewModelScope.launch {
+        var tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+        val jobs = mutableListOf<Deferred<Boolean>>()
+        val matchJobs = mutableListOf<Deferred<Unit>>()
 
-            var tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+        if (tournament.rounds.isNotEmpty()) {
+            updateScores(tournamentId)
+            tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+        }
+        Log.i("Jobs", "started match generation")
+        val matchList = generateRoundMatchList(tournament.rounds, tournament.participants)
+        val round = tournament.createNextRound(matchList)
+        Log.i("Jobs", "finished round and match generation")
+        val roundJob = viewModelScope.async {
+            tournamentRepository.addNewRound(round, tournament.tournamentId)
+        }
+        Log.i("Jobs", "added new round to database")
+        jobs.add(roundJob)
 
-            if (tournament.rounds.isNotEmpty()) {
-
-                updateScores(tournamentId)
-
-                tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
-
+        for (match in matchList) {
+            val matchJob = viewModelScope.async {
+                tournamentRepository.addNewMatch(
+                    match = match,
+                    tournamentId = tournament.tournamentId,
+                    roundId = round.roundId
+                )
             }
+            matchJobs.add(matchJob)
+        }
 
-            val matchList = generateRoundMatchList(tournament.rounds, tournament.participants)
-            val round = tournament.createNextRound(matchList)
-
-            launch {
-                tournamentRepository.addNewRound(round, tournament.tournamentId)
-            }
-
-            for (match in matchList) {
-                launch {
-                    tournamentRepository.addNewMatch(
-                        match = match,
-                        tournamentId = tournament.tournamentId,
-                        roundId = round.roundId
-                    )
-                }
-            }
-
-
+        val roundIdJob = viewModelScope.async {
             tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
+        }
 
-            if (tournament.rounds.size >= tournament.setNumberOfRounds() - 1) {
-                launch {
-                    tournamentRepository.updateTournamentStatus(tournamentId, TournamentStatus.COMPLETE_ROUNDS.statusString)
-                }
-            }
+        jobs.add(roundIdJob)
+        Log.i("Jobs", "started await")
+        matchJobs.awaitAll()
+        jobs.awaitAll()
+        Log.i("Jobs", "finished await ")
 
+        if (tournament.rounds.size >= tournament.setNumberOfRounds() - 1) {
+            tournamentRepository.updateTournamentStatus(tournamentId, TournamentStatus.COMPLETE_ROUNDS.statusString)
         }
 
     }

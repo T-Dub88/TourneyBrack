@@ -112,13 +112,18 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
             tournament = tournament,
             uiState = uiState,
             changeBracketDialogState = { generate ->
-                if (generate) {
-                    if (tournament.timeStarted == null) {
-                        editTourneyViewModel.startTournament(tournament.tournamentId)
-                    }
-                    sharedViewModel.generateBracket(tournament.tournamentId)
-                }
                 editTourneyViewModel.changeBracketGenerationDialogState(false)
+                coroutineScope.launch {
+                    if (generate) {
+                        editTourneyViewModel.enableDisableUIState(false)
+                        if (tournament.timeStarted == null) {
+                            editTourneyViewModel.startTournament(tournament.tournamentId)
+                        }
+                        sharedViewModel.generateBracket(tournament.tournamentId)
+                        editTourneyViewModel.enableDisableUIState(true)
+                    }
+                }
+
             },
             changeClosedDialogState = { state ->
                 editTourneyViewModel.changeClosedDialogState(state)
@@ -138,8 +143,16 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                 editTourneyViewModel.changeMatchesIncompleteDialogState(state)
             },
             changeNextRoundDialogState = { generate ->
-                if (generate) sharedViewModel.generateBracket(tournament.tournamentId)
                 editTourneyViewModel.changeNewRoundDialogState(false)
+                coroutineScope.launch {
+                    if (generate) {
+                        editTourneyViewModel.enableDisableUIState(false)
+                        sharedViewModel.generateBracket(tournament.tournamentId)
+                        editTourneyViewModel.enableDisableUIState(true)
+                    }
+
+                }
+
             },
             changeCompleteRoundsDialogState = { complete ->
                 editTourneyViewModel.changeCompleteRoundsDialogState(false)
