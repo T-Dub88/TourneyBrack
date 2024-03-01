@@ -177,6 +177,11 @@ class ParticipantMatchesViewModel @Inject constructor(
                     tournamentId = tournament.tournamentId,
                     status = TournamentStatus.PLAYING.statusString
                 )
+            } else if (selectedRound.roundNum == tournament.setNumberOfRounds() && tournament.status != TournamentStatus.COMPLETE_ROUNDS.statusString) {
+                tournamentRepository.updateTournamentStatus(
+                    tournamentId = tournament.tournamentId,
+                    status = TournamentStatus.COMPLETE_ROUNDS.statusString
+                )
             }
 
             // Change selected matches state and results
