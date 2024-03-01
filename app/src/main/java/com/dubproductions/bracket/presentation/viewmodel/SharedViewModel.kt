@@ -366,7 +366,7 @@ class SharedViewModel @Inject constructor(
         val matchJobs = mutableListOf<Deferred<Unit>>()
 
         if (tournament.rounds.isNotEmpty()) {
-            updateScores(tournamentId)
+            addTiebreakerPoints(tournamentId, tournament.participants).awaitAll()
             tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
         }
         Log.i("Jobs", "started match generation")
@@ -406,25 +406,25 @@ class SharedViewModel @Inject constructor(
 
     }
 
-    suspend fun updateScores(tournamentId: String) {
+//    suspend fun updateScores(tournamentId: String) {
+//
+//        val tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+//
+////        addMatchPoints(
+////            tournamentId = tournament.tournamentId,
+////            matches = tournament.rounds.last().matches
+////        ).awaitAll()
+////
+////        tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
+//
+//        addTiebreakerPoints(
+//            tournamentId = tournament.tournamentId,
+//            participants = tournament.participants
+//        ).awaitAll()
+//
+//    }
 
-        var tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
-
-        addMatchPoints(
-            tournamentId = tournament.tournamentId,
-            matches = tournament.rounds.last().matches
-        ).awaitAll()
-
-        tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
-
-        addTiebreakerPoints(
-            tournamentId = tournament.tournamentId,
-            participants = tournament.participants
-        ).awaitAll()
-
-    }
-
-    private fun addTiebreakerPoints(
+    fun addTiebreakerPoints(
         tournamentId: String,
         participants: List<Participant>
     ): List<Deferred<Boolean>> {
@@ -454,51 +454,51 @@ class SharedViewModel @Inject constructor(
 
     }
 
-    private fun addMatchPoints(
-        tournamentId: String,
-        matches: List<Match>
-    ): List<Deferred<Boolean>> {
-
-        val pointsJobs = mutableListOf<Deferred<Boolean>>()
-
-        for (match in matches) {
-
-            match.winnerId?.let { winnerId ->
-                val addWinningPlayerPointsJob = viewModelScope.async {
-                    tournamentRepository.updateParticipantPoints(
-                        tournamentId = tournamentId,
-                        participantId = winnerId,
-                        earnedPoints = 1.0
-                    )
-                }
-                pointsJobs.add(addWinningPlayerPointsJob)
-            }
-
-            if (match.tie == true && !match.playerTwoId.isNullOrEmpty()) {
-                val addPlayerOneTieJob = viewModelScope.async {
-                    tournamentRepository.updateParticipantPoints(
-                        tournamentId = tournamentId,
-                        participantId = match.playerOneId,
-                        earnedPoints = 0.5
-                    )
-                }
-                pointsJobs.add(addPlayerOneTieJob)
-
-                val addPlayerTwoTieJob = viewModelScope.async {
-                    tournamentRepository.updateParticipantPoints(
-                        tournamentId = tournamentId,
-                        participantId = match.playerTwoId,
-                        earnedPoints = 0.5
-                    )
-                }
-                pointsJobs.add(addPlayerTwoTieJob)
-            }
-
-        }
-
-        return pointsJobs
-
-    }
+//    private fun addMatchPoints(
+//        tournamentId: String,
+//        matches: List<Match>
+//    ): List<Deferred<Boolean>> {
+//
+//        val pointsJobs = mutableListOf<Deferred<Boolean>>()
+//
+//        for (match in matches) {
+//
+//            match.winnerId?.let { winnerId ->
+//                val addWinningPlayerPointsJob = viewModelScope.async {
+//                    tournamentRepository.updateParticipantPoints(
+//                        tournamentId = tournamentId,
+//                        participantId = winnerId,
+//                        earnedPoints = 1.0
+//                    )
+//                }
+//                pointsJobs.add(addWinningPlayerPointsJob)
+//            }
+//
+//            if (match.tie == true && !match.playerTwoId.isNullOrEmpty()) {
+//                val addPlayerOneTieJob = viewModelScope.async {
+//                    tournamentRepository.updateParticipantPoints(
+//                        tournamentId = tournamentId,
+//                        participantId = match.playerOneId,
+//                        earnedPoints = 0.5
+//                    )
+//                }
+//                pointsJobs.add(addPlayerOneTieJob)
+//
+//                val addPlayerTwoTieJob = viewModelScope.async {
+//                    tournamentRepository.updateParticipantPoints(
+//                        tournamentId = tournamentId,
+//                        participantId = match.playerTwoId,
+//                        earnedPoints = 0.5
+//                    )
+//                }
+//                pointsJobs.add(addPlayerTwoTieJob)
+//            }
+//
+//        }
+//
+//        return pointsJobs
+//
+//    }
 
     fun completeTournament(tournament: Tournament) {
         viewModelScope.launch {

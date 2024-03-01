@@ -23,6 +23,7 @@ import com.dubproductions.bracket.presentation.viewmodel.ParticipantsViewModel
 import com.dubproductions.bracket.presentation.viewmodel.SharedViewModel
 import com.dubproductions.bracket.utils.status.MatchStatus
 import com.dubproductions.bracket.utils.status.TournamentStatus
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.hostingNavGraph(navController: NavHostController) {
@@ -158,13 +159,21 @@ fun NavGraphBuilder.editTournamentScreen(navController: NavHostController) {
                 editTourneyViewModel.changeCompleteRoundsDialogState(false)
                 if (complete) {
                     coroutineScope.launch {
+                        editTourneyViewModel.enableDisableUIState(false)
+
                         editTourneyViewModel.updateTournamentStatus(
                             tournament.tournamentId,
                             TournamentStatus.COMPLETE_TOURNAMENT.statusString
                         )
-                        sharedViewModel.updateScores(tournament.tournamentId)
+
+                        sharedViewModel.addTiebreakerPoints(
+                            tournament.tournamentId,
+                            tournament.participants
+                        ).awaitAll()
+
+                        editTourneyViewModel.enableDisableUIState(true)
+                        editTourneyViewModel.changeCompleteTournamentDialogState(true)
                     }
-                    editTourneyViewModel.changeCompleteTournamentDialogState(true)
                 }
 
             },
