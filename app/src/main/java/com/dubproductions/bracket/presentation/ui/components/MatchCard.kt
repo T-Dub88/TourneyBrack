@@ -68,7 +68,12 @@ fun MatchCard(
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 4.dp),
-                onClick = { if (match.status == MatchStatus.COMPLETE.statusString) onEditClick() },
+                onClick = {
+                    if (match.status == MatchStatus.COMPLETE.statusString &&
+                        !match.playerTwoId.isNullOrEmpty()) {
+                        onEditClick()
+                    }
+                },
                 colors = IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface
                 )
