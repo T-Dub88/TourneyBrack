@@ -241,7 +241,9 @@ class SharedViewModel @Inject constructor(
             if (completedTournaments.value.find { it.tournamentId == tournamentId } == null) {
                 viewModelScope.launch {
                     val tournament = tournamentRepository.fetchCompletedTournamentData(tournamentId)
-                    updateCompletedTournaments(tournament)
+                    if (tournament !in completedTournaments.value) {
+                        updateCompletedTournaments(tournament)
+                    }
                 }
             }
         }
@@ -387,9 +389,8 @@ class SharedViewModel @Inject constructor(
                 }
             }
 
-            launch {
-                tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
-            }
+
+            tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
 
             if (tournament.rounds.size >= tournament.setNumberOfRounds() - 1) {
                 launch {
