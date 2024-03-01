@@ -369,17 +369,27 @@ class SharedViewModel @Inject constructor(
             addTiebreakerPoints(tournamentId, tournament.participants).awaitAll()
             tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
         }
-        Log.i("Jobs", "started match generation")
         val matchList = generateRoundMatchList(tournament.rounds, tournament.participants)
         val round = tournament.createNextRound(matchList)
-        Log.i("Jobs", "finished round and match generation")
+
         val roundJob = viewModelScope.async {
             tournamentRepository.addNewRound(round, tournament.tournamentId)
         }
-        Log.i("Jobs", "added new round to database")
         jobs.add(roundJob)
 
         for (match in matchList) {
+            
+            if (match.playerTwoId.isNullOrEmpty()) {
+                // Add bye players points
+                viewModelScope.launch {
+                    tournamentRepository.updateParticipantPoints(
+                        tournamentId = tournamentId,
+                        participantId = match.playerOneId,
+                        earnedPoints = 1.0
+                    )
+                }
+            }
+
             val matchJob = viewModelScope.async {
                 tournamentRepository.addNewMatch(
                     match = match,
@@ -393,36 +403,16 @@ class SharedViewModel @Inject constructor(
         val roundIdJob = viewModelScope.async {
             tournamentRepository.addRoundIdToTournament(round.roundId, tournament.tournamentId)
         }
-
         jobs.add(roundIdJob)
-        Log.i("Jobs", "started await")
+
         matchJobs.awaitAll()
         jobs.awaitAll()
-        Log.i("Jobs", "finished await ")
 
         if (tournament.rounds.size >= tournament.setNumberOfRounds() - 1) {
             tournamentRepository.updateTournamentStatus(tournamentId, TournamentStatus.COMPLETE_ROUNDS.statusString)
         }
 
     }
-
-//    suspend fun updateScores(tournamentId: String) {
-//
-//        val tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
-//
-////        addMatchPoints(
-////            tournamentId = tournament.tournamentId,
-////            matches = tournament.rounds.last().matches
-////        ).awaitAll()
-////
-////        tournament = hostingTournamentList.value.find { it.tournamentId == tournamentId }!!
-//
-//        addTiebreakerPoints(
-//            tournamentId = tournament.tournamentId,
-//            participants = tournament.participants
-//        ).awaitAll()
-//
-//    }
 
     fun addTiebreakerPoints(
         tournamentId: String,
@@ -453,52 +443,6 @@ class SharedViewModel @Inject constructor(
         return tiebreakerJobs
 
     }
-
-//    private fun addMatchPoints(
-//        tournamentId: String,
-//        matches: List<Match>
-//    ): List<Deferred<Boolean>> {
-//
-//        val pointsJobs = mutableListOf<Deferred<Boolean>>()
-//
-//        for (match in matches) {
-//
-//            match.winnerId?.let { winnerId ->
-//                val addWinningPlayerPointsJob = viewModelScope.async {
-//                    tournamentRepository.updateParticipantPoints(
-//                        tournamentId = tournamentId,
-//                        participantId = winnerId,
-//                        earnedPoints = 1.0
-//                    )
-//                }
-//                pointsJobs.add(addWinningPlayerPointsJob)
-//            }
-//
-//            if (match.tie == true && !match.playerTwoId.isNullOrEmpty()) {
-//                val addPlayerOneTieJob = viewModelScope.async {
-//                    tournamentRepository.updateParticipantPoints(
-//                        tournamentId = tournamentId,
-//                        participantId = match.playerOneId,
-//                        earnedPoints = 0.5
-//                    )
-//                }
-//                pointsJobs.add(addPlayerOneTieJob)
-//
-//                val addPlayerTwoTieJob = viewModelScope.async {
-//                    tournamentRepository.updateParticipantPoints(
-//                        tournamentId = tournamentId,
-//                        participantId = match.playerTwoId,
-//                        earnedPoints = 0.5
-//                    )
-//                }
-//                pointsJobs.add(addPlayerTwoTieJob)
-//            }
-//
-//        }
-//
-//        return pointsJobs
-//
-//    }
 
     fun completeTournament(tournament: Tournament) {
         viewModelScope.launch {
