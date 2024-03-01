@@ -35,14 +35,111 @@
     <string name="tournament_history">Tournament History:</string>
     <string name="tournament_name">Name: %1$s</string>
     <string name="status">Status: %1$s</string>
-    <string name="rounds">Rounds: %1$s</string>
+    <string name="rounds">Rounds: %1$d</string>
     <string name="type">Type: %1$s</string>
     <string name="started_date">Started: %1$s</string>
     <string name="completed_date">Completed: %1$s</string>
     <string name="more_info_card">Tap card for more information</string>
 
-    <!--Composables-->
-    <string name="ok">Ok</string>
+    <!--Hosting Screen-->
+    <string name="currently_hosting">Currently Hosting:</string>
 
+    <!--Tournament Creation Screen-->
+    <string name="create">Create a tournament</string>
+    <string name="selected_tournament_type">Select Tournament Type</string>
+    <string name="swiss">Swiss</string>
+    <string name="tournament_name_hint">Tournament Name</string>
+    <string name="participants_hint">Participants (Separate with comma)</string>
+    <string name="participants_helper_text">*Participants an be added/sign-up later</string>
+    <string name="creation_success_header">Tournament Created!</string>
+    <string name="creation_success_text">Your tournament has been successfully created. Users can search and sign up for your tournament using the code displayed on your hosting screen.</string>
+    <string name="creation_failure_header">Tournament Creation Failed!</string>
+    <string name="creation_failure_text">Your tournament was not created due to an error. Please check the status of your internet connection and try again.</string>
+    <string name="must_select_type">Must select type</string>
+    <string name="create_tournament">Create Tournament</string>
+
+    <!--Edit Tournament Screen-->
+    <string name="edit_tournament">Edit Tournament</string>
+    <string name="tournament_name_2">Tournament Name: %1$s</string>
+    <string name="registration_code">Registration Code: %1$s</string>
+    <string name="format">Format: %1$s</string>
+    <string name="num_participants">Number of Participants: %1$d</string>
+    <string name="num_rounds">Number of Rounds: %1$s</string>
+    <string name="start_date_time">Start Date/Time: %1$s</string>
+    <string name="close_registration">Close Registration</string>
+    <string name="open_registration">Open Registration</string>
+    <string name="view_edit_participants">View/Edit Participants</string>
+    <string name="view_edit_bracket">View/Edit Bracket</string>
+    <string name="start_tournament">Start Tournament</string>
+    <string name="delete_tournament">Delete Tournament</string>
+    <string name="registration_closed">Registration Closed!</string>
+    <string name="registration_closed_message">Players will no longer be able to sign up for your tournament.</string>
+    <string name="registration_opened">Registration Opened!</string>
+    <string name="registration_opened_message">Players are now able to register for your tournament using the registration code.</string>
+    <string name="bracket_gen_title">Bracket Not Generated</string>
+    <string name="bracket_gen_body">Would you like to start tournament and generate a bracket?</string>
+    <string name="generate">Generate</string>
+    <string name="delete_message">Are you sure? This action cannot be undone.</string>
+    <string name="delete">Delete</string>
+    <string name="next_round">Next Round</string>
+    <string name="complete_tournament">Complete Tournament</string>
+    <string name="finalize_rounds">Complete Final Round</string>
+    <string name="complete">Complete</string>
+    <string name="awaiting_confirmation">Awaiting Confirmation</string>
+    <string name="playing_round">Playing Round %1$d</string>
+    <string name="complete_rounds">Complete Rounds</string>
+    <string name="complete_rounds_body">Upload results for the final round? Afterward, you will be prompted to complete the tournament and finalize the results.</string>
+    <string name="complete_tournament_body">Finalize tournament results? This action cannot be undone. Tournament will be moved to the Completed Tournaments section on the home screen. Select "Wait" to review standings before finalizing.</string>
+    <string name="generate_round">Generate Round %1$d</string>
+    <string name="generate_round_body">Do you want to complete Round %1$d and advance to Round %2$d?</string>
+
+    <!--Participants Screen-->
+    <string name="cannot_add_title">Cannot Add New Player</string>
+    <string name="cannot_add_body">New players cannot be added to a tournament after the start of the first round.</string>
+    <string name="add_player_title">Add Player</string>
+    <string name="enter_player_name">Enter Player Name</string>
+    <string name="add_player_error">Must Enter Player Name</string>
+    <string name="add">Add</string>
+    <string name="drop_title">Drop %1$s</string>
+    <string name="drop_body">%1$s will be dropped from the tournament. This action cannot be undone.</string>
+    <string name="drop">Drop</string>
+    <string name="dropped">Dropped</string>
+    <string name="place">Place: %1$d</string>
+    <string name="points">Points: %1$.1f</string>
+    <string name="opponents_average_points">OAP: %1$.1f</string>
+    <string name="opponents_opponents_average_points">OOAP: %1$.1f</string>
+    <string name="drop_player">Drop Player</string>
+    <string name="view_matches">View Matches</string>
+
+    <!--Composables-->
+    <string name="ok">OK</string>
+    <string name="pending">Pending</string>
+    <string name="update_tournament">Tap card to update tournament</string>
+    <string name="cancel">Cancel</string>
+    <string name="not_started">Not Started</string>
+    <string name="edit_match">Edit Match</string>
+    <string name="edit_match_body">Editing this match will delete future round data that has already been generated.</string>
+    <string name="wait">Wait</string>
+
+    <!--Declare Winner Dialog-->
+    <string name="report_results">Report Results</string>
+    <string name="report_tie">Are you sure you want to declare this match a tie?</string>
+    <string name="report_winner">Are you sure you want to declare %1$s as the winner of this match?</string>
+
+    <!--Match Card-->
+    <string name="round">Round: %1$d</string>
+    <string name="match_status">Match Status: %1$s</string>
+    <string name="tie">Tie</string>
+    <string name="win">Win</string>
+    <string name="lose">Lose</string>
+
+    <!--Player Column-->
+    <string name="winner">Winner</string>
+    <string name="bye">Bye</string>
+    <string name="match_result">Match Result: %1$s</string>
+
+    <!--Bracket Screen-->
+    <string name="not_playing">Not Playing</string>
+    <string name="not_playing_warning">This tournament must be started in order to report results.</string>
 
 </resources>
