@@ -117,21 +117,23 @@ class ParticipantsViewModel @Inject constructor(
                     it.playerOneId == participantId || it.playerTwoId == participantId
                 } ?: return
 
-                val completedMatch = match.copy(
-                    winnerId = if (match.playerOneId == participantId) {
-                        match.playerTwoId
-                    } else {
-                        match.playerOneId
-                    },
-                    tie = false,
-                    status = MatchStatus.COMPLETE.statusString
-                )
+                if (match.status == MatchStatus.PENDING.statusString) {
+                    val completedMatch = match.copy(
+                        winnerId = if (match.playerOneId == participantId) {
+                            match.playerTwoId
+                        } else {
+                            match.playerOneId
+                        },
+                        tie = false,
+                        status = MatchStatus.COMPLETE.statusString
+                    )
 
-                tournamentRepository.addMatchResults(
-                    tournamentId = tournament.tournamentId,
-                    roundId = round.roundId,
-                    match = completedMatch
-                )
+                    tournamentRepository.addMatchResults(
+                        tournamentId = tournament.tournamentId,
+                        roundId = round.roundId,
+                        match = completedMatch
+                    )
+                }
 
             }
             TournamentStatus.REGISTERING.statusString,
