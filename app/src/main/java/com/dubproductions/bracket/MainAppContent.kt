@@ -22,10 +22,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.dubproductions.bracket.presentation.navigation.Map
-import com.dubproductions.bracket.presentation.navigation.NavHost
-import com.dubproductions.bracket.presentation.navigation.Screen
-import com.dubproductions.bracket.presentation.theme.BracketTheme
+import com.dubproductions.bracket.core.presentation.navigation.Map
+import com.dubproductions.bracket.core.presentation.navigation.NavHost
+import com.dubproductions.bracket.core.presentation.navigation.Screen
+import com.dubproductions.bracket.core.presentation.theme.BracketTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
