@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dubproductions.bracket.presentation.viewmodel.LoadingViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
